@@ -8,6 +8,7 @@ const { MesaDM, TIEMPOS: TIEMPOS_DM, PRECIOS: PRECIOS_DM, OBJETOS: OBJETOS_DM } 
 const { TIPOS: TIPOS_DM, ORDEN_TIPOS } = require('./diezmil/reglas');
 const { Mesa13, TIEMPOS: TIEMPOS_TJ, MAZOS_VALIDOS, PUNTOS_VALIDOS } = require('./trecejack/mesa_13');
 const { ESPECIALES: ESPECIALES_TJ, ORDEN_ESPECIALES, tablaPatrones } = require('./trecejack/reglas');
+const { MesaFundacion } = require('./fundacion/mesa_fundacion');
 const Bots = require('./bots');
 const { TIEMPO_VALIDO, escalarTiempos } = require('./tiempo');
 
@@ -20,6 +21,7 @@ const MAX_SALAS = 100;
 const MAX_CUERPO = 4096;
 const ACCIONES_DM = ['empezar', 'tirar', 'apartar', 'plantarse', 'voltear', 'apuesta', 'tomar', 'comprar', 'listo', 'usar', 'reaccion', 'nueva', 'salir', 'pausar', 'reanudar', 'tut', 'config', 'visibilidad', 'clave', 'botmas', 'botmenos'];   // las del diez mil
 const ACCIONES_TJ = ['empezar', 'pedir', 'plantarse', 'comprar', 'listo', 'reaccion', 'nueva', 'salir', 'pausar', 'reanudar', 'config', 'visibilidad', 'clave', 'botmas', 'botmenos'];   // las del 13 Jack
+const ACCIONES_FU = ['empezar', 'seguir', 'tirar', 'terminar', 'elegir', 'atras', 'colocar', 'pasar', 'nueva', 'salir', 'pausar', 'reanudar', 'config', 'visibilidad', 'clave', 'botmas', 'botmenos'];   // las de Fundación
 const LETRAS = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789';   // (sin letras que se confunden: I, L, O, 0, 1)
 
 const TIPOS = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.css': 'text/css; charset=utf-8', '.woff2': 'font/woff2', '.png': 'image/png', '.svg': 'image/svg+xml', '.ico': 'image/x-icon', '.webmanifest': 'application/manifest+json' };
@@ -45,6 +47,7 @@ class Salas {
     if (cfg.tutorial) return this._crearTutorial(cfg);
     if (cfg.juego === 'diezmil') return this._crearDiezMil(cfg);
     if (cfg.juego === 'trecejack') return this._crearTrece(cfg);
+    if (cfg.juego === 'fundacion') return this._crearFundacion(cfg);
     return { ok: false, error: 'Ese juego todavía no está disponible' };
   }
 
@@ -113,6 +116,23 @@ class Salas {
     return Object.assign({ ok: true, sala: codigo, juego: 'trecejack', conClave: !!clave, clave }, conf);
   }
 
+  // Una sala de Fundación: { juego: 'fundacion', modoFU: 'multi' | 'solo', metaFU: 8 | 10 | 12, asientos: 1 a 8, tiempo, bots, clave }.
+  _crearFundacion(cfg) {
+    if (this.salas.size >= MAX_SALAS) return { ok: false, error: 'Hay demasiadas salas abiertas, prueba más tarde' };
+    const modo = cfg.modoFU === 'solo' ? 'solo' : 'multi', tiempo = modo === 'solo' ? 'libre' : TIEMPO_VALIDO(cfg.tiempo);   // (en solitario no corre el tiempo)
+    const meta = [8, 10, 12].includes(Number(cfg.metaFU)) ? Number(cfg.metaFU) : 10;
+    const a = Math.floor(Number(cfg.asientos)), asientos = modo === 'multi' ? (a >= 1 && a <= 8 ? a : 4) : 1, publica = this._publica(cfg, modo === 'multi');
+    const conf = { asientos, publica, modoFU: modo, metaFU: meta, tiempo, bots: modo === 'multi' ? Bots.cantidadValida(cfg.bots, asientos) : 0 };
+    let codigo;
+    do { codigo = Array.from({ length: 4 }, () => LETRAS[Math.floor(Math.random() * LETRAS.length)]).join(''); } while (this.salas.has(codigo));
+    const clave = cfg.clave ? this._clave() : null;
+    const sfu = this._nueva(new MesaFundacion({ modo, meta, tiempoModo: tiempo, asientos, bots: conf.bots, clave }));
+    sfu.publica = publica && !clave;
+    this.salas.set(codigo, sfu);
+    this._sucio = true;
+    return Object.assign({ ok: true, sala: codigo, juego: 'fundacion', conClave: !!clave, clave }, conf);
+  }
+
   // Lo público de una sala (sin entrar): qué juego es y si pide clave.
   info(codigo) {
     const s = this.sala(codigo);
@@ -128,7 +148,7 @@ class Salas {
       if (!s.publica || m.clave || m.tutorial || m.modo !== 'multi' || m.fase !== 'espera' || !m.jugadores.some(j => j.conectado && !j.bot)) continue;
       const sillas = [];
       for (let i = 0; i < m.maxAsientos; i++) { const p = m.porAsiento(i); sillas.push(p ? (p.bot ? 'b' : 'h') : null); }
-      out.push({ sala: codigo, juego: m.juego, asientos: m.maxAsientos, sillas, creada: s.creada, datos: m.juego === 'trecejack' ? { objetivo: m.objetivo, mazos: m.mazos, metaPuntos: m.metaPuntos, especiales: m.especiales } : { meta: m.metaBase, cupo: m.cupo, hostil: m.hostil, tomarDados: m.tomarDados } });
+      out.push({ sala: codigo, juego: m.juego, asientos: m.maxAsientos, sillas, creada: s.creada, datos: m.juego === 'fundacion' ? { meta: m.meta } : (m.juego === 'trecejack' ? { objetivo: m.objetivo, mazos: m.mazos, metaPuntos: m.metaPuntos, especiales: m.especiales } : { meta: m.metaBase, cupo: m.cupo, hostil: m.hostil, tomarDados: m.tomarDados }) });
     }
     return out.sort((a, b) => b.creada - a.creada);
   }
@@ -152,8 +172,8 @@ class Salas {
     const s = this.sala(codigo);
     if (!s) return { ok: false, error: 'No existe esa sala' };
     if (!s.mesa.jugador(token)) return { ok: false, error: 'No estás en la sala' };
-    const tj = s.mesa.juego === 'trecejack';
-    if (!(tj ? ACCIONES_TJ : ACCIONES_DM).includes(accion)) return { ok: false, error: 'Acción desconocida' };
+    const tj = s.mesa.juego === 'trecejack', fu = s.mesa.juego === 'fundacion';
+    if (!(fu ? ACCIONES_FU : (tj ? ACCIONES_TJ : ACCIONES_DM)).includes(accion)) return { ok: false, error: 'Acción desconocida' };
     if (accion === 'tut') return s.mesa.tutorial ? this._tutorial(s, token, datos) : { ok: false, error: 'Acción desconocida' };
     if (accion === 'salir' && s.mesa.tutorial) { this.salas.delete(String(codigo).toUpperCase()); return { ok: true }; }
     s.vistos.set(token, this.ahora());
@@ -162,6 +182,25 @@ class Salas {
     const m = s.mesa;
     let r;
     if (['config', 'visibilidad', 'clave', 'botmas', 'botmenos'].includes(accion)) { r = this._accionSala(s, token, accion, datos); this._sucio = true; this._avisar(s); return r; }
+    if (fu) {
+      switch (accion) {
+        case 'empezar': r = m.empezar(token); break;
+        case 'seguir': r = m.seguir(token); break;
+        case 'tirar': r = m.tirar(token, datos.guardar); break;
+        case 'terminar': r = m.terminarDados(token); break;
+        case 'elegir': r = m.elegir(token, datos.edificio); break;
+        case 'atras': r = m.atras(token); break;
+        case 'colocar': r = m.colocar(token, datos.lugar); break;
+        case 'pasar': r = m.pasar(token); break;
+        case 'nueva': r = m.nuevaPartida(token); break;
+        case 'pausar': r = m.pausar(token); break;
+        case 'reanudar': r = m.reanudar(token); break;
+        case 'salir': m.salir(token); s.vistos.delete(token); r = { ok: true }; break;
+      }
+      this._sucio = true;
+      this._avisar(s);
+      return r;
+    }
     if (tj) {
       switch (accion) {
         case 'empezar': r = m.empezar(token); break;
@@ -300,8 +339,8 @@ class Salas {
       const datos = JSON.parse(fs.readFileSync(this.archivo, 'utf8'));
       for (const codigo of Object.keys(datos)) {
         const juego = datos[codigo].mesa.juego;
-        if (juego !== 'diezmil' && juego !== 'trecejack') continue;   // (las salas de otros juegos guardadas por una versión vieja se descartan)
-        const s = this._nueva(juego === 'trecejack' ? Mesa13.desde(datos[codigo].mesa, {}) : MesaDM.desde(datos[codigo].mesa, {}));
+        if (juego !== 'diezmil' && juego !== 'trecejack' && juego !== 'fundacion') continue;   // (las salas de otros juegos guardadas por una versión vieja se descartan)
+        const s = this._nueva(juego === 'fundacion' ? MesaFundacion.desde(datos[codigo].mesa, {}) : (juego === 'trecejack' ? Mesa13.desde(datos[codigo].mesa, {}) : MesaDM.desde(datos[codigo].mesa, {})));
         s.creada = datos[codigo].creada; s.uso = datos[codigo].uso; s.publica = !!datos[codigo].publica;
         this.salas.set(codigo, s);
       }

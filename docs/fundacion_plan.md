@@ -4,7 +4,7 @@ Reglas en `catan_dados.md`, flujo y pantallas en `catan_flujo.md`, arte y maquet
 
 Se trabaja en la rama `feature/fundacion`, con un commit por fase y las pruebas (`npm test`, «fallos: 0») antes de cada uno.
 
-## Fase 1 · Las reglas (servidor, puro, sin red)
+## Fase 1 · Las reglas (servidor, puro, sin red) — HECHA
 `servidor/fundacion/reglas.js`, con pruebas en `pruebas/test_fundacion_reglas.js`.
 - **El mapa**: se genera por semilla (19 hexágonos hasta 4 jugadores, 37 de 5 a 8), con tipos y números mezclados (sin 6 y 8 pegados), vértices, aristas y su vecindad (coordenadas enteras, el cliente las dibuja).
 - **Dados de recursos**: 6 caras (madera, ladrillo, lana, trigo, mineral, oro). Costos y «¿alcanzan?», con el oro como comodín (2 oros = 1 recurso).
@@ -13,14 +13,14 @@ Se trabaja en la rama `feature/fundacion`, con un commit por fase y las pruebas 
 - **Producción**: dos dados de número, 7 del bandido, recursos de cada jugador (pueblo 1, ciudad 2, tope de 4 dados fijados), el caballero que protege del bandido.
 - **Puntos y carreras**: camino más largo (5 o más, por cantidad) y ejército (mínimo 2, el que tenga más), meta y cálculo del ganador.
 
-## Fase 2 · La mesa en el servidor
+## Fase 2 · La mesa en el servidor — HECHA
 `servidor/fundacion/mesa_fundacion.js` (`MesaFundacion`, como `MesaDM` y `Mesa13`) y su integración en `servidor/salas.js`.
 - Máquina de estados: espera → colocación inicial (serpiente) → turnos (producción, dados, construir, colocar) → última vuelta → fin.
 - Relojes por fase, tiempo agotado (un bot juega esa jugada; al turno siguiente, un bot reemplaza hasta que vuelva), desconexión, recarga y estado público para cada jugador (versión para la consulta larga).
 - Reglas de la sala: jugadores 1 a 8, tiempo por fase, meta (8, 10 o 12). Modo solo (mejor marca en turnos).
 - Pruebas: `test_fundacion.js` (partidas completas con una jugada guiada) y las de salas.
 
-## Fase 3 · Los bots y el simulador
+## Fase 3 · Los bots y el simulador — bot básico hecho (`servidor/fundacion/bot.js`); falta el simulador y calibrar
 - Bot de Fundación (guarda dados hacia el mejor edificio, elige lugares por producción esperada) que juega por los bots de la sala, los ausentes y el tiempo agotado.
 - Simulador de partidas para medir y calibrar (`simulador/`): duración, costos, tope de 4 dados fijados, peso del mapa y el umbral de las carreras.
 
@@ -37,3 +37,10 @@ Pruebas de punta a punta con bots, partidas reales con Dante, ajuste de números
 - **Servidor autoritativo**: el cliente solo envía acciones (`tirar` con los dados que se guardan, `fin_dados`, `construir` con el edificio, `colocar` con el lugar, `pasar`, `seguir`).
 - **Los %**: el servidor los calcula y los manda ya hechos (como el Diez mil): una tabla por edificio y por conjunto de dados guardados, para que cambien en vivo al tocar un dado.
 - **Mapa**: coordenadas enteras (centro del hexágono en `2q + r` y `3r`; esquinas a ±1 en X y −2, −1, 1, 2 en Y), sin números decimales para identificar vértices y aristas.
+
+## Estado (rama `feature/fundacion`)
+- Fase 1: `servidor/fundacion/reglas.js` y `pruebas/test_fundacion_reglas.js`.
+- Fase 2: `servidor/fundacion/mesa_fundacion.js` (`MesaFundacion`), integrada en `servidor/salas.js` (crear, entrar, acciones `seguir`, `tirar` con los dados que se guardan, `terminar`, `elegir`, `atras`, `colocar`, `pasar`, mapa de mesas y recuperación) y `pruebas/test_fundacion.js` (partidas completas de 4 y 6 jugadores y en solitario, tiempo agotado, guardar y recuperar, reglas de la sala y red).
+- Tiempos por fase: Normal 25 s para dados y para construir (colocar incluido), 30 s la colocación inicial y 10 s la producción; Extendido el doble (50 s) y Sin límite.
+- Se juega una partida entera en pruebas con bots y un humano simple; la vuelta completa y el fin por meta funcionan.
+

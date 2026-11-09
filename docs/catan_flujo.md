@@ -13,7 +13,7 @@ Estado: **diseño cerrado, en programación.** Sigue `catan_dados.md` (reglas) y
 | Regla | Opciones | Por omisión |
 |---|---|---|
 | Jugadores | 1 a 8 (con 1 es el modo Solo; el mapa es de 19 hexágonos hasta 4 y de 37 de 5 a 8) | 4 |
-| Tiempo por fase | Normal (25 s dados + 25 s construir) · Extendido (45 s + 45 s) · Sin límite | Normal |
+| Tiempo por fase | Normal (25 s dados + 25 s construir) · Extendido (50 s + 50 s) · Sin límite | Normal |
 | Meta | Corta (8 puntos) · Clásica (10) · Larga (12) | Clásica |
 
 Bots: se agregan y quitan desde la sala de espera, como en los otros juegos (jugadores + bots no pasan de 8). La isla no se elige: se mezcla al empezar.
