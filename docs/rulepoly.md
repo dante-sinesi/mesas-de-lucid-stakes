@@ -1,5 +1,7 @@
 # Rulepoly: el juego (diseño acordado)
 
+> **En revisión (9 nov 2026):** Dante sintió que este diseño está trabado (se parece al Diez mil, tiene demasiados sistemas y el modo solo no cerraba). Se exploraron otros caminos y se eligió partir de un juego de dados al estilo Catan: ver `investigacion_juegos.md` y `catan_dados.md`. Este documento queda como historial.
+
 Estado: **diseño conversado y acordado, nada programado.** Los números son puntos de partida: se calibran midiendo partidas de bots (como el Diez mil, ver `diez_mil_calibracion.md`). Lo que se descartó está al final. Sigue los `principios_diseno.md`.
 
 ## La idea en una frase
