@@ -9,7 +9,9 @@ const chipTexto = txt => { const s = nuevoEl('span', 'chipR'); s.appendChild(V.m
 // Las reglas de la sala, en pocas palabras (cada una es una etiqueta).
 function reglasDe(e) {
   const r = [];
-  if (e.juego === 'trecejack') {
+  if (e.juego === 'fundacion') {
+    r.push('Meta ' + e.meta);
+  } else if (e.juego === 'trecejack') {
     r.push(e.objetivo === 'puntos' ? e.metaPuntos + ' puntos' : e.mazos + ' mazos', e.especiales ? 'Especiales' : 'Sin especiales');
   } else {
     r.push('Meta ' + miles(e.metaBase || e.meta));
@@ -97,11 +99,15 @@ function campoSelect(et, id, opciones, valor) {
 function abrirReglas(e) {
   const m = $('reglas'), caja = m.querySelector('.caja'); caja.textContent = '';
   const sino = [[1, 'Sí'], [0, 'No']], tiempo = [['normal', 'Normal'], ['extendido', 'Extendido'], ['libre', 'Sin límite']];
-  const asientos = [2, 3, 4, 5, 6, 7, 8].map(n => [n, String(n)]);
+  const asientos = (e.juego === 'fundacion' ? [1, 2, 3, 4, 5, 6, 7, 8] : [2, 3, 4, 5, 6, 7, 8]).map(n => [n, String(n)]);
   const grid = () => nuevoEl('div', 'cfGrid');
   const g1 = grid(), g2 = grid(), g3 = grid();
   caja.append(nuevoEl('h3', '', 'Reglas · ' + nombreJuego(e.juego)));
-  if (e.juego === 'trecejack') {
+  if (e.juego === 'fundacion') {
+    g1.append(campoSelect('Jugadores', 'rJug', asientos, e.maxAsientos), campoSelect('Tiempo por fase', 'rTiempo', tiempo, e.tiempoModo || 'normal'));
+    g2.append(campoSelect('Meta', 'rMeta', [[8, 'Corta · 8 puntos'], [10, 'Clásica · 10 puntos'], [12, 'Larga · 12 puntos']], e.meta));
+    caja.append(g1, g2);
+  } else if (e.juego === 'trecejack') {
     g1.append(campoSelect('Jugadores', 'rJug', asientos, e.maxAsientos), campoSelect('Tiempo por turno', 'rTiempo', tiempo, e.tiempoModo || 'normal'));
     g2.append(campoSelect('Cartas especiales', 'rEsp', sino, e.especiales ? 1 : 0), campoSelect('Objetivo', 'rObj', [['mazos', 'Por mazos'], ['puntos', 'Por puntos']], e.objetivo));
     const cuantos = obj => (obj === 'puntos' ? [[250, '250 puntos'], [400, '400 puntos'], [650, '650 puntos']] : [[3, '3 mazos'], [5, '5 mazos'], [8, '8 mazos']]);
@@ -116,7 +122,9 @@ function abrirReglas(e) {
   }
   const error = nuevoEl('div', 'error');
   const guardar = async () => {
-    const d = e.juego === 'trecejack'
+    const d = e.juego === 'fundacion'
+      ? { asientos: Number($('rJug').value), tiempo: $('rTiempo').value, meta: Number($('rMeta').value) }
+      : e.juego === 'trecejack'
       ? { asientos: Number($('rJug').value), tiempo: $('rTiempo').value, especiales: $('rEsp').value === '1', objetivo: $('rObj').value, mazos: $('rObj').value === 'mazos' ? Number($('rMeta').value) : undefined, metaPuntos: $('rObj').value === 'puntos' ? Number($('rMeta').value) : undefined }
       : { asientos: Number($('rJug').value), tiempo: $('rTiempo').value, meta: Number($('rMeta').value), cupo: $('rCupo').value === '1', tomarDados: $('rTomar').value === '1', hostil: $('rHostil').value === '1' };
     const r = await accion('config', d);

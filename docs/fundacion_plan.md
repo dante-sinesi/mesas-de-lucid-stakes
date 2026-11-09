@@ -20,11 +20,11 @@ Se trabaja en la rama `feature/fundacion`, con un commit por fase y las pruebas 
 - Reglas de la sala: jugadores 1 a 8, tiempo por fase, meta (8, 10 o 12). Modo solo (mejor marca en turnos).
 - Pruebas: `test_fundacion.js` (partidas completas con una jugada guiada) y las de salas.
 
-## Fase 3 · Los bots y el simulador — bot básico hecho (`servidor/fundacion/bot.js`); falta el simulador y calibrar
+## Fase 3 · Los bots y el simulador — HECHA (calibración pendiente con partidas reales)
 - Bot de Fundación (guarda dados hacia el mejor edificio, elige lugares por producción esperada) que juega por los bots de la sala, los ausentes y el tiempo agotado.
 - Simulador de partidas para medir y calibrar (`simulador/`): duración, costos, tope de 4 dados fijados, peso del mapa y el umbral de las carreras.
 
-## Fase 4 · El cliente
+## Fase 4 · El cliente — HECHA (sw bj-101)
 - **Dados 3D de recursos**: se generaliza `web/dados3d.js` (modelo de 15 cubitos por lado, modo en fila o en dos filas de 3, sin mesa, espaciado) sin cambiar los dados del Diez mil.
 - **Pantalla de la partida** `web/fundacion.js`: mapa en canvas de píxeles planos con cámara (zoom en números enteros), jugadores con franja de color, etapas (producción, dados, construir, colocar, zonas en móvil, caballero), medallas, reloj y botones del juego.
 - **Entrada y salas**: tarjeta en «crear sala» y «solo», icono (pueblo y ciudad) en mesas, lista y ficha, reglas de la sala, ayuda y estadísticas.
@@ -44,3 +44,9 @@ Pruebas de punta a punta con bots, partidas reales con Dante, ajuste de números
 - Tiempos por fase: Normal 25 s para dados y para construir (colocar incluido), 30 s la colocación inicial y 10 s la producción; Extendido el doble (50 s) y Sin límite.
 - Se juega una partida entera en pruebas con bots y un humano simple; la vuelta completa y el fin por meta funcionan.
 
+
+## Simulador (`node simulador/fundacion.js [partidas] [meta]`)
+Partidas solo de bots, 100–150 por configuración: todas terminan. Rondas promedio con meta 10: 23 (1 jugador), 27 (2), 27 (3), 28 (4), 28 (6), 32 (8). Con meta 8: 10, 13, 15, 17, 18. El primer asiento gana de más con pocos jugadores (4 jugadores, meta 10: 31/31/21/17 %). Por jugador: ~3–4 pueblos, 1–2 ciudades, 12–15 caminos, ~3 caballeros. El ranking final puede quedar bajo la meta si una carrera se pierde en la última ronda.
+
+## Pendiente
+Calibrar costos y ritmo con partidas reales; compensar el orden de turno; zonas táctiles en móvil sin probar en un teléfono; sin reacciones, estadísticas ni dibujos de ayuda propios; diseño entre 1024 y 1100 px por revisar.

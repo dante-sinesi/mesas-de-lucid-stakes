@@ -21,6 +21,7 @@ const Mesas = (() => {
   // El icono de un juego: dos cartas (13 Jack) o un dado normal y uno dorado (Diez mil). Es el mismo en "crear sala" y en el centro de cada mesa.
   function iconoJuego(juego, tam = 1) {
     const d = document.createElement('div'); d.className = 'iconoJuego'; d.style.setProperty('--ic', tam);
+    if (juego === 'fundacion') { d.append(FU_ARTE.icono(tam)); return d; }
     if (juego === 'trecejack') { const a = V.cartaCanvas(1, 0, false), b = V.cartaCanvas(13, 1, false); a.className = 'cv a'; b.className = 'cv b'; d.append(a, b); }
     else { const a = D3.sprite('normal', 5, 48 * tam), b = D3.sprite('oro', 6, 42 * tam); a.classList.add('a'); b.classList.add('b'); d.append(a, b); }
     return d;
@@ -56,7 +57,8 @@ const Mesas = (() => {
     });
     g.imageSmoothingEnabled = false; g.globalAlpha = op.fantasma ? 0.55 : 1;
     const pon = (img, cx, cy, w, h, rot) => { g.save(); g.translate(cx * c, cy * c); g.rotate(rot * Math.PI / 180); g.drawImage(img, -w * c / 2, -h * c / 2, w * c, h * c); g.restore(); };
-    if (juego === 'trecejack') { pon(V.cartaCanvas(1, 0, false), M + 0.5 - 2.4, M + 0.5, 4.6, 6.4, -9); pon(V.cartaCanvas(13, 1, false), M + 0.5 + 2.4, M + 0.5, 4.6, 6.4, 8); }
+    if (juego === 'fundacion') { const ic = FU_ARTE.icono(1); pon(ic, M + 0.5, M + 0.5, 9.6, 7.4, 0); }
+    else if (juego === 'trecejack') { pon(V.cartaCanvas(1, 0, false), M + 0.5 - 2.4, M + 0.5, 4.6, 6.4, -9); pon(V.cartaCanvas(13, 1, false), M + 0.5 + 2.4, M + 0.5, 4.6, 6.4, 8); }
     else { pon(D3.sprite('normal', 5, 64), M + 0.5 - 2.2, M + 0.5, 4.8, 4.8, -8); pon(D3.sprite('oro', 6, 64), M + 0.5 + 2.2, M + 0.5, 4.2, 4.2, 7); }
     const d = document.createElement('div'); d.className = 'mesa' + (op.sel ? ' sel' : '');
     d.append(cv);

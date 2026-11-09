@@ -48,6 +48,7 @@ function ponerMedalla(boton, pr) {
 for (const ev of ['pointerdown', 'pointerup', 'keydown', 'touchstart', 'touchend', 'click']) window.addEventListener(ev, () => Sonido.desbloquear(), { passive: true });
 // ---------- ayuda: láminas con dibujos (web/ayuda.js) ----------
 async function abrirAyuda() {
+  if ((estado && estado.juego === 'fundacion') || (typeof juegoLobby !== 'undefined' && juegoLobby === 'fundacion' && Pantalla.actual !== 'dm' && Pantalla.actual !== 'tj')) return abrirAyudaFU();
   const tj = !$('tj').hidden || (typeof juegoLobby !== 'undefined' && juegoLobby === 'trecejack' && Pantalla.actual !== 'dm');
   Ayuda.abrir({ nuevoBoton, modal: $('ayuda'), dm: typeof DM !== 'undefined' ? DM.catalogo : null, tj: typeof TJ !== 'undefined' ? TJ.catalogo : null, juego: tj ? 'trecejack' : 'diezmil' });
 }
@@ -253,7 +254,8 @@ function abrirMesa(codigo, juego) {
   reanudar();   // (se corta la consulta que quedara pendiente de la sala anterior, para que la nueva empiece enseguida)
   guardado('bj_sala', codigo);
   vista.juego = juego; vista.abierta = codigo; vista.pantalla = null;
-  if (juego === 'trecejack') { $('tSala').textContent = codigo; abrirTJ(); } else { $('dSala').textContent = codigo; abrirDM(); }
+  if (juego === 'fundacion') { $('fSala').textContent = codigo; abrirFU(); }
+  else if (juego === 'trecejack') { $('tSala').textContent = codigo; abrirTJ(); } else { $('dSala').textContent = codigo; abrirDM(); }
   try { history.replaceState(null, '', '?sala=' + codigo + (diag ? '&diag=1' : '')); } catch (e) { /* sin cambiar la barra */ }
   mantenerPantalla();
   if (!corriendo) { corriendo = true; bucle(); setInterval(reloj, 250); }
@@ -295,9 +297,9 @@ async function bucle() {
         pintarSala(e);
         continue;
       }
-      const destino = e.juego === 'trecejack' ? 'tj' : 'dm';
+      const destino = e.juego === 'fundacion' ? 'fu' : (e.juego === 'trecejack' ? 'tj' : 'dm');
       if (Pantalla.actual !== destino) { Pantalla.ir(destino); if (destino === 'dm') reajustarDM(); }
-      if (e.juego === 'diezmil') pintarDM(e); else pintarTJ(e);
+      if (e.juego === 'diezmil') pintarDM(e); else if (e.juego === 'fundacion') pintarFU(e); else pintarTJ(e);
     } catch (err) {
       if (err && err.name === 'AbortError') { await pausa(150); continue; }   // (consulta cortada a propósito: pasó de 30 s sin respuesta, o se volvió a la página)
       intento++;
@@ -380,6 +382,7 @@ function reloj() {
   const e = estado;
   if (e && e.juego === 'diezmil' && typeof relojDM === 'function') relojDM(e);
   else if (e && e.juego === 'trecejack' && typeof relojTJ === 'function') relojTJ(e);
+  else if (e && e.juego === 'fundacion' && typeof relojFU === 'function') relojFU(e);
 }
 
 // ---------- acciones ----------
@@ -409,7 +412,7 @@ function confirmarSalir() {
 function abrirInvitar() {
   if (!sala || !estado || (typeof Tut !== 'undefined' && Tut.activo)) return;
   const m = $('invitar'), caja = m.querySelector('.caja'); caja.textContent = '';
-  const url = location.origin + location.pathname + '?sala=' + sala, clave = estado.clave, juego = estado.juego === 'trecejack' ? '13 Jack' : 'Diez mil';
+  const url = location.origin + location.pathname + '?sala=' + sala, clave = estado.clave, juego = estado.juego === 'fundacion' ? 'Fundación' : (estado.juego === 'trecejack' ? '13 Jack' : 'Diez mil');
   const texto = 'Súmate a mi mesa de ' + juego + (clave ? ' (clave ' + clave + ')' : '') + ': ' + url;
   const h = document.createElement('h3'); h.textContent = 'Invitar amigos';
   caja.appendChild(h);

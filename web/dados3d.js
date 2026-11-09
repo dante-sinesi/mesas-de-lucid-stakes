@@ -75,9 +75,9 @@ const D3 = (() => {
   const ejesDe = d => (d[1] !== 0 ? [[1, 0, 0], [0, 0, 1]] : (d[2] !== 0 ? [[1, 0, 0], [0, 1, 0]] : [[0, 1, 0], [0, 0, 1]]));
 
   function voxelesDado(est) {
-    const vox = new Map(), c = est.cuerpo;
-    for (let x = 0; x < N; x++) for (let y = 0; y < N; y++) for (let z = 0; z < N; z++) {
-      const bordes = (x === 0 || x === N - 1 ? 1 : 0) + (y === 0 || y === N - 1 ? 1 : 0) + (z === 0 || z === N - 1 ? 1 : 0);
+    const NN = est.n || N, vox = new Map(), c = est.cuerpo;
+    for (let x = 0; x < NN; x++) for (let y = 0; y < NN; y++) for (let z = 0; z < NN; z++) {
+      const bordes = (x === 0 || x === NN - 1 ? 1 : 0) + (y === 0 || y === NN - 1 ? 1 : 0) + (z === 0 || z === NN - 1 ? 1 : 0);
       const tono = 1 - (bordes >= 2 ? 0.09 : 0) - ((x * 7 + y * 13 + z * 17) % 5) * 0.012;
       let col = [c[0] * tono, c[1] * tono, c[2] * tono];
       if (est.esquina && bordes === 3) col = [est.esquina[0] * tono, est.esquina[1] * tono, est.esquina[2] * tono];
@@ -85,15 +85,29 @@ const D3 = (() => {
     }
     for (const v in FACES) {
       const [n, u, w] = FACES[v];
-      const base = [n[0] > 0 ? N - 1 : 0, n[1] > 0 ? N - 1 : 0, n[2] > 0 ? N - 1 : 0];
+      const base = [n[0] > 0 ? NN - 1 : 0, n[1] > 0 ? NN - 1 : 0, n[2] > 0 ? NN - 1 : 0];
       for (let k = 0; k < 3; k++) if (n[k] === 0) base[k] = 0;
-      for (const pip of PIPS[v]) {
-        const su = Math.min(Math.max(Math.round(pip[0] * N) - 1, 0), N - 2), sw = Math.min(Math.max(Math.round(pip[1] * N) - 1, 0), N - 2);
+      for (const pip of (est.caras ? [] : PIPS[v])) {
+        const su = Math.min(Math.max(Math.round(pip[0] * NN) - 1, 0), NN - 2), sw = Math.min(Math.max(Math.round(pip[1] * NN) - 1, 0), NN - 2);
         for (let du = 0; du < 2; du++) for (let dw = 0; dw < 2; dw++) {
           const p = [0, 1, 2].map(k => base[k] + u[k] * (su + du) + w[k] * (sw + dw));
           vox.delete(clave(p[0], p[1], p[2]));
           vox.set(clave(p[0] - n[0], p[1] - n[1], p[2] - n[2]), est.pip);
         }
+      }
+    }
+    if (est.caras) for (const v in FACES) {   // un dado con una cara de color por recurso (Fundación): cada cara se pinta con su dibujo
+      const [n, u, w] = FACES[v], cara = est.caras[v - 1];
+      const base = [n[0] > 0 ? NN - 1 : 0, n[1] > 0 ? NN - 1 : 0, n[2] > 0 ? NN - 1 : 0];
+      for (let k = 0; k < 3; k++) if (n[k] === 0) base[k] = 0;
+      const M = NN - 2;
+      for (let iu = 1; iu <= M; iu++) for (let iw = 1; iw <= M; iw++) {
+        const tono = 1 - ((iu * 7 + iw * 13) % 5) * 0.012;
+        let col = cara.cuerpo.map(x => x * tono);
+        const ch = cara.fn((iu - 0.5) / M, (iw - 0.5) / M);
+        if (ch && cara.pal[ch]) col = cara.pal[ch];
+        const p = [0, 1, 2].map(k => base[k] + u[k] * iu + w[k] * iw);
+        vox.set(clave(p[0], p[1], p[2]), col);
       }
     }
     return vox;
@@ -180,7 +194,7 @@ const D3 = (() => {
     // `lienzo`: el canvas; `contenedor`: de quien toma el ancho; opciones: { maxAlto }
     constructor(lienzo, contenedor, opciones = {}) {
       this.lienzo = lienzo; this.contenedor = contenedor; this.ctx = lienzo.getContext('2d');
-      this.maxAlto = opciones.maxAlto || 9999;
+      this.maxAlto = opciones.maxAlto || 9999; this.forzarFila = !!opciones.forzarFila; this.espaciado = opciones.espaciado; this.forzarGrilla = !!opciones.forzarGrilla; this.sinMesa = !!opciones.sinMesa;   // (opciones de Fundación: en fila o en dos filas de 3, sin la mesa de fieltro)
       this.mesaCaras = carasDe(voxelesMesa(), TABLE_VOX, [-TABLE_X / 2, 0, -TABLE_Z / 2]);
       this.modelos = {};
       this.dados = [];          // por lugar: { tipo, valor, pos, R, squash, apartado, seleccionado, brillo, anim }
@@ -190,11 +204,11 @@ const D3 = (() => {
       lienzo.addEventListener('pointerdown', ev => this._toque(ev));
       this.ajustar();
     }
-    _modelo(tipo) { return this.modelos[tipo] || (this.modelos[tipo] = carasDe(voxelesDado(ESTILOS[tipo] || ESTILOS.normal), VOX, [-HALF, -HALF, -HALF])); }
+    _modelo(tipo) { if (!this.modelos[tipo]) { const est = ESTILOS[tipo] || ESTILOS.normal, n = est.n || N, lado = VOX * N / n; this.modelos[tipo] = carasDe(voxelesDado(est), lado, [-HALF, -HALF, -HALF]); this.modelos[tipo].lado = lado; } return this.modelos[tipo]; }
 
     // Los lugares de reposo según cuántos dados hay y cómo es la pantalla (en fila en pantallas anchas; en dos filas en celular).
     _reposo(i, n) {
-      if (this.modo === 'fila') { const sp = n <= 5 ? 1.9 : 1.6; return [(i - (n - 1) / 2) * sp, HALF, 0]; }
+      if (this.modo === 'fila') { const sp = this.forzarFila ? (this.espaciado || 0.86) : (n <= 5 ? 1.9 : 1.6); return [(i - (n - 1) / 2) * sp, HALF, 0]; }
       const cols = 3, fila = Math.floor(i / cols), enFila = fila === 0 ? Math.min(n, cols) : n - cols;
       const c = i % cols, sp = 1.8;
       return [(c - (enFila - 1) / 2) * sp, HALF, (fila - (n > cols ? 0.5 : 0)) * 1.9];
@@ -249,15 +263,15 @@ const D3 = (() => {
 
     ajustar() {
       const dpr = Math.min(window.devicePixelRatio || 1, 2), ancho = Math.max(this.contenedor.clientWidth || (window.innerWidth - 24), 200);
-      this.modo = ancho < 560 ? 'grilla' : 'fila';
-      const vw = this.modo === 'fila' ? 9.75 : 5.6, vh = this.modo === 'fila' ? 3.22 : 4.4;
+      this.modo = this.forzarGrilla ? 'grilla' : ((this.forzarFila || ancho >= 560) ? 'fila' : 'grilla');
+      const nD = Math.max(this.dados.length, 1), vw = this.modo === 'fila' ? (this.forzarFila ? Math.max((nD - 1) * (this.espaciado || 0.86) + 1.5, 2.2) : 9.75) : 5.6, vh = this.modo === 'fila' ? (this.forzarFila ? 2.7 : 3.22) : 4.4;
       this.sc = Math.min(ancho / vw, 118, this.maxAlto / vh);
       this.W = Math.round(this.sc * vw); this.H = Math.round(this.sc * vh);
       this.lienzo.style.width = this.W + 'px'; this.lienzo.style.height = this.H + 'px';
       this.lienzo.width = Math.round(this.W * dpr); this.lienzo.height = Math.round(this.H * dpr);
-      this.dpr = dpr; this.ox = this.W / 2; this.oy = this.H / 2 + (this.modo === 'grilla' ? this.sc * 0.2 : 0);
+      this.dpr = dpr; this.ox = this.W / 2; this.oy = this.H / 2 + (this.modo === 'grilla' ? this.sc * 0.2 : (this.forzarFila ? this.sc * 0.4 : 0));
       this.dados.forEach((d, i) => { if (!d.anim) d.pos = this._reposo(i, d.n); });
-      this.fondo = this._dibujarMesa();
+      this.fondo = this.sinMesa ? (() => { const c = document.createElement('canvas'); c.width = this.lienzo.width; c.height = this.lienzo.height; return c; })() : this._dibujarMesa();
       this.dibujar();
     }
     proy(p) { return [this.ox + p[0] * this.sc, this.oy - (p[1] * UPV[1] + p[2] * UPV[2]) * this.sc]; }
@@ -304,9 +318,9 @@ const D3 = (() => {
         const pos = [d.pos[0], d.pos[1] + levanta, d.pos[2]];
         const tinte = d.seleccionado ? 1.22 : (d.apartado ? 0.78 : 1);
         const normales = DIRS.map(v => mVec(R, v)), vis = normales.map(n => dot(n, HACIA_CAM) > 0.001);
-        const ra = [], rb = [];
-        DIRS.forEach((v, di) => { const [a, b] = ejesDe(v); ra[di] = mVec(R, a).map(x => x * h2); rb[di] = mVec(R, b).map(x => x * h2); });
-        for (const f of this._modelo(d.tipo)) {
+        const ra = [], rb = [], mod = this._modelo(d.tipo), h2d = mod.lado / 2;
+        DIRS.forEach((v, di) => { const [a, b] = ejesDe(v); ra[di] = mVec(R, a).map(x => x * h2d); rb[di] = mVec(R, b).map(x => x * h2d); });
+        for (const f of mod) {
           if (!vis[f.n]) continue;
           const c0 = mVec(R, f.c), A = ra[f.n], B = rb[f.n];
           const cW = [c0[0] * S[0] + pos[0], c0[1] * S[1] + pos[1], c0[2] * S[2] + pos[2]];
@@ -322,7 +336,7 @@ const D3 = (() => {
       const px = Math.max(11, Math.round(this.sc * 0.24));
       ctx.font = '700 ' + px + 'px "Lucid Stakes", monospace'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.lineWidth = 3; ctx.lineJoin = 'round';
       this.dados.forEach((d, i) => {
-        if (d.anim || !this.pantalla[i] || !d.mostrarValor) return;
+        if (d.anim || !this.pantalla[i] || !d.mostrarValor || (ESTILOS[d.tipo] && ESTILOS[d.tipo].caras)) return;
         const c = this.pantalla[i], y = c.y + this.sc * 0.66;
         ctx.strokeStyle = 'rgba(8,4,16,.85)'; ctx.strokeText(String(d.valor), c.x, y);
         ctx.fillStyle = d.apartado ? 'rgb(140,150,140)' : 'rgb(255,243,196)'; ctx.fillText(String(d.valor), c.x, y);

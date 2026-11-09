@@ -571,3 +571,30 @@ img, canvas { -webkit-user-drag: none; }
 .cfCampo label { font-size: 13px; color: var(--suave); }
 .cfCampo select { width: 100%; font: inherit; font-size: 16px; color: var(--texto); background: var(--fondo); border: 2px solid var(--borde); padding: 4px 6px; }
 .cajaConfig .error { margin: 0; }
+
+/* ---------- Fundación: el mapa, los dados sobre el tablero, el panel y el final ---------- */
+#fu.pantalla { position: relative; max-width: none; padding: 0; overflow: hidden; }
+#fuMapa { position: absolute; left: 0; top: 0; width: 100%; height: 100%; image-rendering: pixelated; cursor: pointer; touch-action: manipulation; }
+#fuDados canvas { display: block; image-rendering: pixelated; cursor: pointer; }
+#fuDados { display: flex; justify-content: center; }
+.fuInsignias { display: flex; gap: 3px; align-items: center; justify-content: center; min-height: 10px; }
+.fuInsignias canvas { display: block; }
+.fuChips { display: flex; gap: 6px; width: 100%; margin-top: 12px; }
+.fuChip { position: relative; flex: 1; min-width: 0; height: 56px; display: flex; align-items: center; justify-content: center; border: 2px solid var(--borde); background: rgba(255,255,255,.05); cursor: pointer; }
+.fuChip.on { border-color: var(--oro); background: rgba(242,201,76,.12); }
+.fuChip canvas { display: block; }
+.fuCartas { display: flex; gap: 10px; width: 100%; }
+.fuCarta { flex: 1; min-width: 0; display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 10px 6px; border: 3px solid var(--borde); background: var(--panel); cursor: pointer; }
+.fuCarta.on { border-color: var(--oro); background: rgba(242,201,76,.12); }
+.fuCosto { display: flex; gap: 3px; flex-wrap: wrap; justify-content: center; }
+.fuNombre { color: #fff3c4; font-size: 16px; }
+.fuAyudaFila { display: flex; gap: 10px; align-items: flex-start; text-align: left; font-size: 17px; }
+.fuAyudaFila b { color: var(--oro); }
+.fuFinalDato { color: var(--oro); font-size: 30px; font-weight: 700; }
+.fuRank { display: flex; align-items: center; gap: 8px; padding: 4px 8px; background: rgba(255,255,255,.05); }
+.fuRank.yo { background: rgba(242,201,76,.12); }
+.fuRank .nom { flex: 1; min-width: 0; text-align: left; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.fuRank b { color: var(--oro); }
+.fuRank small { color: var(--suave); font-size: 12px; }
+.iconoFu { position: absolute; left: 0; top: 0; }
+@media (max-width: 700px) { .fuChips { margin-top: 10px; } }

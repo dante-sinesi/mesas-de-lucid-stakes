@@ -248,3 +248,7 @@ Se decidió con maquetas (`prototipos/entrada_salas/`, con la estética real del
 Las reglas generales para pensar juegos nuevos (pocas decisiones con consecuencias, fácil de jugar y difícil de decidir, riesgo claro, competencia individual y motivos para volver) están en `docs/principios_diseno.md`.
 
 El diseño acordado del Rulepoly (ruleta de casillas con dueño, sin apuestas ni comercio) está en `docs/rulepoly.md`.
+
+## Fundación
+
+Tercer juego de la plataforma (id `fundacion`): Catan de dados para 1 a 8 jugadores en un mismo mapa generado al azar, con dados 3D de recursos. Reglas en `docs/catan_dados.md`, flujo en `docs/catan_flujo.md`, plan y simulador en `docs/fundacion_plan.md`. Servidor en `servidor/fundacion/`, cliente en `web/fundacion.js` y `web/fu_arte.js`. Service worker bj-101.

@@ -128,6 +128,24 @@
   </div>
 </section>
 
+<section id="fu" class="pantalla pant" hidden>
+  <canvas id="fuMapa"></canvas>
+  <header class="cabecera" id="fuCab">
+    <div class="datosSala"><div class="salaLinea"><span class="chico">Sala</span> <b id="fSala" class="dorado"></b></div></div>
+    <div class="fila">
+      <button id="fAyuda" class="tileBtn" type="button" aria-label="Ayuda" title="Ayuda"></button>
+      <button id="fSonido" class="tileBtn" type="button" aria-label="Sonido"></button>
+      <button id="fInvitar" class="tileBtn" type="button" aria-label="Invitar" title="Invitar"></button>
+      <button id="fSalir" class="tileBtn" type="button" aria-label="Salir" title="Salir"></button>
+    </div>
+  </header>
+  <div class="dmJugadores" id="fuJugadores"></div>
+  <div id="fuDados" hidden><canvas id="fuDadosLienzo"></canvas></div>
+  <div id="fuDock"></div>
+</section>
+
+<div id="fuFinal" class="modal modalAlto" hidden><div class="caja cajaRanking cajaTJ"></div></div>
+
 <div id="tjResumen" class="modal modalAlto" hidden><div class="caja cajaRanking cajaTJ"></div></div>
 <div id="tjTienda" class="modal" hidden><div class="caja cajaTienda cajaTJ"></div></div>
 <div id="tjFinal" class="modal modalAlto" hidden><div class="caja cajaRanking cajaDM"></div></div>
@@ -185,10 +203,12 @@
 <script src="dados3d.js"></script>
 <script src="comun.js"></script>
 <script src="mesas.js"></script>
+<script src="fu_arte.js"></script>
 <script src="entrada.js"></script>
 <script src="sala.js"></script>
 <script src="diezmil.js"></script>
 <script src="trecejack.js"></script>
+<script src="fundacion.js"></script>
 <script src="tutorial.js"></script>
 </body>
 </html>

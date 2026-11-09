@@ -5,6 +5,7 @@
 const JUEGOS = [
   { id: 'trecejack', nombre: '13 Jack' },
   { id: 'diezmil', nombre: 'Diez mil' },
+  { id: 'fundacion', nombre: 'Fundación' },
 ];
 let juegoLobby = 'diezmil';   // el juego que se está mirando (para la ayuda y el tutorial)
 const nombreJuego = id => (JUEGOS.find(j => j.id === id) || {}).nombre || '';
@@ -102,9 +103,11 @@ function irSolo(juego) {
   }
   juegoLobby = juego;
   $('sTitulo').textContent = nombreJuego(juego).toUpperCase();
-  const variantes = juego === 'trecejack'
+  const variantes = juego === 'fundacion'
+    ? [['MEJOR MARCA', () => crearSolo('fundacion')], ['CONTRA BOTS', () => crearContraBots('fundacion')]]
+    : (juego === 'trecejack'
     ? [['SOLITARIO', () => crearSolo('trecejack')], ['CONTRA BOTS', () => crearContraBots('trecejack')]]
-    : [['CARRERA', () => jugarSolo('diezmil', 'carrera')], ['ESCALERA', () => jugarSolo('diezmil', 'escalera')], ['CONTRA BOTS', () => crearContraBots('diezmil')]];
+    : [['CARRERA', () => jugarSolo('diezmil', 'carrera')], ['ESCALERA', () => jugarSolo('diezmil', 'escalera')], ['CONTRA BOTS', () => crearContraBots('diezmil')]]);
   variantes.forEach(([n, f]) => { const b = nuevoEl('button', 'jue variante', n); b.type = 'button'; b.onclick = f; caja.append(b); });
   const fila = nuevoEl('div', 'pie');
   if (juego === 'diezmil') { const t = nuevoEl('button', 'boton sec', 'Tutorial'); t.type = 'button'; V.boton(t, { cubo: 1.7 }); t.onclick = () => Tut.iniciar('diezmil'); fila.append(t); }
@@ -119,7 +122,7 @@ async function jugarSolo(juego, modo) {
 function apodoSolo() { if (!$('apodo').value.trim()) $('apodo').value = guardado('bj_apodo') || 'Jugador ' + (10 + Math.floor(Math.random() * 90)); }
 async function crearSolo(juego, modo) {
   apodoSolo();
-  const r = await api('/api/crear', juego === 'trecejack' ? { juego, modoTJ: 'solo', mazosTJ: 5, especiales: true, tiempo: 'libre' } : { juego, modoDM: modo || 'carrera', metaDM: 10000, tiempo: 'libre' });
+  const r = await api('/api/crear', juego === 'fundacion' ? { juego, modoFU: 'solo', metaFU: 10, tiempo: 'libre' } : (juego === 'trecejack' ? { juego, modoTJ: 'solo', mazosTJ: 5, especiales: true, tiempo: 'libre' } : { juego, modoDM: modo || 'carrera', metaDM: 10000, tiempo: 'libre' }));
   if (!r.ok) return avisoSolo(r.error || 'No se pudo crear la partida');
   const e = await entrar(r.sala, '');
   if (!e.ok) avisoSolo(e.error);
@@ -137,7 +140,7 @@ function avisoSolo(msg) { irEntrada(); $('errorInicio').textContent = msg || '';
 // ---------- crear sala ----------
 
 // Las reglas con las que nace una sala nueva (después se cambian en la sala de espera).
-const reglasBase = juego => (juego === 'trecejack'
+const reglasBase = juego => (juego === 'fundacion' ? { juego, modoFU: 'multi', metaFU: 10, tiempo: 'normal', asientos: 4 } : juego === 'trecejack'
   ? { juego, modoTJ: 'multi', mazosTJ: 5, especiales: true, tiempo: 'normal', asientos: 6 }
   : { juego, modoDM: 'multi', metaDM: 10000, tomarDados: false, hostil: true, cupo: false, tiempo: 'normal', asientos: 6 });
 const Crear = { juego: 'trecejack', publica: false };
@@ -179,7 +182,7 @@ const sillasLibres = n => Array.from({ length: n }, () => null);
 const ocupadas = r => r.sillas.filter(Boolean).length;
 const slotReal = r => ({ sala: r.sala, juego: r.juego, sillas: r.sillas, datos: r.datos, asientos: r.asientos, desde: Date.now(), fantasma: false });
 const slotFantasma = juego => ({ sala: null, juego, sillas: sillasLibres(6), datos: reglasFantasma(juego), asientos: 6, desde: Date.now(), fantasma: true });
-const reglasFantasma = juego => (juego === 'trecejack' ? { objetivo: 'mazos', mazos: 5, metaPuntos: 400, especiales: true } : { meta: 10000, cupo: false, hostil: true, tomarDados: false });
+const reglasFantasma = juego => (juego === 'fundacion' ? { meta: 10 } : juego === 'trecejack' ? { objetivo: 'mazos', mazos: 5, metaPuntos: 400, especiales: true } : { meta: 10000, cupo: false, hostil: true, tomarDados: false });
 
 function irAmigos() {
   Pantalla.ir('amigos');
@@ -209,7 +212,7 @@ function armarMapa() {
   if (Mapa.slots.length > N) Mapa.slots.length = N;
   const sinMostrar = () => Mapa.reales.filter(r => !Mapa.slots.some(s => s.sala === r.sala));
   const cuenta = j => Mapa.slots.filter(s => s.juego === j).length;
-  const juegoQueFalta = () => (cuenta('trecejack') <= cuenta('diezmil') ? 'trecejack' : 'diezmil');
+  const juegoQueFalta = () => JUEGOS.map(j => j.id).sort((a, b) => cuenta(a) - cuenta(b))[0];
   // las mesas libres dejan su lugar a las salas reales
   for (let i = 0; i < Mapa.slots.length; i++) { const s = Mapa.slots[i]; if (s.fantasma && !estaTocada(s)) { const r = sinMostrar()[0]; if (r) Mapa.slots[i] = slotReal(r); } }
   // se completa: salas reales primero, mesas libres después
@@ -259,7 +262,7 @@ function abrirFicha(s) {
   const m = $('ficha'), caja = m.querySelector('.caja'); caja.textContent = '';
   const fila = (a, b) => { const f = nuevoEl('div', 'fichaFila'); f.append(nuevoEl('span', '', a), nuevoEl('b', 'oro', b)); return f; };
   const d = s.datos, ocup = s.fantasma ? 0 : s.sillas.filter(Boolean).length;
-  const objetivo = s.juego === 'trecejack' ? (d.objetivo === 'puntos' ? d.metaPuntos + ' puntos' : d.mazos + ' mazos') : miles(d.meta);
+  const objetivo = s.juego === 'fundacion' ? d.meta + ' puntos' : (s.juego === 'trecejack' ? (d.objetivo === 'puntos' ? d.metaPuntos + ' puntos' : d.mazos + ' mazos') : miles(d.meta));
   const error = nuevoEl('div', 'error');
   const cerrar = () => { m.hidden = true; Mapa.sel = null; Mapa.llave = ''; pintarMapa(); };
   const entrarMesa = async () => {
@@ -270,7 +273,7 @@ function abrirFicha(s) {
   };
   const bs = nuevoEl('div', 'botonesFin');
   bs.append(nuevoBoton('Cerrar', cerrar, 1.8), (() => { const b = nuevoBoton('Entrar', entrarMesa, 1.8); b.oro = true; return b; })());
-  caja.append(nuevoEl('h3', '', nombreJuego(s.juego).toUpperCase()), fila('Jugadores', ocup + ' / ' + s.asientos), fila(s.juego === 'trecejack' ? 'Objetivo' : 'Meta', objetivo), error, bs);
+  caja.append(nuevoEl('h3', '', nombreJuego(s.juego).toUpperCase()), fila('Jugadores', ocup + ' / ' + s.asientos), fila(s.juego === 'diezmil' ? 'Meta' : 'Objetivo', objetivo), error, bs);
   m.hidden = false;
 }
 $('ficha').addEventListener('click', ev => { if (ev.target === $('ficha')) { $('ficha').hidden = true; Mapa.sel = null; Mapa.llave = ''; pintarMapa(); } });
@@ -286,7 +289,7 @@ async function crearYEntrar(juego) {
 function pintarLista() {
   if (Pantalla.actual !== 'lista') return;
   const f = Mapa.filtro, caja = $('lFiltros'); caja.textContent = '';
-  for (const [txt, activo, alTocar] of [['Todos', f.juego === 'todos', () => { f.juego = 'todos'; }], ['13 Jack', f.juego === 'trecejack', () => { f.juego = 'trecejack'; }], ['Diez mil', f.juego === 'diezmil', () => { f.juego = 'diezmil'; }], ['Mitad llena', f.mitad, () => { f.mitad = !f.mitad; }]]) {
+  for (const [txt, activo, alTocar] of [['Todos', f.juego === 'todos', () => { f.juego = 'todos'; }], ['13 Jack', f.juego === 'trecejack', () => { f.juego = 'trecejack'; }], ['Diez mil', f.juego === 'diezmil', () => { f.juego = 'diezmil'; }], ['Fundación', f.juego === 'fundacion', () => { f.juego = 'fundacion'; }], ['Mitad llena', f.mitad, () => { f.mitad = !f.mitad; }]]) {
     const b = nuevoEl('button', 'boton'); b.type = 'button'; V.boton(b, { texto: txt, oro: activo, cubo: 1.4 });
     b.onclick = () => { alTocar(); pintarLista(); };
     caja.append(b);
@@ -296,7 +299,7 @@ function pintarLista() {
   if (!lista.length) { filas.append(nuevoEl('div', 'listaVacia', 'Sin mesas')); return; }
   for (const r of lista) {
     const b = nuevoEl('button', 'listaFila'); b.type = 'button';
-    const objetivo = r.juego === 'trecejack' ? (r.datos.objetivo === 'puntos' ? r.datos.metaPuntos + ' puntos' : r.datos.mazos + ' mazos') : 'Meta ' + miles(r.datos.meta);
+    const objetivo = r.juego === 'fundacion' ? 'Meta ' + r.datos.meta : (r.juego === 'trecejack' ? (r.datos.objetivo === 'puntos' ? r.datos.metaPuntos + ' puntos' : r.datos.mazos + ' mazos') : 'Meta ' + miles(r.datos.meta));
     const ico = Mesas.iconoJuego(r.juego, 0.5);
     const info = nuevoEl('div', 'listaInfo'); info.append(nuevoEl('b', '', nombreJuego(r.juego)), nuevoEl('span', 'suave', objetivo));
     const pts = nuevoEl('div', 'puntos'); r.sillas.forEach((s, i) => { const p = nuevoEl('i', s ? (s === 'b' ? 'bot' : 'on') : ''); if (s === 'h') p.style.background = V.css(Mesas.COLORES[i % Mesas.COLORES.length]); pts.append(p); });
