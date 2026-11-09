@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Prueba de hosting</title>
+<style>
+  body { margin: 0; padding: 24px 16px; background: #120a22; color: #efe6ff; font: 16px/1.5 system-ui, sans-serif; }
+  main { max-width: 640px; margin: 0 auto; }
+  h1 { font-size: 24px; margin: 0 0 4px; }
+  .nota { color: #a99cc9; margin: 0 0 20px; }
+  .cifra { font-size: 72px; font-weight: 700; color: #f2c94c; line-height: 1.1; }
+  button { font: inherit; padding: 10px 18px; border: 0; border-radius: 6px; background: #f2c94c; color: #120a22; cursor: pointer; }
+  .caja { border: 1px solid #2a1c47; border-radius: 8px; padding: 12px 14px; margin: 14px 0; }
+  .caja b { display: block; color: #a99cc9; font-weight: 400; font-size: 13px; margin-bottom: 4px; }
+  .ok { color: #6ee7a8; } .mal { color: #ff8a7a; }
+  pre { margin: 0; white-space: pre-wrap; font-size: 13px; }
+</style>
+</head>
+<body>
+<main>
+  <h1>Prueba de hosting</h1>
+  <p class="nota">Abre esta página en dos o tres pestañas (o en el celular). Toca "Sumar" en una: el número tiene que cambiar casi al instante en las demás.</p>
+  <div class="cifra" id="cifra">—</div>
+  <p><button id="sumar">Sumar</button></p>
+
+  <div class="caja"><b>Long polling (consulta que espera el cambio)</b><span id="lp">conectando…</span></div>
+  <div class="caja"><b>Eventos del servidor (SSE)</b><span id="sse">conectando…</span></div>
+  <div class="caja"><b>El servidor</b><pre id="info">…</pre></div>
+  <div class="caja"><b>Registro</b><pre id="log"></pre></div>
+</main>
+<script>
+const $ = id => document.getElementById(id);
+let version = -1, ultimoSuma = 0, rondas = 0, cambiosLP = 0, eventosSSE = 0, ultimoSSE = 0;
+const lineas = [];
+function log(t) { lineas.unshift(new Date().toLocaleTimeString() + '  ' + t); lineas.length = Math.min(lineas.length, 12); $('log').textContent = lineas.join('\n'); }
+
+async function consultar() {
+  for (;;) {
+    const t0 = performance.now();
+    try {
+      const r = await fetch('/api/estado?v=' + version, { cache: 'no-store' });
+      const e = await r.json();
+      const espera = Math.round(performance.now() - t0);
+      rondas++;
+      if (e.version !== version) {
+        const demora = ultimoSuma ? Math.round(performance.now() - ultimoSuma) : null;
+        version = e.version; cambiosLP++;
+        $('cifra').textContent = e.contador;
+        if (demora !== null && demora < 3000) { log('Long polling: cambio visto ' + demora + ' ms después de tocar el botón'); ultimoSuma = 0; }
+        else log('Long polling: cambio recibido (la consulta esperó ' + espera + ' ms)');
+      }
+      $('lp').innerHTML = '<span class="ok">funciona</span> · ' + rondas + ' consultas, ' + cambiosLP + ' cambios recibidos';
+    } catch (err) {
+      $('lp').innerHTML = '<span class="mal">falló: ' + err.message + '</span> (reintento en 2 s)';
+      await new Promise(r => setTimeout(r, 2000));
+    }
+  }
+}
+
+function eventos() {
+  const es = new EventSource('/api/eventos');
+  es.onmessage = m => {
+    eventosSSE++; ultimoSSE = Date.now();
+    const e = JSON.parse(m.data);
+    $('sse').innerHTML = '<span class="ok">funciona</span> · ' + eventosSSE + ' mensajes, contador ' + e.contador;
+  };
+  es.onerror = () => { $('sse').innerHTML = '<span class="mal">se cortó</span> (el navegador reintenta solo) · mensajes recibidos: ' + eventosSSE; };
+}
+
+async function info() {
+  try {
+    const i = await (await fetch('/api/info', { cache: 'no-store' })).json();
+    $('info').textContent = 'Node ' + i.node + ' · proceso ' + i.pid + ' · encendido hace ' + i.segundos_encendido + ' s\nconsultas abiertas: ' + i.consultas_abiertas + ' · flujos SSE abiertos: ' + i.flujos_abiertos;
+  } catch (e) { $('info').textContent = 'sin respuesta'; }
+}
+
+$('sumar').onclick = async () => { ultimoSuma = performance.now(); await fetch('/api/sumar', { method: 'POST' }); };
+consultar(); eventos(); info(); setInterval(info, 5000);
+</script>
+</body>
+</html>

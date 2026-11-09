@@ -1,0 +1,259 @@
+{
+  "main": {
+    "id": "3ab2886ed250330e",
+    "type": "split",
+    "children": [
+      {
+        "id": "41aa736f2e6ccba8",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "9416f667da06a17e",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "file:Z:/Almacenamiento/Documentos/Cloude Code/Curriculum/Reglas para los CVs.md",
+                "mode": "source",
+                "source": false
+              },
+              "icon": "lucide-file",
+              "title": "Reglas para los CVs"
+            }
+          },
+          {
+            "id": "d823cc4733797060",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "file:Z:/Almacenamiento/Documentos/Cloude Code/Curriculum/Datos verídicos.md",
+                "mode": "source",
+                "source": false
+              },
+              "icon": "lucide-file",
+              "title": "Datos verídicos"
+            }
+          },
+          {
+            "id": "119d0865108e768b",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "file:Z:/Almacenamiento/Documentos/Cloude Code/Curriculum/LinkedIn - textos.md",
+                "mode": "source",
+                "source": false
+              },
+              "icon": "lucide-file",
+              "title": "LinkedIn - textos"
+            }
+          },
+          {
+            "id": "a17cfaee31931e80",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "file:Z:/Almacenamiento/Documentos/Cloude Code/LucidStakes/docs/Brainstorming_Chatgpt.md",
+                "mode": "source",
+                "source": false
+              },
+              "icon": "lucide-file",
+              "title": "Brainstorming_Chatgpt"
+            }
+          }
+        ],
+        "currentTab": 3
+      }
+    ],
+    "direction": "vertical"
+  },
+  "left": {
+    "id": "28827f97dacf0d51",
+    "type": "split",
+    "children": [
+      {
+        "id": "042f3c03939bf81e",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "839e062d19ad4555",
+            "type": "leaf",
+            "state": {
+              "type": "file-explorer",
+              "state": {
+                "sortOrder": "alphabetical",
+                "autoReveal": false,
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-folder-closed",
+              "title": "Explorador de archivos"
+            }
+          },
+          {
+            "id": "a4698b936226f2e8",
+            "type": "leaf",
+            "state": {
+              "type": "search",
+              "state": {
+                "query": "",
+                "matchingCase": false,
+                "explainSearch": false,
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical"
+              },
+              "icon": "lucide-search",
+              "title": "Buscar"
+            }
+          },
+          {
+            "id": "f21078ae58a5b03e",
+            "type": "leaf",
+            "state": {
+              "type": "bookmarks",
+              "state": {
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-bookmark",
+              "title": "Marcadores"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "horizontal",
+    "width": 300
+  },
+  "right": {
+    "id": "d2f0a87918bd279d",
+    "type": "split",
+    "children": [
+      {
+        "id": "a90acb110d57ecd9",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "cc7796e31c798dcc",
+            "type": "leaf",
+            "state": {
+              "type": "backlink",
+              "state": {
+                "file": "diez_mil_calibracion.md",
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical",
+                "showSearch": false,
+                "searchQuery": "",
+                "backlinkCollapsed": false,
+                "unlinkedCollapsed": true
+              },
+              "icon": "links-coming-in",
+              "title": "Enlaces entrantes"
+            }
+          },
+          {
+            "id": "a15fa3f21284a8a3",
+            "type": "leaf",
+            "state": {
+              "type": "outgoing-link",
+              "state": {
+                "file": "diez_mil_calibracion.md",
+                "linksCollapsed": false,
+                "unlinkedCollapsed": true
+              },
+              "icon": "links-going-out",
+              "title": "Enlaces salientes"
+            }
+          },
+          {
+            "id": "24a1273ca4a8393d",
+            "type": "leaf",
+            "state": {
+              "type": "tag",
+              "state": {
+                "sortOrder": "frequency",
+                "useHierarchy": true,
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-tags",
+              "title": "Etiquetas"
+            }
+          },
+          {
+            "id": "6777f0781e14f91a",
+            "type": "leaf",
+            "state": {
+              "type": "all-properties",
+              "state": {
+                "sortOrder": "frequency",
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-archive",
+              "title": "Todas las propiedades"
+            }
+          },
+          {
+            "id": "09fa52fa69a5ff65",
+            "type": "leaf",
+            "state": {
+              "type": "outline",
+              "state": {
+                "file": "diez_mil_calibracion.md",
+                "followCursor": false,
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-list",
+              "title": "Esquema"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "horizontal",
+    "width": 300,
+    "collapsed": true
+  },
+  "left-ribbon": {
+    "hiddenItems": {
+      "switcher:Abrir selector rápido": false,
+      "graph:Abrir vista gráfica": false,
+      "canvas:Crear nuevo lienzo": false,
+      "daily-notes:Abrir la nota de hoy": false,
+      "templates:Insertar plantilla": false,
+      "command-palette:Abrir paleta de comandos": false,
+      "bases:Crear nueva base": false
+    }
+  },
+  "active": "a17cfaee31931e80",
+  "lastOpenFiles": [
+    "rulepoly.md",
+    "rulepoly.md.tmp.16236.d1f7246c3c94",
+    "principios_diseno.md",
+    "principios_diseno.md.tmp.16236.0e9da6eadf49",
+    "file:Z:/Almacenamiento/Documentos/Cloude Code/Lucid Stakes Multijugador (contexto)/Entrada y salas (decidido)/LEEME.md",
+    "file:Z:/Almacenamiento/Documentos/Cloude Code/Curriculum/Reglas para los CVs.md",
+    "file:Z:/Almacenamiento/Documentos/Cloude Code/Curriculum/LinkedIn - textos.md",
+    "file:Z:/Almacenamiento/Documentos/Cloude Code/Curriculum/Plan de búsqueda.md",
+    "diseno.md",
+    "file:C:/Users/Dante/OneDrive - UCA/Escritorio/Bran/Mesas_project-summary.md",
+    "ideas_13_jack.md",
+    "file:Z:/Almacenamiento/Documentos/Cloude Code/Blackjack Web/project-summary.md",
+    "auditoria_ux_tabla.md",
+    "ideas_blackjack.md.tmp.18384.6a798db23540",
+    "ideas_blackjack.md.tmp.18384.b07e8a448a27",
+    "ideas_blackjack.md",
+    "ideas_blackjack.md.tmp.18384.1552a1c34a78",
+    "auditoria_ux.md",
+    "diez_mil_calibracion.md",
+    "sedGzGz4O",
+    "sedeMIhoe",
+    "brainstorm_diez_mil.md"
+  ]
+}

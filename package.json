@@ -1,0 +1,17 @@
+{
+  "name": "mesas-lucid-stakes",
+  "version": "0.1.0",
+  "description": "Mesas multijugador de Lucid Stakes",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "paquete": "node herramientas/empaquetar.js",
+    "test": "node pruebas/test_salas.js && node pruebas/test_sonido.js && node pruebas/test_sw.js && node pruebas/test_farolin.js && node pruebas/test_estadisticas.js && node pruebas/test_diezmil_reglas.js && node pruebas/test_diezmil.js && node pruebas/test_salas_dm.js && node pruebas/test_trecejack_reglas.js && node pruebas/test_trecejack.js && node pruebas/test_bots.js && node pruebas/test_sala_espera.js && node pruebas/test_qr.js"
+  },
+  "license": "UNLICENSED",
+  "private": true,
+  "dependencies": {},
+  "engines": {
+    "node": ">=18"
+  }
+}

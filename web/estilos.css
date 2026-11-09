@@ -1,0 +1,569 @@
+@font-face { font-family: 'Lucid Stakes'; font-weight: 400; src: url(fonts/lucid-stakes-400.woff2) format('woff2'); font-display: swap; }
+@font-face { font-family: 'Lucid Stakes'; font-weight: 700; src: url(fonts/lucid-stakes-700.woff2) format('woff2'); font-display: swap; }
+
+:root {
+  --fondo: #120a22; --panel: #1d1236; --borde: #3a2766; --texto: #efe6ff; --suave: #a99cc9;
+  --oro: #f2c94c; --rojo: #ff8a7a; --bien: #8be36a;
+}
+* { box-sizing: border-box; }
+/* La partida nunca pasa del tamaño de la ventana: no hay scroll. */
+html, body { height: 100%; overflow: hidden; overscroll-behavior: none; }
+body { margin: 0; background: var(--fondo); color: var(--texto); font: 22px/1.3 'Lucid Stakes', 'Courier New', monospace; -webkit-text-size-adjust: 100%; touch-action: manipulation; }
+[hidden] { display: none !important; }
+/* El texto no se selecciona (ni con el mouse ni con una pulsación larga en el celular, que abre el menú de copiar y buscar); los campos de texto sí. */
+html, body { -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; -webkit-tap-highlight-color: transparent; }
+input, textarea, select { -webkit-user-select: text; user-select: text; -webkit-touch-callout: default; }
+img, canvas { -webkit-user-drag: none; }
+.pantalla { height: 100dvh; max-width: 1200px; margin: 0 auto; }
+.dorado { color: var(--oro); font-weight: 700; }
+.chico { color: var(--suave); font-size: 17px; }
+.error { color: var(--rojo); min-height: 1.3em; margin: 8px 0; }
+.etiqueta { display: block; color: var(--suave); font-size: 17px; margin-bottom: 6px; }
+.fila { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+
+.extrasInicio { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
+
+.vb { background: none; border: 0; padding: 0; margin: -6px; cursor: pointer; line-height: 0; display: inline-block; -webkit-tap-highlight-color: transparent; }
+.vb:disabled { cursor: default; }
+.vb canvas { display: block; }
+.vb:focus-visible { outline: 2px dashed var(--oro); outline-offset: 0; }
+.cabecera { flex: none; display: flex; justify-content: space-between; align-items: center; gap: 12px; min-height: 40px; padding: 0 6px; }
+.cv { width: var(--cw, 70px); aspect-ratio: 96 / 134; height: auto; filter: drop-shadow(3px 3px 0 rgba(0,0,0,.5)); }
+
+.barra { height: 6px; background: rgba(0,0,0,.35); margin-top: 4px; }
+.barra div { height: 100%; width: 0; background: var(--oro); }
+.nombre { min-width: 0; font-weight: 700; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: clamp(12px, 2.3cqw, 21px); }
+.datos { color: #bfe6cf; font-size: clamp(10px, 1.8cqw, 16px); white-space: nowrap; }
+.ayuda { color: var(--oro); font-size: clamp(10px, 1.7cqw, 15px); }
+.fichaC { width: var(--chip, 26px); height: auto; image-rendering: pixelated; filter: drop-shadow(2px 2px 0 rgba(0,0,0,.5)); }
+.monto { color: var(--oro); font-weight: 700; font-size: clamp(11px, 2cqw, 18px); }
+.fsel { background: rgba(255,255,255,.04); border: 2px solid transparent; padding: 4px 6px 2px; cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 2px; font: inherit; color: var(--texto); }
+.fsel .fichaC { --chip: 36px; }
+.fsel.on { border-color: var(--oro); background: rgba(242, 201, 76, .14); transform: translateY(-3px); }
+.fsel:disabled { opacity: .3; cursor: default; }
+.fsel .monto { font-size: 14px; }
+.aviso { position: absolute; left: 0; right: 0; bottom: -2px; text-align: center; color: var(--rojo); font-size: 14px; pointer-events: none; }
+
+.modal { position: fixed; inset: 0; z-index: 40; background: rgba(6,3,14,.8); display: flex; align-items: center; justify-content: center; padding: 16px; }
+.modal .caja { background: var(--panel); border: 2px solid var(--borde); padding: 16px; width: min(420px, 100%); max-height: 90dvh; overflow: auto; }
+
+/* ---------- habilidades, objetos y tienda ---------- */
+.tile { width: var(--tile, 34px); height: var(--tile, 34px); image-rendering: pixelated; display: block; filter: drop-shadow(2px 2px 0 rgba(0,0,0,.5)); }
+.tileBtn { background: none; border: 0; padding: 0; cursor: pointer; line-height: 0; }
+.tileBtn:hover .tile { filter: drop-shadow(2px 2px 0 rgba(0,0,0,.5)) brightness(1.25); }
+
+.modalAlto { z-index: 50; }
+.cajaObjeto, .cajaTienda { text-align: center; display: flex; flex-direction: column; align-items: center; gap: 12px; }
+.cajaObjeto .tile { --tile: 64px; }
+.cajaObjeto h3, .cajaTienda h3 { margin: 0; font-size: 22px; color: #fff3c4; }
+.rareza { font-size: 15px; }
+.rareza.comun { color: #d6cde6; } .rareza.raro { color: #8ed0ff; } .rareza.epico { color: var(--oro); }
+.descripcion { color: var(--texto); font-size: 17px; line-height: 1.35; max-width: 340px; }
+.modal .cajaTienda { width: min(580px, 100%); }
+.modal .cajaObjeto { width: min(380px, 100%); }
+.cajaTienda .barra { width: 100%; }
+.oferta { display: grid; grid-template-columns: auto 1fr auto; gap: 10px; align-items: center; text-align: left; background: rgba(255,255,255,.04); padding: 8px; border: 2px solid var(--borde); }
+.oferta .tile { --tile: 48px; }
+.oferta .nom { font-weight: 700; font-size: 18px; }
+.oferta .desc { font-size: 14px; color: var(--suave); line-height: 1.3; }
+.oferta .precio { color: var(--oro); font-weight: 700; font-size: 18px; text-align: center; margin-bottom: 4px; }
+.oferta.comprada { opacity: .5; }
+
+.parlante { width: 44px; height: auto; image-rendering: pixelated; display: block; filter: drop-shadow(2px 2px 0 rgba(0,0,0,.5)); }
+#bSonido:hover .parlante { filter: drop-shadow(2px 2px 0 rgba(0,0,0,.5)) brightness(1.3); }
+#bSonido { padding: 4px; }
+.modal .cajaRanking { width: min(480px, 100%); text-align: center; display: flex; flex-direction: column; align-items: center; gap: 10px; }
+.cajaRanking h3 { margin: 0; font-size: 22px; color: #fff3c4; }
+.filas { display: flex; flex-direction: column; gap: 6px; width: 100%; }
+.pos { display: grid; grid-template-columns: 28px 1fr auto; gap: 8px; align-items: center; text-align: left; background: rgba(255,255,255,.04); border: 2px solid transparent; padding: 6px 8px; position: relative; }
+.pos.lider { border-color: var(--oro); background: rgba(242,201,76,.1); }
+.pos.soy { outline: 2px dashed rgba(242,201,76,.5); outline-offset: -2px; }
+.pos.off { opacity: .55; }
+.pos .n { font-weight: 700; color: var(--suave); font-size: 20px; }
+.pos.lider .n { color: var(--oro); }
+.pos .nom { font-weight: 700; font-size: 18px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.pos .barra { grid-column: 2 / -1; height: 8px; margin: 0; background: rgba(0,0,0,.45); }
+.pos .barra div { background: linear-gradient(90deg, #b8861b, var(--oro)); }
+
+#final { position: fixed; inset: 0; z-index: 70; display: flex; align-items: center; justify-content: center; overflow: hidden; }
+#final .rfondo { background: rgba(6, 3, 14, .9); }
+.podio { display: flex; align-items: flex-end; justify-content: center; gap: 8px; width: 100%; margin: 4px 0; }
+.resto { display: flex; flex-wrap: wrap; gap: 4px 14px; justify-content: center; color: var(--suave); font-size: 15px; }
+.botonesFin { display: flex; gap: 14px; justify-content: center; margin-top: 4px; flex-wrap: wrap; }
+@media (max-width: 700px) { .pos .nom { font-size: 16px; } }
+
+/* ---------- el cartel grande al terminar la ronda ---------- */
+#resultado { position: fixed; inset: 0; z-index: 60; display: flex; align-items: center; justify-content: center; cursor: pointer; overflow: hidden; }
+.rfondo { position: absolute; inset: 0; background: rgba(6, 3, 14, .84); }
+.rluz { position: absolute; inset: 0; pointer-events: none; }
+.rcentro { position: relative; display: flex; flex-direction: column; align-items: center; gap: 14px; text-align: center; padding: 16px; }
+.rcentro canvas { max-width: 94vw; height: auto; }
+.rsub { color: #d9cfff; font-size: clamp(14px, 3.4vw, 22px); }
+.rsub.grande { font-size: clamp(18px, 4.6vw, 30px); color: #fff3c4; }
+.rconf { position: absolute; pointer-events: none; z-index: 2; box-shadow: inset -2px -2px 0 rgba(0,0,0,.25); }
+
+/* ---------- celular (columna, sin hexágono): todo se mide con --u, que escala con el ancho y el alto de la pantalla (pensado para 375 x 812) ---------- */
+@media (max-width: 700px) {
+  .pantalla { --u: calc(min(100vw / 375, 100dvh / 812) * var(--k, 1)); }
+  .cabecera { min-height: calc(var(--u) * 40); }
+  .datosSala .chico { font-size: calc(var(--u) * 15); }
+  .cabecera .fila { flex-wrap: nowrap; gap: calc(var(--u) * 6); align-items: center; }
+  .parlante { width: calc(var(--u) * 28); }
+  .datosSala b { font-size: calc(var(--u) * 20); }
+  .barra { height: calc(var(--u) * 5); }
+  .monto { font-size: calc(var(--u) * 14); }
+  .fsel { padding: 3px 5px 1px; } .fsel .fichaC { --chip: calc(var(--u) * 32); } .fsel .monto { font-size: calc(var(--u) * 13); }   /* (solo se ve lo que se puede hacer ahora) */
+}
+
+/* ---------- ventana baja y ancha (celular acostado, ventanas chatas): la mesa a la izquierda, y a la derecha la cabecera y las acciones en columna ---------- */
+@media (max-height: 540px) and (min-width: 701px) {
+  .cabecera { grid-area: cab; flex-direction: column; align-items: flex-end; gap: 4px; min-height: 0; padding: 0; }
+  .cabecera .fila { flex-wrap: nowrap; justify-content: flex-end; gap: 6px; }
+  .fsel .fichaC { --chip: 28px; } .fsel .monto { font-size: 12px; }
+  .nombre { font-size: max(8px, 2.4cqw); }
+  .datos, .ayuda, .monto { font-size: max(8px, 1.9cqw); }
+}
+.reacciones { position: fixed; top: 56px; right: 12px; z-index: 45; display: grid; grid-template-columns: repeat(3, auto); gap: 6px; padding: 8px; background: rgba(14,10,28,.95); border: 2px solid var(--borde); box-shadow: 4px 4px 0 rgba(0,0,0,.5); }
+.reacciones[hidden] { display: none; }
+.reacciones .reac { padding: 4px 6px; min-width: 40px; display: flex; align-items: center; justify-content: center; }
+.reacciones .reac canvas { max-width: 56px; height: auto; image-rendering: pixelated; }
+
+/* ---------- estadísticas ---------- */
+#stats { z-index: 80; }
+.statFilas { width: 100%; display: flex; flex-direction: column; gap: 2px; }
+.statFila { display: flex; justify-content: space-between; gap: 12px; padding: 3px 6px; background: rgba(255,255,255,.04); font-size: 15px; }
+.statFila b { color: var(--oro); }
+
+#imagen { z-index: 90; }
+.imgRanking { max-width: 100%; max-height: 60vh; width: auto; height: auto; image-rendering: pixelated; border: 2px solid var(--borde); }
+#ayuda { z-index: 95; }
+.cajaAyuda { width: min(560px, 100%); max-height: 92vh; display: flex; flex-direction: column; }
+
+/* láminas de la ayuda */
+.cajaAyuda { width: min(560px, 100%); max-height: 94vh; display: flex; flex-direction: column; gap: 8px; }
+.ayCuerpo { display: flex; flex-direction: column; align-items: center; gap: 10px; min-height: 280px; justify-content: space-between; touch-action: pan-y; }
+.ayTitulo { display: flex; justify-content: center; }
+.ayRot { max-width: 100%; height: auto; image-rendering: pixelated; }
+.ayEscena { width: 100%; flex: 1; display: flex; align-items: center; justify-content: center; min-height: 0; }
+.ayPie { margin: 0; text-align: center; font-size: 14px; line-height: 1.35; color: #d8def0; max-width: 46ch; }
+.ayFila { display: flex; align-items: center; justify-content: center; gap: 10px; flex-wrap: wrap; }
+.ayApila { display: flex; flex-direction: column; gap: 10px; align-items: center; width: 100%; }
+.ayVs { color: var(--suave); font-weight: 700; font-size: 14px; }
+.ayFlecha { color: var(--oro); font-size: 22px; font-weight: 700; }
+.ayAyuda { font-size: 12px; color: var(--suave); text-align: center; max-width: 130px; line-height: 1.25; }
+.ayGaleria { display: flex; flex-direction: column; align-items: center; gap: 8px; width: 100%; }
+.ayGrid { display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; --tile: 48px; }
+.ayTile { border: 2px solid transparent; padding: 2px; }
+.ayTile.on { border-color: var(--oro); }
+.ayInfo { min-height: 56px; width: 100%; padding: 6px 10px; background: rgba(255,255,255,.05); border: 2px solid var(--borde); text-align: left; display: flex; flex-direction: column; gap: 2px; }
+.ayInfo b { color: #fff3c4; font-size: 15px; } .ayInfo span { color: var(--suave); font-size: 13px; line-height: 1.3; }
+.ayInfo .ayHint { text-align: center; }
+.ayTabs { display: flex; flex-wrap: wrap; justify-content: center; gap: 4px; }
+.ayTab { padding: 5px 7px; border: 2px solid var(--borde); background: rgba(255,255,255,.06); cursor: pointer; line-height: 0; }
+.ayTab:hover { background: rgba(255,255,255,.12); }
+.ayTab.on { border-color: var(--oro); background: rgba(255,214,102,.14); }
+.ayTab .ayRot { image-rendering: pixelated; }
+.ayNav { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.ayPuntos { display: flex; gap: 5px; flex-wrap: wrap; justify-content: center; flex: 1; }
+.ayPunto { width: 10px; height: 10px; padding: 0; border: 0; background: rgba(255,255,255,.25); cursor: pointer; }
+.ayPunto.on { background: var(--oro); }
+.cajaAyuda { overflow: hidden; }
+#bSalir { padding: 4px; }
+#bSalir:hover .parlante { filter: drop-shadow(2px 2px 0 rgba(0,0,0,.5)) brightness(1.3); }
+
+/* objetos que se pueden usar ahora */
+.tileBtn.listo .tile { animation: listo 1.1s ease-in-out infinite; }
+@keyframes listo { 0%, 100% { filter: drop-shadow(0 0 0 rgba(242,201,76,0)) brightness(1); transform: translateY(0); } 50% { filter: drop-shadow(0 0 7px rgba(242,201,76,1)) brightness(1.35); transform: translateY(-2px); } }
+@media (prefers-reduced-motion: reduce) { .tileBtn.listo .tile { animation: none; filter: drop-shadow(0 0 5px rgba(242,201,76,.9)); } }
+
+/* avisos de objetos y misiones */
+.avisos { position: fixed; left: 50%; top: 58px; transform: translateX(-50%); z-index: 72; display: flex; flex-direction: column; gap: 6px; align-items: center; pointer-events: none; width: min(92vw, 420px); }
+.avisoObj { display: flex; align-items: center; gap: 8px; padding: 4px 10px 4px 4px; background: rgba(14,10,28,.96); border: 2px solid var(--oro); box-shadow: 3px 3px 0 rgba(0,0,0,.55); font-size: 14px; color: #fff3c4; --tile: 30px; max-width: 100%; }
+
+/* ventana para crear la sala */
+.cajaConfig { width: min(520px, 100%); max-height: 94vh; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; text-align: left; }
+.cajaConfig h3 { margin: 0; text-align: center; color: #fff3c4; font-size: 22px; }
+.cfGrid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.cfCampo { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+.cfCampo label { font-size: 13px; color: var(--suave); }
+.cfCampo select { width: 100%; font: inherit; font-size: 16px; color: var(--texto); background: var(--fondo); border: 2px solid var(--borde); padding: 6px 8px; margin: 0; min-width: 0; }
+.ayDef { flex-wrap: nowrap; gap: 4px; }
+.ayDef .tile { width: 34px; height: 34px; }
+.ayDef .ayFlecha { font-size: 18px; }
+.ayPunto { width: 8px; height: 8px; } .ayPuntos { gap: 4px; }
+
+}
+
+
+/* ---------- la partida de diez mil ---------- */
+#dm.pantalla, #tj.pantalla { display: flex; flex-direction: column; gap: 8px; max-width: none; padding: calc(8px + env(safe-area-inset-top, 0px)) max(12px, env(safe-area-inset-left, 0px)) calc(8px + env(safe-area-inset-bottom, 0px)); overflow: hidden; }
+#dm .datosSala, #tj .datosSala { white-space: nowrap; }
+.dmCuerpo { flex: 1; min-height: 0; display: flex; flex-direction: column; gap: 8px; align-items: center; }
+.dmJugadores { flex: none; display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; width: 100%; }
+.dmJ { position: relative; min-width: 128px; padding: 4px 10px; background: rgba(255,255,255,.05); border: 2px solid var(--borde); display: flex; flex-direction: column; align-items: center; gap: 1px; font-size: 14px; }
+.dmJ.turno { border-color: var(--oro); background: rgba(242,201,76,.12); }
+.dmJ.soy .dmNombre::before { content: '★ '; color: var(--oro); }
+.dmJ.off { opacity: .5; }
+.dmNombre { color: #fff3c4; font-size: 15px; max-width: 14ch; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.dmTotal { color: var(--oro); font-size: 24px; font-weight: 700; line-height: 1; } .dmRotSin { color: #ff9a6b; }
+.dmMeta { color: var(--suave); font-size: 11px; }
+.dmDadosMini { display: flex; gap: 2px; height: 12px; }
+.dmDadosMini span { width: 10px; height: 10px; border: 1px solid rgba(0,0,0,.5); display: block; }
+.dmFichas { color: #8be36a; font-size: 13px; }
+.dmMesa { flex: 1; min-height: 0; width: 100%; display: flex; align-items: center; justify-content: center; position: relative; }
+.dmMesa canvas { display: block; image-rendering: pixelated; cursor: pointer; }
+.dmCartel { position: absolute; top: 6px; left: 50%; transform: translateX(-50%); max-width: 92%; padding: 6px 14px; background: rgba(14,10,28,.95); border: 3px solid var(--oro); box-shadow: 4px 4px 0 rgba(0,0,0,.6); text-align: center; display: flex; flex-direction: column; gap: 2px; z-index: 5; }
+.dmCartel b { color: #fff3c4; font-size: 22px; } .dmCartel span { color: var(--suave); font-size: 14px; }
+.dmCartel.malo { border-color: #ff8a7a; } .dmCartel.bueno { border-color: #8be36a; }
+.dmCartel .barraV { height: 6px; background: rgba(0,0,0,.5); margin-top: 3px; } .dmCartel .barraV div { height: 100%; background: linear-gradient(90deg, #b8861b, var(--oro)); width: 100%; transition: width .25s linear; }
+.dmReloj { flex: none; height: 6px; margin: 2px auto 4px; width: min(100%, 520px); background: rgba(0,0,0,.45); } .dmReloj div { height: 100%; width: 0; background: linear-gradient(90deg, #b8861b, var(--oro)); } .dmReloj div.apura { background: var(--rojo); }
+.dmMis { flex: none; position: relative; display: flex; justify-content: center; width: 100%; }
+.dmMisFila { display: flex; gap: 8px; justify-content: center; align-items: center; }
+.dmMisFila button { display: block; padding: 3px; background: rgba(255,255,255,.05); border: 2px solid var(--borde); cursor: pointer; }
+.dmMisFila button.on { border-color: var(--oro); background: rgba(242,201,76,.15); }
+.dmMisFila canvas { display: block; }
+.dmFlota { position: absolute; left: 50%; top: 38%; transform: translateX(-50%); color: #fff3c4; font-size: 38px; font-weight: 700; text-shadow: 3px 3px 0 rgba(0,0,0,.7); pointer-events: none; z-index: 4; animation: dmSube 1.1s ease-out forwards; white-space: nowrap; }
+@keyframes dmSube { 0% { opacity: 0; transform: translate(-50%, 16px) scale(.6); } 20% { opacity: 1; transform: translate(-50%, 0) scale(1.25); } 40% { transform: translate(-50%, -4px) scale(1); } 100% { opacity: 0; transform: translate(-50%, -46px) scale(1); } }
+.dmInfo { flex: none; height: 2.6em; overflow: hidden; line-height: 1.25; color: #fff3c4; font-size: 17px; text-align: center; }
+.dmHj { margin: 0 6px; color: var(--oro); white-space: nowrap; }
+.dmInfo .acum { color: var(--oro); font-weight: 700; } .dmInfo .mal { color: var(--rojo); } .dmInfo .bien { color: var(--bien); }
+.dmAcciones { flex: none; display: flex; gap: 12px; justify-content: center; align-items: center; flex-wrap: wrap; min-height: 82px; }
+.dmAcciones .vb canvas { max-width: 100%; height: auto; }
+.dadoSprite { image-rendering: pixelated; display: block; }
+.cajaDM { width: min(560px, 100%); max-height: 94vh; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; align-items: center; text-align: center; }
+.cajaDM h3 { margin: 0; color: #fff3c4; font-size: 22px; }
+.dmOfertas { display: flex; flex-direction: column; gap: 8px; width: 100%; }
+.dmOferta { display: grid; grid-template-columns: auto 1fr auto; gap: 10px; align-items: center; text-align: left; background: rgba(255,255,255,.05); padding: 8px; border: 2px solid var(--borde); }
+.dmOferta.comprada { opacity: .5; }
+.dmOferta .nom { font-weight: 700; font-size: 18px; color: #fff3c4; } .dmOferta .desc { font-size: 13px; color: var(--suave); line-height: 1.3; } .dmOferta .precio { color: var(--oro); font-weight: 700; font-size: 18px; text-align: center; margin-bottom: 4px; }
+.dmElegir { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; }
+.dmElegir button { background: rgba(255,255,255,.06); border: 2px solid var(--borde); padding: 4px; cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 2px; font: inherit; font-size: 12px; color: var(--suave); }
+.dmElegir button.on, .dmElegir button:hover { border-color: var(--oro); color: #fff3c4; }
+.dmFin .filaR { display: grid; grid-template-columns: 28px 1fr auto; gap: 8px; width: 100%; padding: 4px 8px; background: rgba(255,255,255,.05); text-align: left; align-items: center; }
+.dmFin .filaR.lider { outline: 2px solid var(--oro); }
+.dmGlobo { position: fixed; z-index: 75; pointer-events: none; filter: drop-shadow(3px 3px 0 rgba(0,0,0,.5)); }
+@media (max-width: 700px) {
+  .dmJugadores { display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px; }
+  .dmJ { min-width: 0; padding: 2px 4px; gap: 0; }
+  .dmMeta { font-size: 11px; } .dmJ.sinEntrar .dmTotal { color: var(--suave); }
+  .dmFichas { font-size: 11px; } .dmDadosMini span { width: 8px; height: 8px; }
+  .dmTotal { font-size: 19px; } .dmNombre { font-size: 13px; }
+  .dmCartel b { font-size: 18px; } .dmCartel span { font-size: 12px; }
+  .dmAcciones { min-height: 118px; gap: 8px; align-content: center; }   /* (alto de dos botones apilados: la mesa no se mueve cuando cambian) */
+  .dmInfo { font-size: 15px; }
+}
+
+.ayDado { display: block; padding: 2px; border: 2px solid transparent; } .ayDado.marca { border-color: var(--oro); background: rgba(242,201,76,.15); }
+.ayDados { display: flex; gap: 2px; flex-wrap: nowrap; justify-content: flex-start; flex: 1; }
+.ayPuntos2 { justify-content: space-between !important; width: 100%; gap: 6px; padding: 1px 6px; background: rgba(255,255,255,.04); flex-wrap: nowrap !important; }
+.ayPuntaje .ayDado { padding: 1px; }
+.ayPuntaje { gap: 3px; }
+.ayPuntaje .ayPuntos2 .ayRot { max-width: 60px; }
+
+.claveSala { color: var(--suave); font-size: 14px; letter-spacing: 1px; }
+.claveSala:empty { display: none; }
+.datosSala { display: flex; flex-direction: column; justify-content: center; line-height: 1.1; }
+@media (max-width: 700px) { .claveSala { font-size: 11px; } }
+.titulo .tituloMenor { display: block; font-size: .55em; opacity: .85; margin-bottom: .1em; }
+
+#apodo.malo { border-color: var(--rojo); }
+#errorApodo { margin: 4px 0 0; min-height: 0; }
+#errorApodo:empty { display: none; }
+
+#bSalir, #dSalir { padding: 6px; margin: -6px -6px -6px 8px; }   /* (más lejos de los otros íconos y con un toque de unos 44 px) */
+
+.statSep { margin-top: 8px; color: var(--oro); font-size: 15px; text-align: center; border-top: 2px solid var(--borde); padding-top: 6px; }
+
+.continuar { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 8px 12px; margin-bottom: 8px; border: 2px solid var(--oro); background: rgba(242,201,76,.1); color: #fff3c4; text-align: left; }
+
+.flotaCompra { position: fixed; z-index: 70; pointer-events: none; color: var(--oro); font-size: 26px; font-weight: 700; text-shadow: 3px 3px 0 rgba(0,0,0,.7); }
+
+
+/* ---------- el tutorial: globo, aro y botones ---------- */
+.tutGlobo { position: fixed; z-index: 90; width: min(92vw, 420px); padding: 10px 14px; background: rgba(14,10,28,.97); border: 3px solid var(--oro); box-shadow: 4px 4px 0 rgba(0,0,0,.6); display: flex; flex-direction: column; align-items: center; gap: 8px; text-align: center; }
+.tutGlobo[hidden] { display: none; }
+.tutTexto { color: #fff3c4; font-size: 17px; line-height: 1.3; }
+.tutBotones { display: flex; gap: 10px; justify-content: center; }
+.tutSaltar { background: none; border: 0; color: var(--suave); font: inherit; font-size: 13px; cursor: pointer; text-decoration: underline; padding: 2px 6px; }
+.tutAnillo { position: fixed; z-index: 89; pointer-events: none; border: 3px solid var(--oro); box-shadow: 0 0 0 3px rgba(0,0,0,.45), 0 0 18px rgba(242,201,76,.7); animation: tutLate 1s ease-in-out infinite; }
+.tutAnillo[hidden] { display: none; }
+@keyframes tutLate { 0%, 100% { opacity: 1; } 50% { opacity: .45; } }
+@media (max-width: 700px) { .tutTexto { font-size: 15px; } }
+
+/* ---------- invitar, jugar solo y estilo de mesa ---------- */
+.cajaInvitar { gap: 8px; }
+.cajaInvitar canvas.qr { image-rendering: pixelated; width: min(58vw, 220px); height: auto; border: 3px solid var(--oro); }
+.cajaInvitar .salaDato { color: #fff3c4; font-size: 18px; }
+@media (max-width: 700px) {
+  .modal .cajaTienda { padding: 10px; gap: 8px; }
+  .cajaTienda h3 { font-size: 18px; }
+  .oferta { gap: 8px; padding: 6px; }
+  .oferta .tile { --tile: 36px; }
+  .oferta .nom { font-size: 15px; }
+  .oferta .rareza { display: block; font-size: 12px; }
+  .oferta .desc { display: none; }
+  .oferta.abierta .desc { display: block; font-size: 13px; }
+  .oferta .precio { font-size: 16px; margin-bottom: 2px; }
+}
+.tutGlobo::after { content: ''; position: absolute; left: var(--fx, 50%); width: 0; height: 0; border: 9px solid transparent; transform: translateX(-50%); display: none; }
+.tutGlobo[data-flecha="abajo"]::after { display: block; top: 100%; border-top-color: var(--oro); border-bottom-width: 0; }
+.tutGlobo[data-flecha="arriba"]::after { display: block; bottom: 100%; border-bottom-color: var(--oro); border-top-width: 0; }
+
+/* ---------- pantallas bajas (320 x 568): la ayuda y las estadísticas entran sin scroll ---------- */
+@media (max-height: 640px) {
+  .modal .caja { padding: 10px; }
+  .cajaRanking { gap: 6px; }
+  .cajaAyuda { gap: 6px; }
+  .ayCuerpo { min-height: 0; gap: 6px; }
+  .ayApila { gap: 6px; }
+  .ayPie { font-size: 13px; line-height: 1.25; }
+  .statFilas { gap: 1px; }
+  .statFila { padding: 1px 6px; font-size: 13px; }
+  .statSep { margin-top: 4px; padding-top: 3px; font-size: 13px; }   /* (en pantallas muy bajas se omiten las últimas partidas) */
+  .cajaRanking h3 { font-size: 18px; }
+}
+
+/* ---------- reacciones rápidas del Diez mil cuando no es tu turno ---------- */
+.dmReaccionesFila { display: flex; flex-direction: column; align-items: center; gap: 4px; }
+.dmReaccionesFila .fila { display: flex; gap: 6px; flex-wrap: wrap; justify-content: center; }
+.dmReaccionesFila .reac { padding: 4px 6px; min-width: 40px; display: flex; align-items: center; justify-content: center; }
+
+/* ---------- Diez mil con más de 3 jugadores en el celular: tarjetas compactas (nombre y puntos) ---------- */
+@media (max-width: 700px) {
+  .dmJugadores.compacto { display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px; }
+  .dmJugadores.compacto .dmJ { min-width: 0; padding: 2px 4px; gap: 0; }
+  .dmJugadores.compacto .dmNombre { font-size: 13px; max-width: 100%; }
+  .dmJugadores.compacto .dmTotal { font-size: 18px; }
+  .dmJugadores.compacto .dmMeta { display: none; }
+  .dmJugadores.compacto .dmFichas { font-size: 10px; line-height: 1.1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
+  .dmJugadores.compacto .dmDadosMini { height: 8px; gap: 1px; justify-content: center; flex-wrap: nowrap; } .dmJugadores.compacto .dmDadosMini span { width: 6px; height: 6px; flex: none; }/* los dados de cada jugador se siguen viendo, más chicos */
+}
+
+/* ---------- la medalla de probabilidad (pegada al botón con el que se arriesga) ---------- */
+.dmAcciones .vb { position: relative; overflow: visible; }
+.medalla { position: absolute; top: -15px; right: -6px; z-index: 3; pointer-events: none; line-height: 0; filter: drop-shadow(2px 2px 0 rgba(0,0,0,.55)); }
+.medalla[hidden] { display: none; }
+.medallaCv { display: block; image-rendering: pixelated; }
+
+/* ---------- la ventana de un jugador (Diez mil) ---------- */
+.dmJ { cursor: pointer; }
+.modal .cajaJugador { width: min(420px, 100%); display: flex; flex-direction: column; gap: 10px; }
+.jvCab { display: flex; justify-content: space-between; align-items: center; }
+.jvCab b { font-size: 24px; color: #fff3c4; }
+.jvX { font: inherit; font-size: 20px; color: var(--suave); background: transparent; border: 2px solid var(--borde); padding: 0 8px; cursor: pointer; }
+.jvGrid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+.jvDato { background: rgba(255,255,255,.06); padding: 6px 10px; min-width: 0; }
+.jvDato span { display: block; color: var(--suave); font-size: 12px; }
+.jvDato b { font-size: 20px; color: var(--oro); }
+.jvDato b.bien { color: var(--bien); } .jvDato b.mal { color: var(--rojo); }
+.jvTit { color: #fff3c4; font-size: 15px; }
+.jvDados { display: grid; grid-template-columns: repeat(auto-fit, minmax(54px, 1fr)); gap: 6px; }
+.jvDado { font: inherit; color: var(--suave); background: transparent; border: 2px solid transparent; padding: 4px 0; display: flex; flex-direction: column; align-items: center; gap: 3px; cursor: pointer; }
+.jvDado canvas { width: 46px; height: 46px; image-rendering: pixelated; }
+.jvDado span { font-size: 11px; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.jvDado.esp { border-color: var(--oro); background: rgba(242,201,76,.10); color: #fff3c4; }
+.jvDado.on { background: rgba(242,201,76,.25); }
+.jvNota { color: var(--suave); font-size: 13px; line-height: 1.3; min-height: 3.9em; }
+
+/* en el creador de sala, el recuadro del modo no se estira (la altura reservada se mantiene, pero vacía) */
+.jvDato:first-child { grid-column: 1 / -1; }
+.jvDado span { font-size: 10px; }
+
+/* ---------- el 13 Jack ---------- */
+.tjMesa { flex: 1; min-height: 0; width: 100%; max-width: 720px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; position: relative; background: linear-gradient(#1c5c43, #15483a); border: 3px solid #7a5a14; box-shadow: inset 0 0 0 3px var(--oro); }
+.tjMano { display: flex; gap: 6px; align-items: flex-end; justify-content: center; flex-wrap: wrap; min-height: 40px; }
+.tjTotal { font-size: 30px; font-weight: 700; color: #fff3c4; text-shadow: 3px 3px 0 rgba(0,0,0,.6); min-height: 36px; }
+.tjTotal.pasado { color: var(--rojo); } .tjTotal.veintiuno { color: var(--oro); }
+.tjCarta { position: relative; display: inline-block; line-height: 0; }
+.tjCarta canvas { image-rendering: pixelated; box-shadow: 3px 3px 0 rgba(0,0,0,.4); }
+.tjCarta.apagada { opacity: .25; filter: grayscale(1); }
+.tjCarta.enMano { opacity: .5; filter: none; }
+.tjCarta.esp canvas { box-shadow: 3px 3px 0 rgba(0,0,0,.4); }
+.tjCarta.elegida canvas { box-shadow: 0 0 0 3px #fff3c4; }
+.tjEtq { position: absolute; bottom: -3px; left: 50%; transform: translateX(-50%); background: var(--oro); color: #1a1030; font-size: 9px; font-weight: 700; padding: 0 3px; border: 1px solid #000; white-space: nowrap; line-height: 1.3; }
+.tjProxima { display: flex; flex-direction: column; align-items: center; gap: 2px; margin-left: 10px; font-size: 11px; color: #bfe6cf; opacity: .85; }
+.tjMazo { flex: none; width: 100%; max-width: 720px; display: flex; flex-direction: column; align-items: center; gap: 4px; }
+.tjEtqMazo { color: var(--suave); font-size: 13px; }
+.tjGridMazo { display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px; width: 100%; justify-items: center; }
+.tjGridMazo .tjCarta { width: 100%; text-align: center; } .tjGridMazo .tjCarta canvas { max-width: 100%; }
+.tjFilaCartas { display: flex; gap: 3px; align-items: center; }
+.tjMini span { width: 6px; height: 6px; } .tjMini span.q { background: #efe6ff; } .tjMini span.u { background: #3a2766; } .tjMini span.e { background: var(--oro); }
+.dmJugadores.compacto .tjMini { height: 8px; gap: 1px; justify-content: center; flex-wrap: nowrap; } .dmJugadores.compacto .tjMini span { width: 5px; height: 5px; flex: none; }
+.dmInfo .suave { color: var(--suave); }
+.modal .cajaTJ { width: min(480px, 100%); display: flex; flex-direction: column; gap: 10px; text-align: center; align-items: stretch; }
+.cajaTJ h3 { margin: 0; font-size: 22px; color: #fff3c4; }
+.tjFilas { display: flex; flex-direction: column; }
+.tjFila { display: grid; grid-template-columns: 24px 1fr auto; align-items: center; gap: 8px; padding: 6px 8px; background: rgba(255,255,255,.07); text-align: left; } .tjFila:nth-child(even) { background: rgba(255,255,255,.04); }
+.tjFila b { font-size: 22px; } .tjN { color: var(--suave); }
+.tjTot { display: flex; justify-content: space-between; align-items: center; padding: 6px 10px; border-top: 2px solid var(--borde); } .tjTot b { font-size: 28px; } .tjTot.chica { border: 0; padding-top: 0; color: var(--bien); font-size: 16px; } .tjTot.chica b { font-size: 18px; }
+.tjRank { display: flex; flex-direction: column; gap: 2px; font-size: 15px; } .tjRankFila { display: grid; grid-template-columns: 1fr auto 18px; gap: 8px; padding: 2px 8px; text-align: left; } .tjRankFila.yo { color: var(--oro); } .tjRankFila i { color: var(--bien); font-style: normal; }
+.tjBarraT { height: 8px; background: rgba(0,0,0,.5); } .tjBarraT div { height: 100%; width: 100%; background: linear-gradient(90deg, #b8861b, var(--oro)); }
+.tjOfertas { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
+.tjOferta { font: inherit; color: var(--suave); background: var(--panel); border: 2px solid var(--borde); padding: 8px 4px; display: flex; flex-direction: column; align-items: center; gap: 4px; cursor: pointer; }
+.tjOferta.on { border-color: var(--oro); } .tjOferta.comprada { opacity: .5; }
+.tjOferta b { color: #fff3c4; font-size: 14px; } .tjOferta .desc { font-size: 11px; line-height: 1.2; } .tjOferta .precio { color: var(--bien); font-size: 14px; margin-top: auto; } .tjOferta .precio.mal { color: var(--rojo); }
+.tjPregunta { color: #fff3c4; font-size: 14px; }
+@media (max-width: 700px) { .tjTotal { font-size: 26px; } .cajaTJ h3 { font-size: 18px; } .tjOferta .desc { font-size: 10px; } }
+
+.tjPatrones { display: flex; gap: 6px; flex-wrap: wrap; justify-content: center; } .tjPatrones span { background: rgba(0,0,0,.45); border: 2px solid var(--oro); color: #fff3c4; font-size: 13px; padding: 1px 8px; }
+.tjFilaCen { display: flex; flex-direction: column; gap: 2px; align-items: flex-start; min-width: 0; } .tjPat { color: var(--oro); font-size: 12px; }
+
+.ayPatTxt { display: flex; flex-direction: row; align-items: baseline; gap: 8px; line-height: 1.1; white-space: nowrap; } .ayPuntaje .ayPuntos2 { padding-top: 2px; padding-bottom: 2px; } .ayPatTxt b { color: #fff3c4; font-size: 15px; } .ayPatTxt span { color: var(--oro); font-size: 16px; font-weight: 700; }
+
+/* ---------- 13 Jack en el celular: todo entra sin tapar nada ---------- */
+.tjMesa { min-height: 112px; }
+.tjTotal { position: absolute; right: 8px; top: 2px; min-height: 0; font-size: 26px; }
+.tjPatrones { position: absolute; left: 4px; right: 4px; bottom: 3px; }
+.tjPatrones span { font-size: 11px; padding: 0 6px; }
+.tjMano { padding: 0 56px 22px; }   /* (lugar a los lados para el total, que va en la esquina) */
+.tjProxima { position: absolute; left: 6px; top: 4px; margin: 0; }
+#tjAcciones { min-height: 72px; }
+@media (max-width: 700px) {
+  #tj.pantalla { gap: 6px; }
+  #tjAcciones { min-height: 72px; gap: 8px; }
+  #tjJugadores.compacto .dmTotal { font-size: 16px; }
+  #tjJugadores.compacto .dmJ { padding: 1px 3px; }
+  #tj .dmInfo { height: 2.5em; font-size: 14px; }
+  #tj .dmReaccionesFila { gap: 2px; } #tj .dmReaccionesFila .chico { font-size: 12px; }
+  #tj .dmReaccionesFila .reac { padding: 2px 4px; min-width: 34px; }
+  .tjEtqMazo { font-size: 12px; }
+}
+@media (max-height: 700px) {
+  #tj .tjGridMazo { gap: 3px; }
+  .modal .cajaTJ { padding: 8px; gap: 6px; max-height: 96dvh; }
+  .cajaTJ h3 { font-size: 16px; }
+  .tjFila { padding: 3px 6px; } .tjFila b { font-size: 18px; }
+  .tjTot b { font-size: 22px; } .tjTot { padding: 3px 8px; }
+  .tjOferta { padding: 4px 2px; gap: 2px; } .tjOferta .desc { font-size: 9px; }
+  #tjJugador .caja { gap: 6px; padding: 8px; }
+  #tjJugador .jvGrid { grid-template-columns: 1fr 1fr 1fr; gap: 4px; }
+  #tjJugador .jvDato:first-child { grid-column: auto; }
+  #tjJugador .jvDato { padding: 3px 6px; } #tjJugador .jvDato span { font-size: 10px; } #tjJugador .jvDato b { font-size: 16px; }
+  #tjJugador .jvCab b { font-size: 20px; } #tjJugador .jvNota { min-height: 2.6em; font-size: 12px; }
+  .tjRank { font-size: 13px; display: grid; grid-template-columns: 1fr 1fr; column-gap: 6px; }
+  .tjRankFila { gap: 4px; padding: 2px 4px; grid-template-columns: 1fr auto 12px; }
+}
+
+/* las 13 cartitas de cada jugador van en dos renglones y nunca se salen de su casilla */
+.tjMini, .dmJugadores.compacto .tjMini { flex-wrap: wrap !important; height: auto !important; min-height: 14px; max-width: 100%; justify-content: center; align-content: flex-start; gap: 2px; width: 62px; margin: 0 auto; }
+.tjMini span, .dmJugadores.compacto .tjMini span { width: 6px; height: 6px; flex: none; }
+.dmJugadores.compacto .tjMini { width: 46px; gap: 1px; } .dmJugadores.compacto .tjMini span { width: 5px; height: 5px; }
+
+/* la mesa del 13 Jack: fieltro hundido con borde de madera (como la mesa de los dados) */
+.tjMesa { background: radial-gradient(ellipse at center, #14694f 0, #0d5740 55%, #08382a 100%); border: 8px solid #3a1f10; border-bottom-width: 14px; box-shadow: inset 0 6px 0 rgba(0,0,0,.4), 0 6px 0 #1f1009; outline: 2px solid var(--oro); outline-offset: -10px; box-sizing: border-box; }
+.tjMesa .tjCarta { box-shadow: 0 5px 0 rgba(0,0,0,.35); }
+@media (max-height: 700px) { .ayGaleria .ayGrid { gap: 3px; } .ayGaleria .ayTile { padding: 1px; } .ayInfo { min-height: 48px; } }
+
+/* el cartel de los demás sobre la mesa del 13 Jack: la mano baja para no taparse */
+#tjCartel { width: max-content; max-width: 94%; white-space: nowrap; } #tjCartel span { overflow: hidden; text-overflow: ellipsis; }
+.tjMesa.conCartel .tjMano { padding-top: 64px; padding-bottom: 8px; }
+.tjMesa.conCartel .tjTotal { top: auto; bottom: 6px; }
+
+@media (max-width: 700px) { #tj .dmInfo { height: 1.5em; } #tj .dmInfo.avisoLargo { height: 2.5em; } }
+
+@media (max-width: 700px) {
+  #tjJugadores.compacto { display: flex; flex-wrap: wrap; justify-content: center; gap: 4px; }
+  #tjJugadores.compacto .dmJ { flex: 0 0 calc(25% - 3px); box-sizing: border-box; }
+  #tjJugadores.compacto[data-n="5"] .dmJ, #tjJugadores.compacto[data-n="6"] .dmJ { flex-basis: calc(33.333% - 3px); }
+}
+
+/* El icono de robot que acompaña el nombre de un bot (solo la cabeza, cubitos de 9x9). */
+.botIco { display: inline-block; width: 1.05em; height: 1.05em; margin-right: .3em; vertical-align: -.14em; image-rendering: pixelated; background: center / contain no-repeat url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 9 9' shape-rendering='crispEdges'><g fill='%239fe3ff'><rect x='4' y='0' width='1' height='2'/><rect x='1' y='2' width='7' height='7'/><rect x='0' y='4' width='1' height='3'/><rect x='8' y='4' width='1' height='3'/></g><g fill='%230b1020'><rect x='2' y='4' width='2' height='2'/><rect x='5' y='4' width='2' height='2'/><rect x='2' y='7' width='5' height='1'/></g></svg>"); }
+
+/* ---------- las pantallas de entrada: una columna centrada que nunca pasa del tamaño de la ventana ---------- */
+.pant.ent { width: 100%; display: flex; align-items: center; justify-content: center; max-width: none; padding: calc(10px + env(safe-area-inset-top, 0px)) calc(12px + env(safe-area-inset-right, 0px)) calc(10px + env(safe-area-inset-bottom, 0px)) calc(12px + env(safe-area-inset-left, 0px)); overflow: hidden; }
+.pcaja { width: min(560px, 100%); min-width: 0; height: 100%; max-height: 100dvh; display: flex; flex-direction: column; gap: 10px; min-height: 0; }
+#amigos .pcaja, #sala .pcaja { width: min(1000px, 100%); }
+.entCaja { justify-content: center; align-items: stretch; text-align: center; gap: 8px; }
+.entCaja .titulo { font-size: clamp(34px, 9vh, 66px); font-weight: 700; color: var(--oro); margin: 0; text-shadow: 4px 4px 0 #000; line-height: 1.05; }
+.entCaja .titulo .tituloMenor { display: inline; font-size: 1em; margin: 0; opacity: 1; }
+.apodoCampo { align-self: center; width: min(260px, 100%); font: inherit; font-size: 20px; color: var(--oro); background: var(--fondo); border: 2px solid var(--oro); padding: 4px 10px; text-align: center; }
+.entCaja .error { margin: 0; text-align: center; font-size: 17px; }
+.puertas { display: flex; flex-direction: column; gap: 10px; flex: 1; min-height: 0; }
+.puerta { font: inherit; cursor: pointer; color: var(--texto); background: var(--panel); border: 2px solid var(--borde); flex: 1; min-height: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; }
+.puerta:hover { border-color: var(--oro); background: #241748; }
+.puerta:focus-visible { outline: 2px dashed var(--oro); outline-offset: 2px; }
+.puerta b { font-size: 24px; letter-spacing: 1px; font-weight: 400; }
+.puerta .figuras { display: flex; gap: 10px; }
+.codigoPanel { text-align: left; }
+.codigoPanel label { display: block; color: var(--suave); font-size: 15px; margin-bottom: 6px; }
+.codigoFila { display: flex; gap: 10px; align-items: center; }
+.codigoFila input, #campoClave input { flex: 1; min-width: 0; font: inherit; color: var(--texto); background: var(--fondo); border: 2px solid var(--borde); padding: 4px 8px; text-align: center; text-transform: uppercase; letter-spacing: 8px; font-size: 26px; }
+#campoClave { margin-top: 8px; }
+.creditos { margin: 0; color: var(--suave); opacity: .7; font-size: 14px; letter-spacing: 1px; }
+@media (min-width: 800px) and (min-height: 560px) { .entCaja { width: min(1000px, 100%); } .puertas { flex-direction: row; gap: 18px; } .puerta b { font-size: 30px; } }
+
+.cab { flex: none; display: flex; align-items: center; justify-content: space-between; gap: 10px; min-height: 40px; }
+.cab .t { flex: 1; text-align: center; color: var(--oro); font-weight: 700; font-size: 22px; text-shadow: 2px 2px 0 #000; }
+.cabChip canvas { display: block; }
+.pie { flex: none; display: flex; gap: 12px; justify-content: center; align-items: center; margin-top: auto; flex-wrap: wrap; }
+.panel { background: var(--panel); border: 2px solid var(--borde); padding: 10px; }
+.panel > label { display: block; color: var(--suave); font-size: 15px; margin-bottom: 6px; }
+.seg { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+.seg + .seg { margin-top: 8px; }
+.avisoMapa { position: absolute; left: 50%; bottom: 80px; transform: translateX(-50%); z-index: 30; background: var(--panel); border: 2px solid var(--rojo); color: var(--rojo); padding: 6px 12px; max-width: 90%; text-align: center; }
+
+/* el mapa: el paño verde con las mesas encima */
+.pano { position: relative; flex: 1; min-height: 0; min-width: 0; overflow: hidden; }
+.pano canvas#mapaFondo { position: absolute; inset: 0; width: 100%; height: 100%; }
+.mesasGrid { position: absolute; inset: 10px; display: grid; align-items: center; justify-items: center; min-height: 0; }
+.mesa { position: relative; width: 100%; height: 100%; min-width: 0; min-height: 0; cursor: pointer; padding: 2px; }
+.mesa canvas { width: 100%; height: 100%; object-fit: contain; display: block; }
+.mesa.sel canvas { filter: drop-shadow(2px 0 0 #fff3c4) drop-shadow(-2px 0 0 #fff3c4) drop-shadow(0 2px 0 #fff3c4) drop-shadow(0 -2px 0 #fff3c4); }
+.mesa:hover canvas { filter: brightness(1.12); }
+.cajaFicha { width: min(300px, 100%); display: flex; flex-direction: column; gap: 8px; text-align: center; border-color: var(--oro) !important; border-width: 3px !important; }
+.cajaFicha h3 { margin: 0; color: var(--oro); font-size: 22px; }
+.fichaFila { display: flex; justify-content: space-between; border-bottom: 2px dotted var(--borde); padding: 3px 0; }
+.fichaFila span { color: var(--suave); }
+
+/* el icono de un juego (el mismo en crear sala y en solo): dos cartas o un dado normal y uno dorado */
+.iconoJuego { position: relative; width: calc(120px * var(--ic, 1)); height: calc(92px * var(--ic, 1)); display: flex; align-items: center; justify-content: center; flex: none; }
+.iconoJuego .cv { position: absolute; --cw: calc(52px * var(--ic, 1)); filter: drop-shadow(3px 3px 0 rgba(0,0,0,.5)); }
+.iconoJuego .cv.a { transform: translateX(-34%) rotate(-10deg); } .iconoJuego .cv.b { transform: translateX(34%) rotate(8deg); }
+.iconoJuego .dadoSprite { position: absolute; filter: drop-shadow(3px 3px 0 rgba(0,0,0,.5)); }
+.iconoJuego .dadoSprite.a { transform: translateX(-32%) rotate(-8deg); } .iconoJuego .dadoSprite.b { transform: translateX(32%) rotate(7deg); }
+
+/* solo y crear sala: los juegos como tarjetas grandes, uno debajo del otro (así entra un tercero sin rehacer nada) */
+.opciones { display: flex; flex-direction: column; gap: 10px; flex: 1; min-height: 0; }
+.jue { font: inherit; color: var(--texto); background: var(--panel); border: 3px solid var(--borde); cursor: pointer; flex: 1; min-height: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; }
+.jue:hover { border-color: var(--suave); }
+.jue.on { border-color: var(--oro); background: #2a1c4c; }
+.jue b { font-size: 24px; font-weight: 400; color: var(--texto); letter-spacing: 1px; }
+.jue.on b { color: var(--oro); }
+.jue.variante { flex: 1; font-size: 24px; letter-spacing: 1px; }
+
+/* la lista */
+.filtros { flex: none; display: flex; gap: 8px; flex-wrap: wrap; }
+.listaFilas { flex: 1; min-height: 0; overflow-y: auto; display: flex; flex-direction: column; gap: 6px; }
+.listaFila { font: inherit; color: var(--texto); text-align: left; background: var(--panel); border: 2px solid var(--borde); padding: 6px 10px; display: flex; align-items: center; gap: 12px; cursor: pointer; flex: none; }
+.listaFila:hover { border-color: var(--oro); }
+.listaInfo { display: flex; flex-direction: column; flex: 1; min-width: 0; }
+.listaInfo b { font-weight: 400; font-size: 20px; color: #fff3c4; }
+.listaFila .puntos { display: flex; gap: 3px; flex-wrap: wrap; max-width: 90px; }
+.listaFila .puntos i { width: 10px; height: 10px; border: 2px solid var(--borde); background: transparent; display: block; }
+.listaFila .puntos i.bot { background: #9fe3ff; border-color: #9fe3ff; }
+.listaFila .puntos i.on { border-color: transparent; }
+.listaVacia { color: var(--suave); text-align: center; padding: 20px; }
+
+/* la sala de espera */
+.salaCuerpo { flex: 1; min-height: 0; display: flex; flex-direction: column; gap: 10px; overflow-y: auto; }
+.salaCol { display: flex; flex-direction: column; gap: 10px; min-height: 0; }
+@media (min-width: 800px) { .salaCuerpo { flex-direction: row; align-items: flex-start; } .salaCol { flex: 1; } }
+.asientos { display: flex; flex-direction: column; gap: 4px; }
+.as { display: flex; align-items: center; gap: 8px; background: #160e2a; border: 2px solid var(--borde); padding: 3px 8px; min-width: 0; white-space: nowrap; overflow: hidden; }
+.as .n { color: #6c5f9a; width: 1.2em; }
+.as .nom { display: flex; align-items: center; gap: 2px; min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+.as.yo { border-color: var(--oro); }
+.as.libre { border-style: dashed; color: #8277b3; }
+.as.libre .botIco { opacity: .35; }
+.as.toca { cursor: pointer; } .as.toca:hover { border-color: var(--suave); }
+.as .botIco { margin: 0 .3em 0 0; width: 1.2em; height: 1.2em; }
+.as .acc { margin-left: auto; font: inherit; color: var(--suave); background: none; border: 0; cursor: pointer; font-size: 14px; }
+.as canvas { image-rendering: pixelated; flex: none; }
+.reglasFila { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
+.chipR canvas { display: block; }
+.cfGrid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.cfCampo { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+.cfCampo label { font-size: 13px; color: var(--suave); }
+.cfCampo select { width: 100%; font: inherit; font-size: 16px; color: var(--texto); background: var(--fondo); border: 2px solid var(--borde); padding: 4px 6px; }
+.cajaConfig .error { margin: 0; }

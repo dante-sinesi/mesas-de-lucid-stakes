@@ -1,0 +1,11 @@
+{
+  "name": "prueba-hosting",
+  "version": "1.0.0",
+  "description": "Prueba de long polling y SSE para las mesas de Lucid Stakes",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "license": "UNLICENSED",
+  "private": true
+}

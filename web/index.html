@@ -1,0 +1,194 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Mesas de Lucid Stakes</title>
+<meta name="theme-color" content="#120a22">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/png" href="icon-192.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Lucid Stakes">
+<link rel="stylesheet" href="estilos.css">
+</head>
+<body>
+
+<section id="entrada" class="pantalla pant ent">
+  <div class="pcaja entCaja">
+    <h1 class="titulo"><span class="tituloMenor">Lucid</span> Stakes</h1>
+    <input id="apodo" class="apodoCampo" maxlength="16" autocomplete="off" placeholder="Tu apodo">
+    <p class="error" id="errorApodo"></p>
+    <div class="continuar" id="continuar" hidden><span id="continuarTxt"></span><button id="bContinuar" class="boton">Volver</button></div>
+    <div class="puertas">
+      <button id="pAmigos" type="button" class="puerta"><span class="figuras" id="figAmigos"></span><b>CON AMIGOS</b></button>
+      <button id="pSolo" type="button" class="puerta"><span class="figuras" id="figSolo"></span><b>SOLO</b></button>
+    </div>
+    <div class="panel codigoPanel">
+      <label for="codigo">Entrar ya</label>
+      <div class="codigoFila"><input id="codigo" maxlength="4" autocomplete="off" placeholder="K7QD" class="codigo"><button id="bEntrar" class="boton" type="button">Entrar</button></div>
+      <div id="campoClave" hidden><input id="claveSala" maxlength="6" autocomplete="off" placeholder="Clave" class="codigo"></div>
+    </div>
+    <p id="errorInicio" class="error"></p>
+    <div class="extrasInicio"><button id="bStats" class="boton sec" type="button">Mis estadísticas</button><button id="bInstalar" class="boton sec" type="button" hidden>Instalar en tu celular</button></div>
+    <p class="creditos">© Dante Jorge Sinesi</p>
+  </div>
+</section>
+
+<section id="amigos" class="pantalla pant ent" hidden>
+  <div class="pcaja">
+    <div class="cab"><button id="aVolver" type="button" class="boton sec">‹</button><div class="t">CON AMIGOS</div><span id="aCuenta" class="cabChip"></span></div>
+    <div class="pano" id="mapaPano"><canvas id="mapaFondo"></canvas><div class="mesasGrid" id="mapaMesas"></div></div>
+    <div class="pie"><button id="aLista" type="button" class="boton sec">Lista</button><button id="aCrear" type="button" class="boton">Crear sala</button></div>
+  </div>
+</section>
+
+<section id="lista" class="pantalla pant ent" hidden>
+  <div class="pcaja">
+    <div class="cab"><button id="lVolver" type="button" class="boton sec">‹</button><div class="t">LISTA</div><button id="lMapa" type="button" class="boton sec">Mapa</button></div>
+    <div class="filtros" id="lFiltros"></div>
+    <div class="listaFilas" id="lFilas"></div>
+  </div>
+</section>
+
+<section id="solo" class="pantalla pant ent" hidden>
+  <div class="pcaja">
+    <div class="cab"><button id="sVolver" type="button" class="boton sec">‹</button><div class="t" id="sTitulo">SOLO</div><span></span></div>
+    <div class="opciones" id="sOpciones"></div>
+  </div>
+</section>
+
+<section id="crear" class="pantalla pant ent" hidden>
+  <div class="pcaja">
+    <div class="cab"><button id="cVolver" type="button" class="boton sec">‹</button><div class="t">CREAR SALA</div><span></span></div>
+    <div class="opciones" id="cJuegos"></div>
+    <div class="panel"><label>Visibilidad</label><div class="seg" id="cVis"></div></div>
+    <div class="pie"><button id="cCrear" type="button" class="boton">Crear sala</button></div>
+  </div>
+</section>
+
+<section id="sala" class="pantalla pant ent" hidden>
+  <div class="pcaja">
+    <div class="cab"><button id="saVolver" type="button" class="boton sec">‹</button><div class="t" id="saTitulo"></div><span id="saCodigo" class="cabChip"></span></div>
+    <div class="salaCuerpo">
+      <div class="salaCol">
+        <div class="panel"><label id="saJugEt">Jugadores</label><div class="asientos" id="saAsientos"></div></div>
+      </div>
+      <div class="salaCol">
+        <div class="panel"><label>Reglas</label><div class="reglasFila" id="saReglas"></div></div>
+        <div class="panel"><label>Visibilidad</label><div class="seg" id="saVis"></div><div class="seg" id="saClave"></div></div>
+      </div>
+    </div>
+    <div class="pie"><button id="saInvitar" type="button" class="boton sec">Invitar</button><button id="saEmpezar" type="button" class="boton">Empezar partida</button></div>
+  </div>
+</section>
+
+<div id="ficha" class="modal modalAlto" hidden><div class="caja cajaFicha"></div></div>
+<div id="reglas" class="modal modalAlto" hidden><div class="caja cajaConfig"></div></div>
+
+<section id="dm" class="pantalla pant" hidden>
+  <header class="cabecera">
+    <div class="datosSala"><div class="salaLinea"><span class="chico">Sala</span> <b id="dSala" class="dorado"></b></div><span class="claveSala" id="dClave"></span></div>
+    <div class="fila">
+      <button id="dAyuda" class="tileBtn" type="button" aria-label="Ayuda" title="Ayuda"></button>
+      <button id="dSonido" class="tileBtn" type="button" aria-label="Sonido"></button>
+      <button id="dInvitar" class="tileBtn" type="button" aria-label="Invitar" title="Invitar"></button>
+      <button id="dSalir" class="tileBtn" type="button" aria-label="Salir" title="Salir"></button>
+    </div>
+  </header>
+  <div class="dmCuerpo">
+    <div class="dmJugadores" id="dmJugadores"></div>
+    <div class="dmMesa" id="dmMesa"><canvas id="dmLienzo"></canvas><div class="dmCartel" id="dmCartel" hidden></div></div>
+    <div class="dmMis" id="dmMis" hidden><div class="dmMisFila" id="dmMisFila"></div></div>
+    <div class="dmInfo" id="dmInfo"></div>
+    <div class="dmReloj"><div id="dmBarra"></div></div>
+    <div class="dmAcciones" id="dmAcciones"></div>
+  </div>
+</section>
+
+<section id="tj" class="pantalla pant" hidden>
+  <header class="cabecera">
+    <div class="datosSala"><div class="salaLinea"><span class="chico">Sala</span> <b id="tSala" class="dorado"></b> <span class="chico" id="tMazo"></span></div><span class="claveSala" id="tClave"></span></div>
+    <div class="fila">
+      <button id="tAyuda" class="tileBtn" type="button" aria-label="Ayuda" title="Ayuda"></button>
+      <button id="tSonido" class="tileBtn" type="button" aria-label="Sonido"></button>
+      <button id="tInvitar" class="tileBtn" type="button" aria-label="Invitar" title="Invitar"></button>
+      <button id="tSalir" class="tileBtn" type="button" aria-label="Salir" title="Salir"></button>
+    </div>
+  </header>
+  <div class="dmCuerpo">
+    <div class="dmJugadores" id="tjJugadores"></div>
+    <div class="tjMesa" id="tjMesa"><div class="dmCartel" id="tjCartel" hidden></div><div class="tjMano" id="tjMano"></div><div class="tjTotal" id="tjTotal"></div></div>
+    <div class="dmInfo" id="tjInfo"></div>
+    <div class="tjMazo" id="tjMazo"></div>
+    <div class="dmReloj"><div id="tjBarra"></div></div>
+    <div class="dmAcciones" id="tjAcciones"></div>
+  </div>
+</section>
+
+<div id="tjResumen" class="modal modalAlto" hidden><div class="caja cajaRanking cajaTJ"></div></div>
+<div id="tjTienda" class="modal" hidden><div class="caja cajaTienda cajaTJ"></div></div>
+<div id="tjFinal" class="modal modalAlto" hidden><div class="caja cajaRanking cajaDM"></div></div>
+<div id="tjJugador" class="modal modalAlto" hidden><div class="caja cajaJugador"></div></div>
+
+<div id="dmTienda" class="modal" hidden>
+  <div class="caja cajaTienda cajaDM"></div>
+</div>
+
+<div id="dmFinal" class="modal modalAlto" hidden>
+  <div class="caja cajaRanking cajaDM"></div>
+</div>
+
+<div id="dmJugador" class="modal modalAlto" hidden>
+  <div class="caja cajaJugador"></div>
+</div>
+
+<div id="invitar" class="modal modalAlto" hidden><div class="caja cajaRanking cajaInvitar"></div></div>
+
+<div id="salirConf" class="modal modalAlto" hidden><div class="caja cajaRanking"></div></div>
+
+<div id="tutOferta" class="modal modalAlto" hidden><div class="caja cajaRanking"></div></div>
+
+<div id="ayuda" class="modal modalAlto" hidden>
+  <div class="caja cajaRanking cajaAyuda"></div>
+</div>
+
+<div id="avisos" class="avisos"></div>
+
+<div id="imagen" class="modal modalAlto" hidden>
+  <div class="caja cajaRanking"></div>
+</div>
+
+<div id="stats" class="modal modalAlto" hidden>
+  <div class="caja cajaRanking"></div>
+</div>
+
+<div id="instalar" class="modal modalAlto" hidden>
+  <div class="caja cajaObjeto"></div>
+</div>
+
+<div id="resultado" hidden>
+  <div class="rfondo"></div>
+  <div class="rluz"></div>
+  <div class="rcentro"></div>
+</div>
+
+<script src="glifos.js"></script>
+<script src="sonido.js"></script>
+<script src="estadisticas.js"></script>
+<script src="voxel.js"></script>
+<script src="farolin.js"></script>
+<script src="ayuda.js"></script>
+<script src="qr.js"></script>
+<script src="dados3d.js"></script>
+<script src="comun.js"></script>
+<script src="mesas.js"></script>
+<script src="entrada.js"></script>
+<script src="sala.js"></script>
+<script src="diezmil.js"></script>
+<script src="trecejack.js"></script>
+<script src="tutorial.js"></script>
+</body>
+</html>
