@@ -11,7 +11,7 @@ const Bots = require('../bots');
 const { TIEMPO_VALIDO, escalarTiempos } = require('../tiempo');
 
 const FASE = { ESPERA: 'espera', INICIAL: 'inicial', TURNO: 'turno', FIN: 'fin' };
-const TIEMPOS = { produccion: 10000, dados: 25000, construir: 25000, inicial: 30000, fin: 1600, ausente: 2500, ausencia: 180000, reemplazo: 30000 };
+const TIEMPOS = { produccion: 15000, dados: 25000, construir: 25000, inicial: 30000, fin: 1600, ausente: 2500, ausencia: 180000, reemplazo: 30000 };
 const CLAVES_TIEMPO = ['produccion', 'dados', 'construir', 'inicial'];   // los plazos que cambian con el tiempo de la sala
 const MAX_APODO = 16;
 const MAX_ASIENTOS = 8;

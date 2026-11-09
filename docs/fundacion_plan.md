@@ -50,3 +50,5 @@ Partidas solo de bots, 100–150 por configuración: todas terminan. Rondas prom
 
 ## Pendiente
 Calibrar costos y ritmo con partidas reales; compensar el orden de turno; zonas táctiles en móvil sin probar en un teléfono; sin reacciones, estadísticas ni dibujos de ayuda propios; diseño entre 1024 y 1100 px por revisar.
+
+- Producción (bj-102): al empezar cada turno se ve una ventana con los dos dados comunes que caen, la suma, y qué pasó (recursos ganados que quedan fijos, el bandido que salta o por qué no se gana nada), con botón «Continuar» (15 s). Los dados de recursos muestran las filas de edificios con su costo en dados y el %.

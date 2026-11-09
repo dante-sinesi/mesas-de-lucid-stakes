@@ -160,6 +160,7 @@ function repintarFU() {
     dadosFU(e);
     bottom = MOV ? Math.min(bottom, H - dock.offsetHeight - 120) : bottom;
   }
+  prodFU(e, MOV, left, right, dock, W);
   // --- el mapa con su cámara ---
   const aw = right - left, ah = bottom - top;
   const WORLD = { w: geo.WW, h: geo.WH };
@@ -301,24 +302,23 @@ function pintarDockFU(e, MOV) {
   const de = fuNombreDe(e, t.de);
   if (t.terminado) { col(info(de + (t.motivo === 'construyo' ? ' construyó' : ' pasó el turno')), reloj()); return; }
   if (t.sub === 'produccion') {
-    const gana = textoGana(t.gana);
-    const base = 'Salió ' + t.num.suma + (t.num.suma === 7 ? ' · el bandido salta' : ' · ' + (miTurno ? gana : de + ' ' + gana.replace('ganas', 'gana').replace('no ganas', 'no gana')));
-    col(info(base), reloj(), miTurno ? acciones(botonFU('Seguir', () => hacerFU('seguir'), true)) : null);
+    col(info(miTurno ? 'Mira qué pasó y continúa' : de + ' mira la tirada'), reloj(), miTurno ? acciones(botonFU('Continuar', () => hacerFU('seguir'), true, !FU.animando)) : null);
     return;
   }
   if (t.sub === 'dados') {
     if (!miTurno) { col(info(de + ' tira los dados · tirada ' + t.tirada + ' de ' + t.tiradas), reloj()); return; }
     const meds = tablaMedalla(e), eds = Object.keys(meds);
     if (eds.length && (!FU.objetivo || !eds.includes(FU.objetivo))) FU.objetivo = eds.slice().sort((a, b) => FU_VALOR[b] * meds[b] - FU_VALOR[a] * meds[a])[0];
-    const chips = fuEl('div', 'fuChips');
+    const chips = fuEl('div', 'fuFilas'), ic = MOV ? 20 : 24;
     eds.forEach(ed => {
-      const c = fuEl('div', 'fuChip' + (ed === FU.objetivo ? ' on' : '')); c.append(iconoEdificio(ed, fuColor(yo), ed === 'ciudad' || ed === 'caballero' ? 2 : 3));
-      ponerMedalla(c, meds[ed]); c.onclick = () => { FU.objetivo = ed; Sonido.play('clic'); repintarFU(); }; chips.append(c);
+      const c = fuEl('div', 'fuFila' + (ed === FU.objetivo ? ' on' : '')); c.append(iconoEdificio(ed, fuColor(yo), 2));
+      const f = fuEl('div', 'fuCosto'); FU_COSTOS[ed].forEach(k => f.append(iconoRecFU(k, ic)));
+      c.append(f); ponerMedalla(c, meds[ed]); c.onclick = () => { FU.objetivo = ed; Sonido.play('clic'); repintarFU(); }; chips.append(c);
     });
     const quedan = t.tiradas - t.tirada;
     const tirar = botonFU('Tirar ' + (6 - t.fijos - FU.keep.size), () => tirarFU(), true, quedan > 0 && !FU.animando);
     if (quedan > 0 && FU.objetivo && meds[FU.objetivo] !== undefined) ponerMedalla(tirar, meds[FU.objetivo]);
-    col(chips, info('Tirada ' + t.tirada + ' de ' + t.tiradas + (t.fijos ? '' : '')), reloj(), acciones(tirar, botonFU('Construir', () => hacerFU('terminar'), false, !FU.animando)));
+    col(fuEl('div', 'fuAyuda', 'Tira para juntar estos recursos y construir. Toca los dados que quieras guardar.'), chips, info('Tirada ' + t.tirada + ' de ' + t.tiradas), reloj(), acciones(tirar, botonFU('Construir', () => hacerFU('terminar'), false, !FU.animando)));
     return;
   }
   if (t.sub === 'construir') {
@@ -338,6 +338,64 @@ function pintarDockFU(e, MOV) {
     const atras = t.posibles.length > 1 ? botonFU('Atrás', () => { if (FU.zona !== null) { FU.zona = null; FU.sel = null; repintarFU(); } else hacerFU('atras'); }) : botonFU('Pasar', () => hacerFU('pasar'));
     col(info(zonas ? 'Toca una zona' : 'Toca un punto y confirma'), reloj(), acciones(atras, botonFU('Confirmar', () => confirmarLugarFU(), true, FU.sel !== null && !zonas)));
   }
+}
+
+
+// ---------- el resultado de la producción ----------
+
+const FU_NOMBRE_TIPO = { bosque: 'bosque', colinas: 'colinas', pastos: 'pastos', campos: 'campos', montana: 'montaña', desierto: 'desierto' };
+function iconoRecFU(k, px) { const cc = FU_ARTE.cvs(15, 15); cc.getContext('2d').drawImage(FU_ARTE.dado2d(FU_NOMBRE_REC[k]), 0, 0); cc.style.cssText = 'width:' + px + 'px;height:' + px + 'px;image-rendering:pixelated;display:block'; return cc; }
+function dadoNumFU(n, px) {   // dado común de puntos, 11 x 11 píxeles planos
+  const c = FU_ARTE.cvs(11, 11), g = c.getContext('2d'), A = FU_ARTE;
+  A.fr(g, 0, 0, 11, 11, [0.45, 0.35, 0.2]); A.fr(g, 1, 1, 9, 9, [0.97, 0.94, 0.86]);
+  const P = { 1: [[5, 5]], 2: [[3, 3], [7, 7]], 3: [[3, 3], [5, 5], [7, 7]], 4: [[3, 3], [7, 3], [3, 7], [7, 7]], 5: [[3, 3], [7, 3], [5, 5], [3, 7], [7, 7]], 6: [[3, 3], [7, 3], [3, 5], [7, 5], [3, 7], [7, 7]] };
+  (P[n] || []).forEach(([x, y]) => A.fr(g, x - 1, y - 1, 2, 2, [0.16, 0.1, 0.24]));
+  c.style.cssText = 'width:' + px + 'px;height:' + px + 'px;image-rendering:pixelated;display:block'; return c;
+}
+function prodFU(e, MOV, left, right, dock, W) {
+  const box = $('fuProd'), t = e.turno, ver = !!(t && e.fase === 'turno' && t.sub === 'produccion' && !t.terminado);
+  box.hidden = !ver;
+  if (!ver) { FU.prodKey = null; if (FU.prodTimer) { clearInterval(FU.prodTimer); FU.prodTimer = null; FU.animando = false; } return; }
+  const key = [e.ronda, t.de, t.num.a, t.num.b].join('-');
+  const ancho = MOV ? Math.min(W - 24, 340) : 360;
+  box.style.cssText = 'position:absolute;z-index:2;width:' + ancho + 'px;' + (MOV ? 'left:' + Math.round((W - ancho) / 2) + 'px;bottom:' + (dock.offsetHeight + 8) + 'px' : 'left:' + Math.round((left + right - ancho) / 2) + 'px;bottom:24px');
+  const px = MOV ? 56 : 72;
+  if (FU.prodKey !== key) {
+    FU.prodKey = key; FU.prodFase = sinMovimiento() ? 1 : 0;
+    if (FU.prodTimer) clearInterval(FU.prodTimer);
+    if (!FU.prodFase) {
+      FU.animando = true; dock.dataset.llave = ''; pintarDockFU(e, MOV); let n = 0;
+      FU.prodTimer = setInterval(() => {
+        n++;
+        if (n >= 12) { clearInterval(FU.prodTimer); FU.prodTimer = null; FU.prodFase = 1; FU.animando = false; Sonido.play('clic'); repintarFU(); return; }
+        dibujarProdFU(box, FU.e, px, [1 + Math.floor(Math.random() * 6), 1 + Math.floor(Math.random() * 6)], false);
+      }, 80);
+    }
+  }
+  if (FU.prodFase) dibujarProdFU(box, e, px, [t.num.a, t.num.b], true);
+  else if (!FU.prodTimer) dibujarProdFU(box, e, px, [1, 1], false);
+}
+function dibujarProdFU(box, e, px, caras, final) {
+  const t = e.turno, yo = e.yo, mio = t.de === yo, de = fuNombreDe(e, t.de);
+  box.textContent = '';
+  const fila = fuEl('div', 'fuProdDados'); fila.append(dadoNumFU(caras[0], px), dadoNumFU(caras[1], px));
+  if (final) fila.append(fuEl('div', 'fuProdSuma', '= ' + t.num.suma));
+  box.append(fila);
+  if (!final) return;
+  const lin = fuEl('div', 'fuProdTexto');
+  if (t.num.suma === 7) {
+    const h = e.mapa.hexes[t.bandido];
+    lin.append(fuEl('div', '', 'Salió 7: el bandido salta a ' + FU_NOMBRE_TIPO[h.tipo] + (h.num ? ' ' + h.num : '') + '. Ese terreno no produce.'));
+    lin.append(fuEl('div', 'suave', (mio ? 'No ganas' : de + ' no gana') + ' ningún recurso'));
+  } else if (t.gana.length) {
+    const r = fuEl('div', 'fuProdGana'); r.append(fuEl('span', '', (mio ? 'Ganas ' : de + ' gana ') + t.gana.length + (t.gana.length === 1 ? ' recurso:' : ' recursos:')));
+    t.gana.forEach(k => r.append(iconoRecFU(k, 28)));
+    lin.append(r, fuEl('div', 'suave', mio ? 'Quedan fijos en tus dados: no se vuelven a tirar.' : 'Quedan fijos en sus dados.'));
+  } else {
+    const bloq = t.hexes.some(i => e.tab.bandido === i && e.mapa.hexes[i].vertices.some(v => { const o = e.tab.vert[v]; return o && o[0] === t.de; }));
+    lin.append(fuEl('div', '', mio ? 'No ganas nada: ' + (bloq ? 'el bandido bloquea tu terreno.' : 'ninguno de tus edificios toca el ' + t.num.suma + '.') : de + ' no gana nada.'));
+  }
+  box.append(lin);
 }
 
 // ---------- las acciones ----------
