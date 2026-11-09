@@ -194,7 +194,7 @@ const D3 = (() => {
     // `lienzo`: el canvas; `contenedor`: de quien toma el ancho; opciones: { maxAlto }
     constructor(lienzo, contenedor, opciones = {}) {
       this.lienzo = lienzo; this.contenedor = contenedor; this.ctx = lienzo.getContext('2d');
-      this.maxAlto = opciones.maxAlto || 9999; this.forzarFila = !!opciones.forzarFila; this.espaciado = opciones.espaciado; this.forzarGrilla = !!opciones.forzarGrilla; this.sinMesa = !!opciones.sinMesa; this.velocidad = opciones.velocidad; this.dprMax = opciones.dprMax;   // (opciones de Fundación: en fila o en dos filas de 3, sin la mesa de fieltro)
+      this.maxAlto = opciones.maxAlto || 9999; this.forzarFila = !!opciones.forzarFila; this.espaciado = opciones.espaciado; this.forzarGrilla = !!opciones.forzarGrilla; this.sinMesa = !!opciones.sinMesa; this.velocidad = opciones.velocidad; this.sombra = opciones.sombra !== false; this.dprMax = opciones.dprMax;   // (opciones de Fundación: en fila o en dos filas de 3, sin la mesa de fieltro)
       this.mesaCaras = carasDe(voxelesMesa(), TABLE_VOX, [-TABLE_X / 2, 0, -TABLE_Z / 2]);
       this.modelos = {};
       this.dados = [];          // por lugar: { tipo, valor, pos, R, squash, apartado, seleccionado, brillo, anim }
@@ -304,7 +304,7 @@ const D3 = (() => {
       ctx.setTransform(this.dpr, 0, 0, this.dpr, 0, 0); ctx.lineWidth = 0.7; ctx.lineJoin = 'round';
       // las sombras (y el aro dorado de los dados elegidos)
       this.dados.forEach(d => {
-        const rec = !!(ESTILOS[d.tipo] && ESTILOS[d.tipo].caras);   // (solo los dados de recursos llevan sombra; a los demás solo se les ve el aro dorado si están elegidos)
+        const rec = this.sombra;   // (los dados llevan su sombra, salvo en las escenas que la desactivan: ahí solo se ve el aro dorado si están elegidos)
         if (!d.seleccionado && !rec) return;
         const alto = Math.max(d.pos[1] - HALF - (d.apartado || d.seleccionado ? 0.15 : 0), 0), cerca = 1 - Math.min(Math.max(alto / DROP, 0), 1), m = 0.5 * (0.55 + 0.7 * cerca);
         const P = [[-1, -1], [1, -1], [1, 1], [-1, 1]].map(([s, t]) => this.proy([d.pos[0] + s * m, 0.012, d.pos[2] + t * m]));

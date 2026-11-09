@@ -403,7 +403,7 @@ function prodFU(e, MOV, left, right, dock, W) {
     const fila = fuEl('div', 'fuProdDados'), lienzo = document.createElement('canvas'), cont = fuEl('div', 'fuProdEsc'); cont.append(lienzo);
     const suma = fuEl('div', 'fuProdSuma'); suma.id = 'fuProdSuma'; fila.append(cont, suma);
     const texto = fuEl('div', 'fuProdTexto'); texto.id = 'fuProdTexto'; box.append(fila, texto);
-    FU.escNum = new D3.Escena(lienzo, cont, { maxAlto: 130, forzarFila: true, espaciado: 1.7, sinMesa: true, velocidad: 0.75, dprMax: 1.5 });
+    FU.escNum = new D3.Escena(lienzo, cont, { maxAlto: 130, forzarFila: true, espaciado: 1.7, sinMesa: true, velocidad: 0.75, dprMax: 1.5, sombra: false });
     FU.escNum.configurar(['normal', 'normal']);
     FU.escNum.alAterrizar = () => { if (!document.hidden) Sonido.play('ficha'); };
     FU.escNum.alTerminar = () => { FU.prodFase = 1; FU.animando = false; if (FU.e) repintarFU(); };
