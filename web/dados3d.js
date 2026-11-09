@@ -304,10 +304,11 @@ const D3 = (() => {
       ctx.setTransform(this.dpr, 0, 0, this.dpr, 0, 0); ctx.lineWidth = 0.7; ctx.lineJoin = 'round';
       // las sombras (y el aro dorado de los dados elegidos)
       this.dados.forEach(d => {
-        if (!d.seleccionado) return;   // (sin sombra: solo el aro dorado de los elegidos)
+        const rec = !!(ESTILOS[d.tipo] && ESTILOS[d.tipo].caras);   // (solo los dados de recursos llevan sombra; a los demás solo se les ve el aro dorado si están elegidos)
+        if (!d.seleccionado && !rec) return;
         const alto = Math.max(d.pos[1] - HALF - (d.apartado || d.seleccionado ? 0.15 : 0), 0), cerca = 1 - Math.min(Math.max(alto / DROP, 0), 1), m = 0.5 * (0.55 + 0.7 * cerca);
         const P = [[-1, -1], [1, -1], [1, 1], [-1, 1]].map(([s, t]) => this.proy([d.pos[0] + s * m, 0.012, d.pos[2] + t * m]));
-        ctx.fillStyle = d.seleccionado ? 'rgba(242,201,76,0.08)' : 'rgba(0,0,0,' + (0.1 + 0.34 * cerca).toFixed(3) + ')';
+        ctx.fillStyle = d.seleccionado ? 'rgba(242,201,76,' + (rec ? (0.25 + 0.2 * cerca).toFixed(3) : '0.08') + ')' : 'rgba(0,0,0,' + (0.1 + 0.34 * cerca).toFixed(3) + ')';
         ctx.beginPath(); ctx.moveTo(P[0][0], P[0][1]); P.slice(1).forEach(q => ctx.lineTo(q[0], q[1])); ctx.closePath(); ctx.fill();
         if (d.seleccionado) { ctx.strokeStyle = 'rgba(255,224,120,.95)'; ctx.lineWidth = 2; ctx.stroke(); ctx.lineWidth = 0.7; }
       });
