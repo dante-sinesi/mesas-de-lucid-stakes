@@ -17,11 +17,11 @@ const fuEl = (t, c, x) => { const n = document.createElement(t); if (c) n.classN
 
 function abrirFU() {
   if (!FU.escena) {
-    FU.escena = new D3.Escena($('fuDadosLienzo'), $('fuDados'), { maxAlto: 250, forzarGrilla: true, sinMesa: true });
+    FU.escena = new D3.Escena($('fuDadosLienzo'), $('fuDados'), { maxAlto: 250, forzarGrilla: true, sinMesa: true, velocidad: 1.1, dprMax: 1.5 });
     FU.escena.configurar(Array(6).fill('recurso'));
     FU.escena.alTocar = tocarDadoFU;
     FU.escena.alAterrizar = () => { if (!document.hidden) Sonido.play('ficha'); };
-    FU.escena.alTerminar = () => { FU.animando = false; marcarDadosFU(); };
+    FU.escena.alTerminar = () => { FU.animando = false; marcarDadosFU(); if (FU.e) repintarFU(); };
     $('fAyuda').appendChild(V.interrogante()); $('fAyuda').onclick = abrirAyudaFU;
     $('fInvitar').appendChild(V.invitar()); $('fInvitar').onclick = abrirInvitar;
     $('fSalir').appendChild(V.puerta()); $('fSalir').onclick = confirmarSalir;
@@ -133,6 +133,7 @@ function repintarFU() {
   const e = FU.e; if (!e || !e.mapa) return;
   const sec = $('fu'), W = sec.clientWidth, H = sec.clientHeight, MOV = W < 700 || H < 520, angosto = W < 1100;
   if (!W || !H) return;
+  FU.MOV = MOV;
   const geo = geometria(e.mapa), t = e.turno, yo = e.yo, miTurno = e.turnoDe === yo && yo !== null;
   const cab = $('fuCab'), jug = $('fuJugadores'), dock = $('fuDock'), dados = $('fuDados');
 
@@ -146,9 +147,10 @@ function repintarFU() {
     dock.style.cssText = 'position:absolute;left:0;right:0;bottom:0;z-index:3;background:#170e2c;border:3px solid #3a2766;padding:10px 12px 8px;display:flex;flex-direction:column;align-items:center;gap:6px;box-sizing:border-box';
     top = jug.offsetTop + jug.offsetHeight + 6; bottom = H - dock.offsetHeight - 4; left = 0; right = W;
   } else {
-    jug.style.cssText = 'position:absolute;top:56px;left:16px;width:' + Math.round((angosto ? 150 : 190) * (e.jugadores.length > 4 ? 1.6 : 1)) + 'px;flex-direction:column;flex-wrap:nowrap;gap:6px;background:rgba(18,10,34,.86);border:2px solid #3a2766;padding:8px;z-index:3';
-    dock.style.cssText = 'position:absolute;right:16px;top:56px;width:' + (angosto ? 270 : 310) + 'px;z-index:3;background:rgba(18,10,34,.92);border:3px solid #3a2766;padding:10px 12px 8px;display:flex;flex-direction:column;align-items:center;gap:6px;box-sizing:border-box';
-    top = 56; bottom = H - 10; left = Math.round((angosto ? 190 : 230) * (e.jugadores.length > 4 ? 1.45 : 1)); right = W - (angosto ? 300 : 340);
+    const dockW = angosto ? 270 : 310;
+    jug.style.cssText = 'position:absolute;top:50px;left:16px;right:' + (dockW + 32) + 'px;z-index:3';
+    dock.style.cssText = 'position:absolute;right:16px;top:56px;width:' + dockW + 'px;z-index:3;background:rgba(18,10,34,.92);border:3px solid #3a2766;padding:10px 12px 8px;display:flex;flex-direction:column;align-items:center;gap:6px;box-sizing:border-box';
+    top = jug.offsetTop + jug.offsetHeight + 8; bottom = H - 10; left = 16; right = W - dockW - 28;
   }
   // --- los dados en 3D, sobre el tablero ---
   const verDados = !!(t && t.sub === 'dados' && e.fase === 'turno');
@@ -246,7 +248,7 @@ function pintarJugadoresFU(e, MOV) {
   const caja = $('fuJugadores'), llave = JSON.stringify([e.turnoDe, e.yo, MOV, e.carreras, e.jugadores.map(j => [j.asiento, j.apodo, j.puntos, j.bot, j.conectado, j.expulsado])]);
   if (caja.dataset.llave === llave) return;
   caja.dataset.llave = llave; caja.textContent = '';
-  const n = e.jugadores.length; caja.className = 'dmJugadores fuJug' + (MOV ? ' fuJugMov' : (n > 4 ? ' fuJugDos' : '')); caja.dataset.n = n; caja.style.setProperty('--cols', MOV ? Math.min(n, 4) : (n > 4 ? 2 : 1));
+  const n = e.jugadores.length; caja.className = 'dmJugadores' + (n > 3 ? ' compacto' : '') + (MOV ? '' : ' fuFilaJ');
   e.jugadores.forEach(j => {
     const d = fuEl('div', 'dmJ' + (j.asiento === e.turnoDe ? ' turno' : '') + (j.asiento === e.yo ? ' soy' : '') + (j.conectado || j.bot ? '' : ' off'));
     d.style.borderTop = '5px solid ' + fuRgb(fuColor(j.asiento));
@@ -285,6 +287,19 @@ function cubiertosFU(ed, dados) {
   let pares = Math.floor(cnt[5] / 2); costo.forEach((k, i) => { if (!ok[i] && pares > 0) { ok[i] = true; pares--; } });
   return ok;
 }
+
+// Los dados que conviene guardar para el edificio elegido: los que cubren su costo (y pares de oros si falta alguno).
+function autoGuardarFU(ed, t) {
+  const keep = new Set(); if (!ed || !FU_COSTOS[ed]) return keep;
+  const falta = FU_COSTOS[ed].slice(), cuenta = v => { const i = falta.indexOf(v); if (i >= 0) { falta.splice(i, 1); return true; } return false; };
+  for (let i = 0; i < t.fijos; i++) cuenta(t.dados[i]);
+  for (let i = t.fijos; i < 6; i++) if (t.dados[i] !== 5 && cuenta(t.dados[i])) keep.add(i);
+  const orosFijos = t.dados.slice(0, t.fijos).filter(d => d === 5).length, libres = []; for (let i = t.fijos; i < 6; i++) if (t.dados[i] === 5) libres.push(i);
+  const pares = Math.min(falta.length, Math.floor((orosFijos + libres.length) / 2));
+  let usar = pares * 2 - Math.min(orosFijos, pares * 2);
+  libres.slice(0, Math.max(0, usar)).forEach(i => keep.add(i));
+  return keep;
+}
 function iconoEdificio(ed, color, z) {
   const A = FU_ARTE, img = ed === 'camino' ? A.camino(color) : (ed === 'pueblo' ? A.casa(color) : (ed === 'ciudad' ? A.ciudad(color) : A.caballero(color)));
   img.style.imageRendering = 'pixelated';
@@ -319,11 +334,13 @@ function pintarDockFU(e, MOV) {
     if (!miTurno) { col(info(de + ' tira los dados · tirada ' + t.tirada + ' de ' + t.tiradas), reloj()); return; }
     const meds = tablaMedalla(e), eds = Object.keys(meds);
     if (eds.length && (!FU.objetivo || !eds.includes(FU.objetivo))) FU.objetivo = eds.slice().sort((a, b) => FU_VALOR[b] * meds[b] - FU_VALOR[a] * meds[a])[0];
+    const kA = t.tirada + '|' + FU.objetivo + '|' + e.ronda;
+    if (FU.autoKey !== kA && !FU.animando) { FU.autoKey = kA; FU.keep = autoGuardarFU(FU.objetivo, t); marcarDadosFU(); }
     const chips = fuEl('div', 'fuFilas'), ic = MOV ? 20 : 24;
     eds.forEach(ed => {
       const c = fuEl('div', 'fuFila' + (ed === FU.objetivo ? ' on' : '')); c.append(iconoEdificio(ed, fuColor(yo), 2));
       const f = fuEl('div', 'fuCosto'), cub = cubiertosFU(ed, t.dados); FU_COSTOS[ed].forEach((k, i) => { const im = iconoRecFU(k, ic); if (!cub[i]) im.style.opacity = '.3'; f.append(im); });
-      c.append(f); ponerMedalla(c, meds[ed]); c.onclick = () => { FU.objetivo = ed; Sonido.play('clic'); repintarFU(); }; chips.append(c);
+      c.append(f); ponerMedalla(c, meds[ed]); c.onclick = () => { FU.objetivo = ed; FU.autoKey = null; Sonido.play('clic'); repintarFU(); }; chips.append(c);
     });
     const quedan = t.tiradas - t.tirada;
     const tirar = botonFU('Tirar ' + (6 - t.fijos - FU.keep.size), () => tirarFU(), true, quedan > 0 && !FU.animando);
@@ -366,7 +383,7 @@ function prodFU(e, MOV, left, right, dock, W) {
     const fila = fuEl('div', 'fuProdDados'), lienzo = document.createElement('canvas'), cont = fuEl('div', 'fuProdEsc'); cont.append(lienzo);
     const suma = fuEl('div', 'fuProdSuma'); suma.id = 'fuProdSuma'; fila.append(cont, suma);
     const texto = fuEl('div', 'fuProdTexto'); texto.id = 'fuProdTexto'; box.append(fila, texto);
-    FU.escNum = new D3.Escena(lienzo, cont, { maxAlto: 130, forzarFila: true, espaciado: 1.7, sinMesa: true });
+    FU.escNum = new D3.Escena(lienzo, cont, { maxAlto: 130, forzarFila: true, espaciado: 1.7, sinMesa: true, velocidad: 0.75, dprMax: 1.5 });
     FU.escNum.configurar(['normal', 'normal']);
     FU.escNum.alAterrizar = () => { if (!document.hidden) Sonido.play('ficha'); };
     FU.escNum.alTerminar = () => { FU.prodFase = 1; FU.animando = false; if (FU.e) repintarFU(); };
@@ -379,7 +396,7 @@ function prodFU(e, MOV, left, right, dock, W) {
     FU.prodKey = key; esc.maxAlto = MOV ? 100 : 130; esc.ajustar(); esc.mostrar([1, 1]);
     $('fuProdSuma').textContent = ''; $('fuProdTexto').textContent = '';
     if (sinMovimiento()) { esc.mostrar(vals); esc.dibujar(); FU.prodFase = 1; FU.animando = false; }
-    else { FU.prodFase = 0; FU.animando = true; dock.dataset.llave = ''; pintarDockFU(e, MOV); esc.tirar([0, 1], vals, e.ronda * 31 + t.num.suma); }
+    else { FU.prodFase = 0; FU.animando = true; dock.dataset.llave = ''; pintarDockFU(e, MOV); setTimeout(() => { if (FU.prodKey === key) esc.tirar([0, 1], vals, e.ronda * 31 + t.num.suma); }, 450); }
   }
   if (FU.prodFase) { esc.mostrar(vals); textoProdFU(e); }
 }
@@ -427,7 +444,8 @@ function tocarDadoFU(i) {
 }
 function dadosFU(e) {
   const t = e.turno, esc = FU.escena, vals = t.dados.map(c => c + 1);
-  if (esc.dados.length !== 6) esc.configurar(Array(6).fill('recurso'));
+  const tipoD = FU.MOV ? 'recursoM' : 'recurso';
+  if (esc.dados.length !== 6 || esc.dados[0].tipo !== tipoD) esc.configurar(Array(6).fill(tipoD));
   if (t.tirada !== FU.tiradaVista) {
     const primera = FU.tiradaVista < 1 || t.tirada === 1;
     const lugares = [];

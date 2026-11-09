@@ -625,3 +625,7 @@ img, canvas { -webkit-user-drag: none; }
 .fuJugDos .dmJ { min-width: 0; padding: 2px 4px; }
 .fuJugDos .dmNombre { max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 13px; }
 .fuJug { max-height: calc(100% - 70px); overflow-y: auto; }
+
+.fuFilaJ { flex-wrap: nowrap !important; display: flex !important; }
+.fuFilaJ .dmJ { flex: 1 1 0; min-width: 0; max-width: 170px; }
+.fuFilaJ .dmNombre { max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }

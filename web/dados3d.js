@@ -194,7 +194,7 @@ const D3 = (() => {
     // `lienzo`: el canvas; `contenedor`: de quien toma el ancho; opciones: { maxAlto }
     constructor(lienzo, contenedor, opciones = {}) {
       this.lienzo = lienzo; this.contenedor = contenedor; this.ctx = lienzo.getContext('2d');
-      this.maxAlto = opciones.maxAlto || 9999; this.forzarFila = !!opciones.forzarFila; this.espaciado = opciones.espaciado; this.forzarGrilla = !!opciones.forzarGrilla; this.sinMesa = !!opciones.sinMesa;   // (opciones de Fundación: en fila o en dos filas de 3, sin la mesa de fieltro)
+      this.maxAlto = opciones.maxAlto || 9999; this.forzarFila = !!opciones.forzarFila; this.espaciado = opciones.espaciado; this.forzarGrilla = !!opciones.forzarGrilla; this.sinMesa = !!opciones.sinMesa; this.velocidad = opciones.velocidad; this.dprMax = opciones.dprMax;   // (opciones de Fundación: en fila o en dos filas de 3, sin la mesa de fieltro)
       this.mesaCaras = carasDe(voxelesMesa(), TABLE_VOX, [-TABLE_X / 2, 0, -TABLE_Z / 2]);
       this.modelos = {};
       this.dados = [];          // por lugar: { tipo, valor, pos, R, squash, apartado, seleccionado, brillo, anim }
@@ -250,7 +250,7 @@ const D3 = (() => {
       let sigue = false;
       this.dados.forEach((d, i) => {
         if (!d.anim) return;
-        const t = (ahora - d.anim.t0) / 1000 * VELOCIDAD;
+        const t = (ahora - d.anim.t0) / 1000 * (this.velocidad || VELOCIDAD);
         const s = estadoTiro(i, t, d.valor, d.anim.semilla, this._reposo(i, d.n));
         if (t >= s.tAterriza && !d.anim.aterrizo) { d.anim.aterrizo = true; if (this.alAterrizar) this.alAterrizar(i); }
         if (t < s.fin) { d.pos = s.pos; d.R = s.R; d.squash = s.squash; sigue = true; }
@@ -262,7 +262,7 @@ const D3 = (() => {
     }
 
     ajustar() {
-      const dpr = Math.min(window.devicePixelRatio || 1, 2), ancho = Math.max(this.contenedor.clientWidth || (window.innerWidth - 24), 200);
+      const dpr = Math.min(window.devicePixelRatio || 1, this.dprMax || 2), ancho = Math.max(this.contenedor.clientWidth || (window.innerWidth - 24), 200);
       this.modo = this.forzarGrilla ? 'grilla' : ((this.forzarFila || ancho >= 560) ? 'fila' : 'grilla');
       const nD = Math.max(this.dados.length, 1), vw = this.modo === 'fila' ? (this.forzarFila ? Math.max((nD - 1) * (this.espaciado || 0.86) + 1.5, 2.2) : 9.75) : 5.6, vh = this.modo === 'fila' ? (this.forzarFila ? 2.7 : 3.22) : 4.4;
       this.sc = Math.min(ancho / vw, 118, this.maxAlto / vh);
@@ -304,9 +304,10 @@ const D3 = (() => {
       ctx.setTransform(this.dpr, 0, 0, this.dpr, 0, 0); ctx.lineWidth = 0.7; ctx.lineJoin = 'round';
       // las sombras (y el aro dorado de los dados elegidos)
       this.dados.forEach(d => {
+        if (!d.seleccionado) return;   // (sin sombra: solo el aro dorado de los elegidos)
         const alto = Math.max(d.pos[1] - HALF - (d.apartado || d.seleccionado ? 0.15 : 0), 0), cerca = 1 - Math.min(Math.max(alto / DROP, 0), 1), m = 0.5 * (0.55 + 0.7 * cerca);
         const P = [[-1, -1], [1, -1], [1, 1], [-1, 1]].map(([s, t]) => this.proy([d.pos[0] + s * m, 0.012, d.pos[2] + t * m]));
-        ctx.fillStyle = d.seleccionado ? 'rgba(242,201,76,' + (0.25 + 0.2 * cerca).toFixed(3) + ')' : 'rgba(0,0,0,' + (0.1 + 0.34 * cerca).toFixed(3) + ')';
+        ctx.fillStyle = d.seleccionado ? 'rgba(242,201,76,0.08)' : 'rgba(0,0,0,' + (0.1 + 0.34 * cerca).toFixed(3) + ')';
         ctx.beginPath(); ctx.moveTo(P[0][0], P[0][1]); P.slice(1).forEach(q => ctx.lineTo(q[0], q[1])); ctx.closePath(); ctx.fill();
         if (d.seleccionado) { ctx.strokeStyle = 'rgba(255,224,120,.95)'; ctx.lineWidth = 2; ctx.stroke(); ctx.lineWidth = 0.7; }
       });

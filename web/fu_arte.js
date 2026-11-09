@@ -35,6 +35,7 @@ const FU_ARTE = (() => {
   };
   // El dado de recursos en 3D: la escena de los dados del diez mil con un modelo de 15 cubitos de lado (marco de marfil y una cara de color por recurso).
   D3.ESTILOS.recurso = { n: 15, cuerpo: [0.96, 0.93, 0.84], esquina: [0.80, 0.62, 0.25], caras: RECURSOS.map(k => ({ cuerpo: EST[k].cuerpo, pal: EST[k].pal, fn: SIMB[k] })) };
+  D3.ESTILOS.recursoM = Object.assign({}, D3.ESTILOS.recurso, { n: 9 });   // (menos cubitos por lado: más liviano en el celular)
   const cacheD = {};
   function dado2d(k) {   // el mismo dado de frente (15 x 15), para las tarjetas de costo
     if (cacheD[k]) return cacheD[k];
