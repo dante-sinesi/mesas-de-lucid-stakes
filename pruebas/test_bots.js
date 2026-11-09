@@ -43,7 +43,7 @@ for (const [nombre, Clase] of [['Diez mil', MesaDM], ['13 Jack', Mesa13]]) {
   const m = conBots(MesaDM, { modo: 'multi', bots: 7 }, ['Ana']);
   check(m.jugadores.length === 8 && m.jugadores.filter(j => j.bot).length === 7, 'con 7 bots y un humano la sala queda completa');
   m.salir(T('Ana'));
-  check(m.jugadores.length === 0, 'cuando se va el último humano, los bots se van con él');
+  check(m.jugadores.length === 7 && m.jugadores.every(j => j.bot), 'cuando se va el último humano de la sala de espera, los bots se quedan por si vuelve');
   const s = conBots(MesaDM, { modo: 'carrera', bots: 3 }, ['Ana']);
   check(s.jugadores.length === 1 && !s.jugadores[0].bot, 'los modos solitarios no llevan bots');
 }

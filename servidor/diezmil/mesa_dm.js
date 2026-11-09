@@ -177,7 +177,7 @@ class MesaDM {
     if (!j) return;
     const eraSuTurno = this.turno === j && this.fase === FASE.TURNO;
     this.jugadores = this.jugadores.filter(x => x !== j);
-    if (!j.bot && !this._humanos().length) this.jugadores = [];   // (sin humanos no hay sala: los bots se van con el último)
+    if (!j.bot && this.fase !== FASE.ESPERA && !this._humanos().length) this.jugadores = [];   // (en plena partida, sin humanos no hay sala: los bots se van con el último; en la sala de espera se quedan, por si vuelve)
     if (this.fase === FASE.FIN) { this._cambio(); return; }
     if (this.modo !== 'multi' && this.fase !== FASE.ESPERA) { this._terminarPartida('abandono', null); this._cambio(); return; }
     if (!this.jugadores.length) { this.fase = FASE.ESPERA; this.turno = null; this.t = null; this.limite = null; this.herencia = null; this.eleccion = null; this._cambio(); return; }

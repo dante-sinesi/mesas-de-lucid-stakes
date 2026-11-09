@@ -145,7 +145,7 @@ class Salas {
     const out = [];
     for (const [codigo, s] of this.salas) {
       const m = s.mesa;
-      if (!s.publica || m.clave || m.tutorial || m.modo !== 'multi' || m.fase !== 'espera' || (!m.jugadores.some(j => j.conectado && !j.bot) && s.vacioDesde === null)) continue;   // (una sala que se quedó sin nadie sigue en la lista hasta que se borra, a los 30 s)
+      if (!s.publica || m.clave || m.tutorial || m.modo !== 'multi' || m.fase !== 'espera' || (!m.jugadores.some(j => j.conectado && !j.bot) && !s.huboHumano)) continue;   // (una sala que se quedó sin nadie sigue en la lista hasta que se borra, a los 30 s)
       const sillas = [];
       for (let i = 0; i < m.maxAsientos; i++) { const p = m.porAsiento(i); sillas.push(p ? (p.bot ? 'b' : 'h') : null); }
       out.push({ sala: codigo, juego: m.juego, asientos: m.maxAsientos, sillas, creada: s.creada, datos: m.juego === 'fundacion' ? { meta: m.meta } : (m.juego === 'trecejack' ? { objetivo: m.objetivo, mazos: m.mazos, metaPuntos: m.metaPuntos, especiales: m.especiales } : { meta: m.metaBase, cupo: m.cupo, hostil: m.hostil, tomarDados: m.tomarDados }) });
@@ -164,7 +164,7 @@ class Salas {
     if (s.mesa.clave && !s.mesa.jugador(token) && String(clave || '').trim().toUpperCase() !== s.mesa.clave) return { ok: false, error: clave ? 'La clave no es correcta' : 'Esta sala tiene clave', pideClave: true };
     const r = s.mesa.unirse(token, apodo);
     if (r.ok) r.juego = s.mesa.juego;
-    if (r.ok) { s.vistos.set(token, this.ahora()); s.uso = this.ahora(); this._sucio = true; this._avisar(s); }
+    if (r.ok) { s.huboHumano = true; s.vistos.set(token, this.ahora()); s.uso = this.ahora(); this._sucio = true; this._avisar(s); }
     return r;
   }
 

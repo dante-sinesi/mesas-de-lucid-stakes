@@ -56,3 +56,5 @@ Calibrar costos y ritmo con partidas reales; compensar el orden de turno; zonas 
 - bj-103: los dos dados de puntos son 3D; la tirada de recursos dice qué se construye y apaga los recursos que faltan; al poner se ve qué edificio se coloca; jugadores en grilla compacta; cuando un bot jugó por alguien (desconexión o dos tiempos agotados en Fundación) sale el aviso «Un bot jugó por ti» con «Retomar el control» (acción `retomar`, los tres juegos); una sala pública que se quedó sin nadie sigue en la lista hasta que se borra (30 s).
 
 - bj-106: los bots (y quien tiene el turno jugado por un bot) esperan 5,5 s tras la tirada de números, 2,8 s entre tiradas de recursos y 2,2 s al elegir y colocar, para que todos vean; al terminar un turno en una sala con otros el resultado queda 2,6 s (3,6 s si jugó un bot). Quien construye se ve en el panel («Ana construyó un pueblo») y en el mapa, con la cámara acercada y un aro en el lugar (`turno.lugar`).
+
+- bj-107: si quien armó una sala de espera se va, los bots y las reglas se quedan 30 s y la sala sigue en la lista; quien entra encuentra la sala como estaba (en plena partida, sin humanos, la sala se cierra como antes).

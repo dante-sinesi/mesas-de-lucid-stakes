@@ -142,7 +142,7 @@ class MesaFundacion {
     if (this.fase === FASE.ESPERA || this.fase === FASE.FIN) this.jugadores = this.jugadores.filter(x => x !== j);
     else if (this.modo !== 'multi') { this.jugadores = this.jugadores.filter(x => x !== j); this._terminarPartida('abandono', j); }
     else { j.bot = true; j.token = Bots.tokenBot(); j.conectado = true; j.expulsado = false; }
-    if (!j.bot && this.jugadores.every(x => x.bot)) this.jugadores = [];   // (sin humanos no hay sala: los bots se van con el último)
+    if (!j.bot && this.fase !== FASE.ESPERA && this.jugadores.every(x => x.bot)) this.jugadores = [];   // (en plena partida, sin humanos no hay sala: los bots se van con el último; en la sala de espera se quedan, por si vuelve)
     if (!this._humanos().length && this.fase !== FASE.ESPERA) this.jugadores = [];
     if (!this.jugadores.length) { this.fase = FASE.ESPERA; this._limpiarPartida(); }
     this.avanzar(); this._cambio();
