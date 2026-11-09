@@ -221,6 +221,7 @@ class MesaFundacion {
     const j = this._actor();
     if (!j) return false;
     if (this._juegaElBot(j)) {   // juega el bot (o el que reemplaza a quien se fue o no actuó: guarda su lugar)
+      if (!j.bot && !j.reemplazado && (j.expulsado || !j.conectado)) { j.reemplazado = true; this._cambio(); }
       if (this.botEn === null) this.botEn = t + Bots.demora(this._sub() === 'dados' ? 'tirar' : 'decidir');
       if (t < this.botEn) return false;
       this.botEn = null;
@@ -234,7 +235,7 @@ class MesaFundacion {
   // Se acabó el tiempo: un bot juega lo que falta de este turno. A la segunda vez seguida, un bot toma el lugar hasta que vuelva a actuar.
   _agotado(j) {
     j.automaticos++; j.fallos++;
-    if (j.fallos >= SEGUIDOS_PARA_BOT) j.expulsado = true;
+    if (j.fallos >= SEGUIDOS_PARA_BOT) { j.expulsado = true; j.reemplazado = true; }
     const turno = this.t, idx = this.inicial ? this.inicial.idx : -1, fase = this.fase;
     for (let i = 0; i < 80; i++) {
       this._jugadaBot(j);
@@ -242,6 +243,16 @@ class MesaFundacion {
     }
   }
   _manual(j) { j.fallos = 0; j.expulsado = false; }
+  // Quien volvió después de que un bot jugó por él retoma el control (y se apaga el aviso).
+  retomar(token) {
+    const j = this.jugador(token);
+    if (!j) return { ok: false, error: 'No estás en la sala' };
+    j.reemplazado = false;
+    this._manual(j);
+    this._cambio();
+    return { ok: true };
+  }
+
 
   // ---------- la colocación inicial ----------
 
@@ -462,7 +473,7 @@ class MesaFundacion {
       juego: 'fundacion', sinTiempo: !!this.sinTiempo, pausa: this.pausa !== null, tiempos: { dados: this.tiempos.dados, construir: this.tiempos.construir, inicial: this.tiempos.inicial, produccion: this.tiempos.produccion }, version: this.version, ahora: this.ahora(),
       modo: this.modo, fase: this.fase, limite: this.limite, meta: this.meta, ronda: this.ronda, finDeVuelta: this.finDeVuelta, llegoMeta: this.llegoMeta, maxAsientos: this.maxAsientos, tiempoModo: this.tiempoModo,
       turnoDe: this.fase === FASE.TURNO && this.t ? this.t.asiento : (this.fase === FASE.INICIAL && this.inicial ? this._actor().asiento : null),
-      yo: yo ? yo.asiento : null, anfitrion: this.anfitrion() ? this.anfitrion().asiento : null,
+      yo: yo ? yo.asiento : null, reemplazado: !!(yo && yo.reemplazado), anfitrion: this.anfitrion() ? this.anfitrion().asiento : null,
       jugadores: this.jugadores.map(j => { const c = this.tab ? R.piezas(this.tab, j.asiento) : { pueblo: 0, ciudad: 0, camino: 0, caballero: 0 }; return { asiento: j.asiento, apodo: j.apodo, conectado: j.conectado, bot: !!j.bot, expulsado: !!j.expulsado, puntos: this.tab ? this._puntosDe(j.asiento) : 0, pueblos: c.pueblo, ciudades: c.ciudad, caminos: c.camino, caballeros: c.caballero, quedan: this.tab ? R.quedan(this.tab, j.asiento) : null, turnos: j.turnos }; }),
       inicial: this.fase === FASE.INICIAL && this.inicial ? { de: this._actor().asiento, sub: this.inicial.sub, idx: this.inicial.idx, total: this.inicial.plan.length, ultimoPueblo: this.inicial.ultimoPueblo } : null,
       turno, carreras: this.carreras, eventos: this.eventos.slice(), contadorEventos: this.contadorEventos, fin: this.fin, orden: this.orden,

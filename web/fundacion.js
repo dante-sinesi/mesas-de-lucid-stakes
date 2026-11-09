@@ -146,9 +146,9 @@ function repintarFU() {
     dock.style.cssText = 'position:absolute;left:0;right:0;bottom:0;z-index:3;background:#170e2c;border:3px solid #3a2766;padding:10px 12px 8px;display:flex;flex-direction:column;align-items:center;gap:6px;box-sizing:border-box';
     top = jug.offsetTop + jug.offsetHeight + 6; bottom = H - dock.offsetHeight - 4; left = 0; right = W;
   } else {
-    jug.style.cssText = 'position:absolute;top:56px;left:16px;width:' + (angosto ? 150 : 190) + 'px;flex-direction:column;flex-wrap:nowrap;gap:6px;background:rgba(18,10,34,.86);border:2px solid #3a2766;padding:8px;z-index:3';
+    jug.style.cssText = 'position:absolute;top:56px;left:16px;width:' + Math.round((angosto ? 150 : 190) * (e.jugadores.length > 4 ? 1.6 : 1)) + 'px;flex-direction:column;flex-wrap:nowrap;gap:6px;background:rgba(18,10,34,.86);border:2px solid #3a2766;padding:8px;z-index:3';
     dock.style.cssText = 'position:absolute;right:16px;top:56px;width:' + (angosto ? 270 : 310) + 'px;z-index:3;background:rgba(18,10,34,.92);border:3px solid #3a2766;padding:10px 12px 8px;display:flex;flex-direction:column;align-items:center;gap:6px;box-sizing:border-box';
-    top = 56; bottom = H - 10; left = (angosto ? 190 : 230); right = W - (angosto ? 300 : 340);
+    top = 56; bottom = H - 10; left = Math.round((angosto ? 190 : 230) * (e.jugadores.length > 4 ? 1.45 : 1)); right = W - (angosto ? 300 : 340);
   }
   // --- los dados en 3D, sobre el tablero ---
   const verDados = !!(t && t.sub === 'dados' && e.fase === 'turno');
@@ -156,7 +156,7 @@ function repintarFU() {
   if (verDados) {
     const ancho = MOV ? Math.min(W - 24, 360) : 640, alto = MOV ? 250 : 300;
     dados.style.cssText = 'position:absolute;z-index:2;width:' + ancho + 'px;' + (MOV ? 'left:' + Math.round((W - ancho) / 2) + 'px;bottom:' + (dock.offsetHeight + 2) + 'px' : 'left:' + Math.round((left + right - ancho) / 2) + 'px;bottom:8px');
-    FU.escena.maxAlto = alto; FU.escena.ajustar();
+    const kAj = ancho + 'x' + alto + 'x' + W; if (FU.kAjuste !== kAj) { FU.kAjuste = kAj; FU.escena.maxAlto = alto; FU.escena.ajustar(); }
     dadosFU(e);
     bottom = MOV ? Math.min(bottom, H - dock.offsetHeight - 120) : bottom;
   }
@@ -183,7 +183,8 @@ function repintarFU() {
     FU.zonas = [];
   } else FU.zonas = [];
   const cx = left + aw / 2, cy = top + ah / 2;
-  const mundo = dibujarMundo(e, geo), c = $('fuMapa');
+  const kMundo = e.version + '|' + e.mapa.semilla; if (FU.kMundo !== kMundo || !FU.mundo) { FU.kMundo = kMundo; FU.mundo = dibujarMundo(e, geo); }
+  const mundo = FU.mundo, c = $('fuMapa');
   const cw = Math.ceil(W / z), ch = Math.ceil(H / z);
   if (c.width !== cw) c.width = cw; if (c.height !== ch) c.height = ch;
   c.style.width = W + 'px'; c.style.height = H + 'px';
@@ -245,7 +246,7 @@ function pintarJugadoresFU(e, MOV) {
   const caja = $('fuJugadores'), llave = JSON.stringify([e.turnoDe, e.yo, MOV, e.carreras, e.jugadores.map(j => [j.asiento, j.apodo, j.puntos, j.bot, j.conectado, j.expulsado])]);
   if (caja.dataset.llave === llave) return;
   caja.dataset.llave = llave; caja.textContent = '';
-  caja.className = 'dmJugadores' + (MOV && e.jugadores.length > 3 ? ' compacto' : '');
+  const n = e.jugadores.length; caja.className = 'dmJugadores fuJug' + (MOV ? ' fuJugMov' : (n > 4 ? ' fuJugDos' : '')); caja.dataset.n = n; caja.style.setProperty('--cols', MOV ? Math.min(n, 4) : (n > 4 ? 2 : 1));
   e.jugadores.forEach(j => {
     const d = fuEl('div', 'dmJ' + (j.asiento === e.turnoDe ? ' turno' : '') + (j.asiento === e.yo ? ' soy' : '') + (j.conectado || j.bot ? '' : ' off'));
     d.style.borderTop = '5px solid ' + fuRgb(fuColor(j.asiento));
@@ -276,6 +277,14 @@ function tablaMedalla(e) { // el % de cada edificio con los dados guardados ahor
   Object.keys(t.prob).forEach(ed => { out[ed] = t.prob[ed][mask]; });
   return out;
 }
+
+// Qué recursos del costo ya están cubiertos por los dados de ahora (dos oros valen un recurso).
+function cubiertosFU(ed, dados) {
+  const cnt = [0, 0, 0, 0, 0, 0]; dados.forEach(d => { cnt[d]++; });
+  const costo = FU_COSTOS[ed], ok = costo.map(k => { if (cnt[k] > 0) { cnt[k]--; return true; } return false; });
+  let pares = Math.floor(cnt[5] / 2); costo.forEach((k, i) => { if (!ok[i] && pares > 0) { ok[i] = true; pares--; } });
+  return ok;
+}
 function iconoEdificio(ed, color, z) {
   const A = FU_ARTE, img = ed === 'camino' ? A.camino(color) : (ed === 'pueblo' ? A.casa(color) : (ed === 'ciudad' ? A.ciudad(color) : A.caballero(color)));
   img.style.imageRendering = 'pixelated';
@@ -295,7 +304,8 @@ function pintarDockFU(e, MOV) {
   if (e.fase === 'inicial' && e.inicial) {
     const ini = e.inicial;
     if (ini.de !== yo) { col(info(fuNombreDe(e, ini.de) + ' pone su ' + (ini.sub === 'pueblo' ? 'pueblo' : 'camino')), reloj()); return; }
-    col(info('Pon tu ' + (ini.sub === 'pueblo' ? 'pueblo' : 'camino') + ' (' + (Math.floor(ini.idx / 2) + 1) + ' de ' + Math.ceil(ini.total / e.jugadores.length) + ')'), reloj(), acciones(botonFU('Confirmar', () => confirmarLugarFU(), true, FU.sel !== null)));
+    const quei = fuEl('div', 'fuQue'); quei.append(iconoEdificio(ini.sub === 'pueblo' ? 'pueblo' : 'camino', fuColor(yo), ini.sub === 'pueblo' ? 4 : 3), fuEl('div', '', 'Pon tu ' + (ini.sub === 'pueblo' ? 'pueblo' : 'camino') + ' (' + (Math.floor(ini.idx / 2) + 1) + ' de ' + Math.ceil(ini.total / e.jugadores.length) + ')'));
+    col(quei, info(FU.sel === null ? 'Toca un punto del mapa' : 'Confirma el lugar'), reloj(), acciones(botonFU('Confirmar', () => confirmarLugarFU(), true, FU.sel !== null)));
     return;
   }
   if (e.fase !== 'turno' || !t) { col(info(e.fase === 'fin' ? 'Fin de la partida' : '')); return; }
@@ -312,13 +322,13 @@ function pintarDockFU(e, MOV) {
     const chips = fuEl('div', 'fuFilas'), ic = MOV ? 20 : 24;
     eds.forEach(ed => {
       const c = fuEl('div', 'fuFila' + (ed === FU.objetivo ? ' on' : '')); c.append(iconoEdificio(ed, fuColor(yo), 2));
-      const f = fuEl('div', 'fuCosto'); FU_COSTOS[ed].forEach(k => f.append(iconoRecFU(k, ic)));
+      const f = fuEl('div', 'fuCosto'), cub = cubiertosFU(ed, t.dados); FU_COSTOS[ed].forEach((k, i) => { const im = iconoRecFU(k, ic); if (!cub[i]) im.style.opacity = '.3'; f.append(im); });
       c.append(f); ponerMedalla(c, meds[ed]); c.onclick = () => { FU.objetivo = ed; Sonido.play('clic'); repintarFU(); }; chips.append(c);
     });
     const quedan = t.tiradas - t.tirada;
     const tirar = botonFU('Tirar ' + (6 - t.fijos - FU.keep.size), () => tirarFU(), true, quedan > 0 && !FU.animando);
     if (quedan > 0 && FU.objetivo && meds[FU.objetivo] !== undefined) ponerMedalla(tirar, meds[FU.objetivo]);
-    col(fuEl('div', 'fuAyuda', 'Tira para juntar estos recursos y construir. Toca los dados que quieras guardar.'), chips, info('Tirada ' + t.tirada + ' de ' + t.tiradas), reloj(), acciones(tirar, botonFU('Construir', () => hacerFU('terminar'), false, !FU.animando)));
+    col(fuEl('div', 'fuAyuda', FU.objetivo ? 'Quieres construir: ' + FU_NOMBRE_ED[FU.objetivo].toLowerCase() + '. Guarda los dados que sirvan; los recursos apagados te faltan.' : 'Tira para juntar los recursos de un edificio.'), chips, info('Tirada ' + t.tirada + ' de ' + t.tiradas), reloj(), acciones(tirar, botonFU('Construir', () => hacerFU('terminar'), false, !FU.animando)));
     return;
   }
   if (t.sub === 'construir') {
@@ -336,7 +346,9 @@ function pintarDockFU(e, MOV) {
     if (!miTurno) { col(info(de + ' elige dónde poner su ' + (t.edificio || '').toLowerCase()), reloj()); return; }
     const zonas = FU.zonasMostrar && FU.zonasMostrar.length;
     const atras = t.posibles.length > 1 ? botonFU('Atrás', () => { if (FU.zona !== null) { FU.zona = null; FU.sel = null; repintarFU(); } else hacerFU('atras'); }) : botonFU('Pasar', () => hacerFU('pasar'));
-    col(info(zonas ? 'Toca una zona' : 'Toca un punto y confirma'), reloj(), acciones(atras, botonFU('Confirmar', () => confirmarLugarFU(), true, FU.sel !== null && !zonas)));
+    const nomEd = FU_NOMBRE_ED[t.edificio] || 'edificio', que = fuEl('div', 'fuQue'); if (t.edificio) que.append(iconoEdificio(t.edificio, fuColor(yo), t.edificio === 'camino' ? 3 : 4));
+    que.append(fuEl('div', '', 'Vas a poner: ' + nomEd.toLowerCase()));
+    col(que, info(zonas ? 'Toca una zona' : 'Toca un punto y confirma'), reloj(), acciones(atras, botonFU('Confirmar', () => confirmarLugarFU(), true, FU.sel !== null && !zonas)));
   }
 }
 
@@ -345,44 +357,36 @@ function pintarDockFU(e, MOV) {
 
 const FU_NOMBRE_TIPO = { bosque: 'bosque', colinas: 'colinas', pastos: 'pastos', campos: 'campos', montana: 'montaña', desierto: 'desierto' };
 function iconoRecFU(k, px) { const cc = FU_ARTE.cvs(15, 15); cc.getContext('2d').drawImage(FU_ARTE.dado2d(FU_NOMBRE_REC[k]), 0, 0); cc.style.cssText = 'width:' + px + 'px;height:' + px + 'px;image-rendering:pixelated;display:block'; return cc; }
-function dadoNumFU(n, px) {   // dado común de puntos, 11 x 11 píxeles planos
-  const c = FU_ARTE.cvs(11, 11), g = c.getContext('2d'), A = FU_ARTE;
-  A.fr(g, 0, 0, 11, 11, [0.45, 0.35, 0.2]); A.fr(g, 1, 1, 9, 9, [0.97, 0.94, 0.86]);
-  const P = { 1: [[5, 5]], 2: [[3, 3], [7, 7]], 3: [[3, 3], [5, 5], [7, 7]], 4: [[3, 3], [7, 3], [3, 7], [7, 7]], 5: [[3, 3], [7, 3], [5, 5], [3, 7], [7, 7]], 6: [[3, 3], [7, 3], [3, 5], [7, 5], [3, 7], [7, 7]] };
-  (P[n] || []).forEach(([x, y]) => A.fr(g, x - 1, y - 1, 2, 2, [0.16, 0.1, 0.24]));
-  c.style.cssText = 'width:' + px + 'px;height:' + px + 'px;image-rendering:pixelated;display:block'; return c;
-}
 function prodFU(e, MOV, left, right, dock, W) {
   const box = $('fuProd'), t = e.turno, ver = !!(t && e.fase === 'turno' && t.sub === 'produccion' && !t.terminado);
   box.hidden = !ver;
-  if (!ver) { FU.prodKey = null; if (FU.prodTimer) { clearInterval(FU.prodTimer); FU.prodTimer = null; FU.animando = false; } return; }
-  const key = [e.ronda, t.de, t.num.a, t.num.b].join('-');
-  const ancho = MOV ? Math.min(W - 24, 340) : 360;
-  box.style.cssText = 'position:absolute;z-index:2;width:' + ancho + 'px;' + (MOV ? 'left:' + Math.round((W - ancho) / 2) + 'px;bottom:' + (dock.offsetHeight + 8) + 'px' : 'left:' + Math.round((left + right - ancho) / 2) + 'px;bottom:24px');
-  const px = MOV ? 56 : 72;
-  if (FU.prodKey !== key) {
-    FU.prodKey = key; FU.prodFase = sinMovimiento() ? 1 : 0;
-    if (FU.prodTimer) clearInterval(FU.prodTimer);
-    if (!FU.prodFase) {
-      FU.animando = true; dock.dataset.llave = ''; pintarDockFU(e, MOV); let n = 0;
-      FU.prodTimer = setInterval(() => {
-        n++;
-        if (n >= 12) { clearInterval(FU.prodTimer); FU.prodTimer = null; FU.prodFase = 1; FU.animando = false; Sonido.play('clic'); repintarFU(); return; }
-        dibujarProdFU(box, FU.e, px, [1 + Math.floor(Math.random() * 6), 1 + Math.floor(Math.random() * 6)], false);
-      }, 80);
-    }
+  if (!ver) { FU.prodKey = null; return; }
+  if (!FU.escNum) {   // los dos dados comunes, en 3D como todos los demás
+    box.textContent = '';
+    const fila = fuEl('div', 'fuProdDados'), lienzo = document.createElement('canvas'), cont = fuEl('div', 'fuProdEsc'); cont.append(lienzo);
+    const suma = fuEl('div', 'fuProdSuma'); suma.id = 'fuProdSuma'; fila.append(cont, suma);
+    const texto = fuEl('div', 'fuProdTexto'); texto.id = 'fuProdTexto'; box.append(fila, texto);
+    FU.escNum = new D3.Escena(lienzo, cont, { maxAlto: 130, forzarFila: true, espaciado: 1.7, sinMesa: true });
+    FU.escNum.configurar(['normal', 'normal']);
+    FU.escNum.alAterrizar = () => { if (!document.hidden) Sonido.play('ficha'); };
+    FU.escNum.alTerminar = () => { FU.prodFase = 1; FU.animando = false; if (FU.e) repintarFU(); };
   }
-  if (FU.prodFase) dibujarProdFU(box, e, px, [t.num.a, t.num.b], true);
-  else if (!FU.prodTimer) dibujarProdFU(box, e, px, [1, 1], false);
+  const key = [e.ronda, t.de, t.num.a, t.num.b].join('-');
+  const ancho = MOV ? Math.min(W - 24, 340) : 380;
+  box.style.cssText = 'position:absolute;z-index:2;width:' + ancho + 'px;' + (MOV ? 'left:' + Math.round((W - ancho) / 2) + 'px;bottom:' + (dock.offsetHeight + 8) + 'px' : 'left:' + Math.round((left + right - ancho) / 2) + 'px;bottom:24px');
+  const esc = FU.escNum, vals = [t.num.a, t.num.b];
+  if (FU.prodKey !== key) {
+    FU.prodKey = key; esc.maxAlto = MOV ? 100 : 130; esc.ajustar(); esc.mostrar([1, 1]);
+    $('fuProdSuma').textContent = ''; $('fuProdTexto').textContent = '';
+    if (sinMovimiento()) { esc.mostrar(vals); esc.dibujar(); FU.prodFase = 1; FU.animando = false; }
+    else { FU.prodFase = 0; FU.animando = true; dock.dataset.llave = ''; pintarDockFU(e, MOV); esc.tirar([0, 1], vals, e.ronda * 31 + t.num.suma); }
+  }
+  if (FU.prodFase) { esc.mostrar(vals); textoProdFU(e); }
 }
-function dibujarProdFU(box, e, px, caras, final) {
-  const t = e.turno, yo = e.yo, mio = t.de === yo, de = fuNombreDe(e, t.de);
-  box.textContent = '';
-  const fila = fuEl('div', 'fuProdDados'); fila.append(dadoNumFU(caras[0], px), dadoNumFU(caras[1], px));
-  if (final) fila.append(fuEl('div', 'fuProdSuma', '= ' + t.num.suma));
-  box.append(fila);
-  if (!final) return;
-  const lin = fuEl('div', 'fuProdTexto');
+function textoProdFU(e) {
+  const t = e.turno, yo = e.yo, mio = t.de === yo, de = fuNombreDe(e, t.de), lin = $('fuProdTexto');
+  $('fuProdSuma').textContent = '= ' + t.num.suma;
+  lin.textContent = '';
   if (t.num.suma === 7) {
     const h = e.mapa.hexes[t.bandido];
     lin.append(fuEl('div', '', 'Salió 7: el bandido salta a ' + FU_NOMBRE_TIPO[h.tipo] + (h.num ? ' ' + h.num : '') + '. Ese terreno no produce.'));
@@ -395,7 +399,6 @@ function dibujarProdFU(box, e, px, caras, final) {
     const bloq = t.hexes.some(i => e.tab.bandido === i && e.mapa.hexes[i].vertices.some(v => { const o = e.tab.vert[v]; return o && o[0] === t.de; }));
     lin.append(fuEl('div', '', mio ? 'No ganas nada: ' + (bloq ? 'el bandido bloquea tu terreno.' : 'ninguno de tus edificios toca el ' + t.num.suma + '.') : de + ' no gana nada.'));
   }
-  box.append(lin);
 }
 
 // ---------- las acciones ----------

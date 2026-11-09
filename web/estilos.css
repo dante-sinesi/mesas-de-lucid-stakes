@@ -612,3 +612,16 @@ img, canvas { -webkit-user-drag: none; }
 .fuFila > canvas { flex: none; }
 .fuFila .fuCosto { flex: 1; justify-content: flex-start; flex-wrap: nowrap; gap: 3px; }
 .fuFila .medalla { position: static; margin-left: auto; flex: none; transform: scale(.8); transform-origin: right center; }
+
+.fuProdEsc { flex: none; }
+.fuProdEsc canvas { display: block; }
+.fuQue { display: flex; align-items: center; justify-content: center; gap: 10px; color: var(--oro); font-size: 17px; }
+.fuJugMov { display: grid !important; grid-template-columns: repeat(var(--cols), 1fr); gap: 4px; }
+.fuJugMov .dmJ { min-width: 0; padding: 2px 4px; gap: 0; }
+.fuJugMov .dmNombre { font-size: 13px; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.fuJugMov .dmTotal { font-size: 18px; }
+.fuJugDos { display: grid !important; grid-template-columns: 1fr 1fr; }
+.fuJug .dmJ { box-sizing: border-box; }
+.fuJugDos .dmJ { min-width: 0; padding: 2px 4px; }
+.fuJugDos .dmNombre { max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 13px; }
+.fuJug { max-height: calc(100% - 70px); overflow-y: auto; }

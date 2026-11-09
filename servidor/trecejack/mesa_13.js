@@ -471,6 +471,7 @@ class Mesa13 {
         if (t >= this.finManoEn) { this._siguienteTurno(); return true; }
         return false;
       }
+      if (!this.turno.bot && !this.turno.conectado && this.modo === 'multi') this.turno.reemplazado = true;
       if (this.turno.bot || (!this.turno.conectado && this.modo === 'multi')) {   // juega el bot (o el bot que reemplaza a quien se desconectó: guarda su lugar y sigue su partida)
         if (this.botEn === null) this.botEn = t + Bots.demora('decidir');
         if (t < this.botEn) return false;
@@ -489,6 +490,16 @@ class Mesa13 {
       }
     }
     return false;
+  }
+
+
+  // Quien volvió después de que un bot jugó por él retoma el control (y se apaga el aviso).
+  retomar(token) {
+    const j = this.jugador(token);
+    if (!j) return { ok: false, error: 'No estás en la sala' };
+    j.reemplazado = false;
+    this._cambio();
+    return { ok: true };
   }
 
   _cambio() { this.version++; }
@@ -534,7 +545,7 @@ class Mesa13 {
     const out = {
       juego: 'trecejack', sinTiempo: !!this.sinTiempo, pausa: this.pausa !== null, tiempos: { turno: this.tiempos.turno, resumen: this.tiempos.resumen, tienda: this.tiempos.tienda }, version: this.version, ahora: this.ahora(),
       modo: this.modo, fase: this.fase, limite: this.limite, mazoN: this.mazoN, mano: this.mano, mazos: this.mazos, objetivo: this.objetivo, metaPuntos: this.metaPuntos, manosPorMazo: R.MANOS_POR_MAZO, especiales: this.especiales, maxAsientos: this.maxAsientos, tiempoModo: this.tiempoModo, cadaTienda: this.cadaTienda,
-      turnoDe: this.turno ? this.turno.asiento : null, yo: yo ? yo.asiento : null, anfitrion: this.anfitrion() ? this.anfitrion().asiento : null,
+      turnoDe: this.turno ? this.turno.asiento : null, yo: yo ? yo.asiento : null, reemplazado: !!(yo && yo.reemplazado), anfitrion: this.anfitrion() ? this.anfitrion().asiento : null,
       jugadores: this.jugadores.map(j => ({ asiento: j.asiento, apodo: j.apodo, total: j.total, fichas: j.fichas, conectado: j.conectado, bot: !!j.bot, listo: j.listo, tardio: !!j.tardio, mejorMano: j.mejorMano, pasadas: j.pasadas, veintiunos: j.veintiunos,
         manosJugadas: j.manosJugadas, quedan: j.mazo.length, cartas: this._cartasDe(j), manos: j.manos.map(m => ({ cartas: m.cartas, total: m.total, pasado: m.pasado, puntos: m.puntos, patrones: m.patrones })), resumen: j.resumen })),
       turno, ultimaMano: this.ultimaMano, fin: this.fin, reacciones: this.reacciones.slice(), contadorReacciones: this.contadorReacciones,

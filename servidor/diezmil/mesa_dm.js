@@ -612,6 +612,7 @@ class MesaDM {
         if (this.finTurnoEn !== null && t >= this.finTurnoEn) { this._siguienteTurno(); return true; }
         return false;
       }
+      if (!this.turno.bot && !this.turno.conectado && this.modo === 'multi' && !this.tutorial) this.turno.reemplazado = true;
       if (this.turno.bot || (!this.turno.conectado && this.modo === 'multi' && !this.tutorial)) {   // juega el bot (o el bot que reemplaza a quien se desconectó: guarda su lugar y sigue su partida)
         if (this.botEn === null) this.botEn = t + Bots.demora(this.eleccion ? 'decidir' : this.t.estado);
         if (t < this.botEn) return false;
@@ -643,6 +644,16 @@ class MesaDM {
       if (t.estado === 'apartar') this.limite = this._plazo('apartar');
       else { t.aceptarQuemada(); this._terminarTurno(); }
     }
+  }
+
+
+  // Quien volvió después de que un bot jugó por él retoma el control (y se apaga el aviso).
+  retomar(token) {
+    const j = this.jugador(token);
+    if (!j) return { ok: false, error: 'No estás en la sala' };
+    j.reemplazado = false;
+    this._cambio();
+    return { ok: true };
   }
 
   _cambio() { this.version++; }
@@ -690,7 +701,7 @@ class MesaDM {
     }
     const out = {
       juego: 'diezmil', tutorial: !!this.tutorial, sinTiempo: !!(this.sinTiempo || this.tutorial), pausa: this.pausa !== null, tiempos: { tirar: this.tiempos.tirar, apartar: this.tiempos.apartar, decidir: this.tiempos.decidir, quemada: this.tiempos.quemada, eleccion: this.tiempos.eleccion }, version: this.version, ahora: this.ahora(), modo: this.modo, fase: this.fase, limite: this.limite, ronda: this.ronda, etapa: this.etapa, meta: this.meta, tomarDados: this.tomarDados, hostil: this.hostil, cupo: this.cupo, maxAsientos: this.maxAsientos, tiempoModo: this.tiempoModo, metaBase: this.metaBase, cadaTienda: this.cadaTienda,
-      ultimaVuelta: this.pendiente ? this.pendiente.asiento : null, turnoDe: this.turno ? this.turno.asiento : null, yo: yo ? yo.asiento : null, anfitrion: this.anfitrion() ? this.anfitrion().asiento : null, etapaTurnos: ETAPA_TURNOS,
+      ultimaVuelta: this.pendiente ? this.pendiente.asiento : null, turnoDe: this.turno ? this.turno.asiento : null, yo: yo ? yo.asiento : null, reemplazado: !!(yo && yo.reemplazado), anfitrion: this.anfitrion() ? this.anfitrion().asiento : null, etapaTurnos: ETAPA_TURNOS,
       jugadores: this.jugadores.map(j => ({ asiento: j.asiento, apodo: j.apodo, total: j.total, entrado: j.entrado, fichas: j.fichas, conectado: j.conectado, turnos: j.turnosPropios, turnosEtapa: j.turnosEtapa, quemadas: j.quemadas, nObjetos: j.objetos.length, mejorTurno: j.mejorTurno, tardio: !!j.tardio,
         dados: j.dados.map(d => ({ tipo: d.tipo, caras: d.caras.slice() })), listo: j.listo, bot: !!j.bot })),
       turno, ultimoTurno: this.ultimoTurno, fin: this.fin,

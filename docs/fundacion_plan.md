@@ -52,3 +52,5 @@ Partidas solo de bots, 100–150 por configuración: todas terminan. Rondas prom
 Calibrar costos y ritmo con partidas reales; compensar el orden de turno; zonas táctiles en móvil sin probar en un teléfono; sin reacciones, estadísticas ni dibujos de ayuda propios; diseño entre 1024 y 1100 px por revisar.
 
 - Producción (bj-102): al empezar cada turno se ve una ventana con los dos dados comunes que caen, la suma, y qué pasó (recursos ganados que quedan fijos, el bandido que salta o por qué no se gana nada), con botón «Continuar» (15 s). Los dados de recursos muestran las filas de edificios con su costo en dados y el %.
+
+- bj-103: los dos dados de puntos son 3D; la tirada de recursos dice qué se construye y apaga los recursos que faltan; al poner se ve qué edificio se coloca; jugadores en grilla compacta; cuando un bot jugó por alguien (desconexión o dos tiempos agotados en Fundación) sale el aviso «Un bot jugó por ti» con «Retomar el control» (acción `retomar`, los tres juegos); una sala pública que se quedó sin nadie sigue en la lista hasta que se borra (30 s).

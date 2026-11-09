@@ -300,6 +300,7 @@ async function bucle() {
       const destino = e.juego === 'fundacion' ? 'fu' : (e.juego === 'trecejack' ? 'tj' : 'dm');
       if (Pantalla.actual !== destino) { Pantalla.ir(destino); if (destino === 'dm') reajustarDM(); }
       if (e.juego === 'diezmil') pintarDM(e); else if (e.juego === 'fundacion') pintarFU(e); else pintarTJ(e);
+      avisoReemplazo(e);
     } catch (err) {
       if (err && err.name === 'AbortError') { await pausa(150); continue; }   // (consulta cortada a propósito: pasó de 30 s sin respuesta, o se volvió a la página)
       intento++;
@@ -392,6 +393,19 @@ async function accion(nombre, extra) {
     const r = await api('/api/accion', Object.assign({ sala, token, accion: nombre }, extra || {}));
     return r;
   } catch (err) { return { ok: false, error: 'No se pudo enviar, intenta de nuevo' }; }
+}
+
+// Si un bot jugó por ti (te desconectaste o no actuaste a tiempo), se avisa y se te devuelve el control.
+function avisoReemplazo(e) {
+  const m = $('retomarConf'); if (!m) return;
+  if (!e.reemplazado || e.fase === 'fin' || e.fase === 'espera') { if (!m.hidden && !m.dataset.espera) m.hidden = true; return; }
+  if (!m.hidden) return;
+  const caja = m.querySelector('.caja'); caja.textContent = '';
+  const h = document.createElement('h3'); h.textContent = 'Un bot jugó por ti';
+  const p = document.createElement('p'); p.className = 'nota'; p.textContent = 'No actuaste a tiempo o perdiste la conexión, así que un bot siguió tu partida para no frenar a los demás.';
+  const fila = document.createElement('div'); fila.className = 'botonesFin';
+  const b = nuevoBoton('Retomar el control', async () => { b.disabled = true; await accion('retomar'); m.hidden = true; }, 2); b.oro = true;
+  fila.append(b); caja.append(h, p, fila); m.hidden = false;
 }
 
 async function salirDeLaMesa() { await accion('salir'); volverAlInicio(''); }

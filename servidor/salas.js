@@ -19,9 +19,9 @@ const SALA_ABANDONADA_MS = 30 * 60 * 1000;   // una sala donde no queda nadie co
 const SALA_VACIA_MS = 30 * 1000;             // una sala que espera y se quedó sin nadie (por ejemplo una mesa libre del mapa que se tomó y se dejó) se borra a los 30 s
 const MAX_SALAS = 100;
 const MAX_CUERPO = 4096;
-const ACCIONES_DM = ['empezar', 'tirar', 'apartar', 'plantarse', 'voltear', 'apuesta', 'tomar', 'comprar', 'listo', 'usar', 'reaccion', 'nueva', 'salir', 'pausar', 'reanudar', 'tut', 'config', 'visibilidad', 'clave', 'botmas', 'botmenos'];   // las del diez mil
-const ACCIONES_TJ = ['empezar', 'pedir', 'plantarse', 'comprar', 'listo', 'reaccion', 'nueva', 'salir', 'pausar', 'reanudar', 'config', 'visibilidad', 'clave', 'botmas', 'botmenos'];   // las del 13 Jack
-const ACCIONES_FU = ['empezar', 'seguir', 'tirar', 'terminar', 'elegir', 'atras', 'colocar', 'pasar', 'nueva', 'salir', 'pausar', 'reanudar', 'config', 'visibilidad', 'clave', 'botmas', 'botmenos'];   // las de Fundación
+const ACCIONES_DM = ['empezar', 'tirar', 'apartar', 'plantarse', 'voltear', 'apuesta', 'tomar', 'comprar', 'listo', 'usar', 'reaccion', 'nueva', 'salir', 'retomar', 'pausar', 'reanudar', 'tut', 'config', 'visibilidad', 'clave', 'botmas', 'botmenos'];   // las del diez mil
+const ACCIONES_TJ = ['empezar', 'pedir', 'plantarse', 'comprar', 'listo', 'reaccion', 'nueva', 'salir', 'retomar', 'pausar', 'reanudar', 'config', 'visibilidad', 'clave', 'botmas', 'botmenos'];   // las del 13 Jack
+const ACCIONES_FU = ['empezar', 'seguir', 'tirar', 'terminar', 'elegir', 'atras', 'colocar', 'pasar', 'nueva', 'salir', 'retomar', 'pausar', 'reanudar', 'config', 'visibilidad', 'clave', 'botmas', 'botmenos'];   // las de Fundación
 const LETRAS = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789';   // (sin letras que se confunden: I, L, O, 0, 1)
 
 const TIPOS = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.css': 'text/css; charset=utf-8', '.woff2': 'font/woff2', '.png': 'image/png', '.svg': 'image/svg+xml', '.ico': 'image/x-icon', '.webmanifest': 'application/manifest+json' };
@@ -145,7 +145,7 @@ class Salas {
     const out = [];
     for (const [codigo, s] of this.salas) {
       const m = s.mesa;
-      if (!s.publica || m.clave || m.tutorial || m.modo !== 'multi' || m.fase !== 'espera' || !m.jugadores.some(j => j.conectado && !j.bot)) continue;
+      if (!s.publica || m.clave || m.tutorial || m.modo !== 'multi' || m.fase !== 'espera' || (!m.jugadores.some(j => j.conectado && !j.bot) && s.vacioDesde === null)) continue;   // (una sala que se quedó sin nadie sigue en la lista hasta que se borra, a los 30 s)
       const sillas = [];
       for (let i = 0; i < m.maxAsientos; i++) { const p = m.porAsiento(i); sillas.push(p ? (p.bot ? 'b' : 'h') : null); }
       out.push({ sala: codigo, juego: m.juego, asientos: m.maxAsientos, sillas, creada: s.creada, datos: m.juego === 'fundacion' ? { meta: m.meta } : (m.juego === 'trecejack' ? { objetivo: m.objetivo, mazos: m.mazos, metaPuntos: m.metaPuntos, especiales: m.especiales } : { meta: m.metaBase, cupo: m.cupo, hostil: m.hostil, tomarDados: m.tomarDados }) });
@@ -195,6 +195,7 @@ class Salas {
         case 'nueva': r = m.nuevaPartida(token); break;
         case 'pausar': r = m.pausar(token); break;
         case 'reanudar': r = m.reanudar(token); break;
+        case 'retomar': r = m.retomar(token); break;
         case 'salir': m.salir(token); s.vistos.delete(token); r = { ok: true }; break;
       }
       this._sucio = true;
@@ -212,6 +213,7 @@ class Salas {
         case 'nueva': r = m.nuevaPartida(token); break;
         case 'pausar': r = m.pausar(token); break;
         case 'reanudar': r = m.reanudar(token); break;
+        case 'retomar': r = m.retomar(token); break;
         case 'salir': m.salir(token); s.vistos.delete(token); r = { ok: true }; break;
       }
       this._sucio = true;
