@@ -192,9 +192,6 @@ img, canvas { -webkit-user-drag: none; }
 .ayDef .ayFlecha { font-size: 18px; }
 .ayPunto { width: 8px; height: 8px; } .ayPuntos { gap: 4px; }
 
-}
-
-
 /* ---------- la partida de diez mil ---------- */
 #dm.pantalla, #tj.pantalla { display: flex; flex-direction: column; gap: 8px; max-width: none; padding: calc(8px + env(safe-area-inset-top, 0px)) max(12px, env(safe-area-inset-left, 0px)) calc(8px + env(safe-area-inset-bottom, 0px)); overflow: hidden; }
 #dm .datosSala, #tj .datosSala { white-space: nowrap; }
@@ -477,7 +474,14 @@ img, canvas { -webkit-user-drag: none; }
 .entCaja { justify-content: center; align-items: stretch; text-align: center; gap: 8px; }
 .entCaja .titulo { font-size: clamp(34px, 9vh, 66px); font-weight: 700; color: var(--oro); margin: 0; text-shadow: 4px 4px 0 #000; line-height: 1.05; }
 .entCaja .titulo .tituloMenor { display: inline; font-size: 1em; margin: 0; opacity: 1; }
-.apodoCampo { align-self: center; width: min(260px, 100%); font: inherit; font-size: 20px; color: var(--oro); background: var(--fondo); border: 2px solid var(--oro); padding: 4px 10px; text-align: center; }
+.apodoBloque { align-self: center; width: min(260px, 100%); display: flex; flex-direction: column; gap: 4px; text-align: left; }
+.apodoEt { color: var(--suave); font-size: 15px; }
+.apodoCaja { position: relative; }
+.apodoCampo { width: 100%; font: inherit; font-size: 20px; color: var(--oro); background: #1a0f33; border: 2px dashed var(--oro); padding: 6px 38px 6px 10px; text-align: left; cursor: text; }
+.apodoCampo:focus { outline: none; border-style: solid; box-shadow: 0 0 0 2px #fff3c4; }
+.apodoCampo::placeholder { color: var(--suave); opacity: .8; }
+.apodoLapiz { position: absolute; right: 9px; top: 50%; transform: translateY(-50%); pointer-events: none; line-height: 0; }
+.apodoLapiz canvas { display: block; }
 .entCaja .error { margin: 0; text-align: center; font-size: 17px; }
 .puertas { display: flex; flex-direction: column; gap: 10px; flex: 1; min-height: 0; }
 .puerta { font: inherit; cursor: pointer; color: var(--texto); background: var(--panel); border: 2px solid var(--borde); flex: 1; min-height: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; }

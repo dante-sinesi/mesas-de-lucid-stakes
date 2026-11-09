@@ -240,6 +240,9 @@ Se decidió con maquetas (`prototipos/entrada_salas/`, con la estética real del
 - **La sala de espera:** un renglón por asiento (corona de cubitos en el anfitrión, ★ en ti, robot en los bots con «Quitar», robot atenuado en cada asiento libre con «Añadir bot»), reglas en etiquetas y visibilidad (pública o privada) y clave (sin / con, de 6 caracteres; con clave no es pública). Solo el **anfitrión** (el de menor asiento conectado; si se va, pasa al siguiente) edita las reglas (jugadores de 2 a 8, tiempo, y las de cada juego), suma o quita bots, cambia la visibilidad y empieza. Tras «Nueva partida» se vuelve a esta pantalla.
 - **Servidor** (`servidor/salas.js`): `publica` por sala; asientos de 2 a 8 (`asientos`); acciones del anfitrión mientras espera (`config`, `visibilidad`, `clave`, `botmas`, `botmenos`); `GET /api/salas` (sin apodos ni identificadores). Una sala que espera y se queda sin humanos conectados se borra a los **30 s** (una mesa libre que se tomó y se dejó, por ejemplo). Pruebas: `pruebas/test_sala_espera.js`.
 
+- **Apodo editable (bj-100):** el campo lleva la etiqueta «Tu apodo», borde punteado y un lápiz de cubitos, para que se entienda que se puede cambiar. El mapa ya no muestra «N mesas» (era información redundante).
+- **Lección (CSS):** una llave `}` sobrante en `estilos.css` hacía que el navegador descartara la regla siguiente (`#dm.pantalla, #tj.pantalla`, el diseño en columna de la partida) y los dados y las cartas quedaban chicos. Al editar el CSS conviene revisar que las llaves estén balanceadas.
+
 ## Principios de diseño
 
 Las reglas generales para pensar juegos nuevos (pocas decisiones con consecuencias, fácil de jugar y difícil de decidir, riesgo claro, competencia individual y motivos para volver) están en `docs/principios_diseno.md`.

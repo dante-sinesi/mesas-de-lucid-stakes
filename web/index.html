@@ -19,7 +19,7 @@
 <section id="entrada" class="pantalla pant ent">
   <div class="pcaja entCaja">
     <h1 class="titulo"><span class="tituloMenor">Lucid</span> Stakes</h1>
-    <input id="apodo" class="apodoCampo" maxlength="16" autocomplete="off" placeholder="Tu apodo">
+    <div class="apodoBloque"><label for="apodo" class="apodoEt">Tu apodo</label><div class="apodoCaja"><input id="apodo" class="apodoCampo" maxlength="16" autocomplete="off" placeholder="Escribe tu apodo"><span class="apodoLapiz" id="apodoLapiz" aria-hidden="true"></span></div></div>
     <p class="error" id="errorApodo"></p>
     <div class="continuar" id="continuar" hidden><span id="continuarTxt"></span><button id="bContinuar" class="boton">Volver</button></div>
     <div class="puertas">
@@ -39,7 +39,7 @@
 
 <section id="amigos" class="pantalla pant ent" hidden>
   <div class="pcaja">
-    <div class="cab"><button id="aVolver" type="button" class="boton sec">‹</button><div class="t">CON AMIGOS</div><span id="aCuenta" class="cabChip"></span></div>
+    <div class="cab"><button id="aVolver" type="button" class="boton sec">‹</button><div class="t">CON AMIGOS</div></div>
     <div class="pano" id="mapaPano"><canvas id="mapaFondo"></canvas><div class="mesasGrid" id="mapaMesas"></div></div>
     <div class="pie"><button id="aLista" type="button" class="boton sec">Lista</button><button id="aCrear" type="button" class="boton">Crear sala</button></div>
   </div>

@@ -17,6 +17,8 @@ const botonDe = (id, op) => V.boton($(id), op || { cubo: 1.7 });
 
 $('figAmigos').append(Mesas.persona(Mesas.COLORES[0], 6), Mesas.persona(Mesas.COLORES[1], 6));
 $('figSolo').append(Mesas.persona(Mesas.COLORES[3], 6));
+// El lápiz del campo del apodo (de cubitos): avisa que el nombre se puede cambiar.
+$('apodoLapiz').append(Mesas.pixeles(['.....##.', '....####', '...####.', '..####..', '.####...', '.###....', '#.#.....', '##......'], [0.66, 0.61, 0.79], 3));
 for (const [id, op] of [['bEntrar', { oro: true, cubo: 2 }], ['aVolver', { cubo: 1.5 }], ['lVolver', { cubo: 1.5 }], ['sVolver', { cubo: 1.5 }], ['cVolver', { cubo: 1.5 }], ['saVolver', { cubo: 1.5 }],
   ['aLista', { cubo: 2, minAncho: 120 }], ['aCrear', { oro: true, cubo: 2, minAncho: 170 }], ['lMapa', { cubo: 1.5 }], ['cCrear', { oro: true, cubo: 2.2, minAncho: 220 }], ['saInvitar', { cubo: 2 }], ['saEmpezar', { oro: true, cubo: 2 }]]) botonDe(id, op);
 
@@ -229,7 +231,6 @@ function pintarMapa() {
   const llave = JSON.stringify([Mapa.slots.map(s => [s.sala, s.juego, s.sillas, s.fantasma]), Mapa.sel && Mapa.sel.sala, esChico()]);
   if (llave === Mapa.llave) return;
   Mapa.llave = llave;
-  $('aCuenta').textContent = ''; $('aCuenta').appendChild(V.medalla(Mapa.slots.length + ' mesas', 'media'));
   const caja = $('mapaMesas'); caja.textContent = '';
   const cols = esChico() ? 2 : 4;
   caja.style.gridTemplateColumns = 'repeat(' + cols + ', 1fr)'; caja.style.gridTemplateRows = 'repeat(' + Math.ceil(Mapa.slots.length / cols) + ', 1fr)';
