@@ -192,7 +192,10 @@ class MesaFundacion {
     this.limite = this.ahora() + (this.tiempos[clave] || this.tiempos.dados);
     this.botEn = null;
   }
-  _juegaElBot(j) { return j.bot || j.expulsado || (!j.conectado && this.modo === 'multi'); }
+  _juegaElBot(j) { return j.bot || j.expulsado || (!j.conectado && this.modo === 'multi') || (j.turnoBot !== undefined && j.turnoBot === this._clave()); }
+  _clave() { return this.fase === FASE.INICIAL && this.inicial ? 'i' + this.inicial.idx : (this.t ? 't' + this.ronda + '-' + this.t.asiento : null); }
+  // Cuánto espera un bot entre jugadas: lo justo para que los demás vean los dados, el resultado y lo que se construye.
+  _demoraBot() { if (this.fase === FASE.INICIAL) return 1800; return { produccion: 5500, dados: 2800, construir: 2200, colocar: 2200 }[this._sub()] || 2000; }
 
   avanzar() {
     if (this.pausa !== null) return;
@@ -222,7 +225,7 @@ class MesaFundacion {
     if (!j) return false;
     if (this._juegaElBot(j)) {   // juega el bot (o el que reemplaza a quien se fue o no actuó: guarda su lugar)
       if (!j.bot && !j.reemplazado && (j.expulsado || !j.conectado)) { j.reemplazado = true; this._cambio(); }
-      if (this.botEn === null) this.botEn = t + Bots.demora(this._sub() === 'dados' ? 'tirar' : 'decidir');
+      if (this.botEn === null) this.botEn = t + this._demoraBot();
       if (t < this.botEn) return false;
       this.botEn = null;
       this._jugadaBot(j);
@@ -236,11 +239,7 @@ class MesaFundacion {
   _agotado(j) {
     j.automaticos++; j.fallos++;
     if (j.fallos >= SEGUIDOS_PARA_BOT) { j.expulsado = true; j.reemplazado = true; }
-    const turno = this.t, idx = this.inicial ? this.inicial.idx : -1, fase = this.fase;
-    for (let i = 0; i < 80; i++) {
-      this._jugadaBot(j);
-      if (this.fase !== fase || this.finTurnoEn !== null || this.t !== turno || (this.inicial && this.inicial.idx !== idx)) break;
-    }
+    j.turnoBot = this._clave();   // (un bot termina este turno a paso visible, para que todos vean qué pasó)
   }
   _manual(j) { j.fallos = 0; j.expulsado = false; }
   // Quien volvió después de que un bot jugó por él retoma el control (y se apaga el aviso).
@@ -322,6 +321,7 @@ class MesaFundacion {
     const t = this.t;
     if (!R.lugares(this.mapa, this.tab, j.asiento, t.edificio).includes(lugar)) return { ok: false, error: 'Ahí no se puede' };
     t.gastados = R.pagar(R.COSTOS[t.edificio], t.dados).usados;
+    t.lugar = lugar;   // (dónde se construyó: los demás lo ven resaltado)
     R.poner(this.tab, t.edificio, j.asiento, lugar); this._evento(j.asiento, t.edificio, lugar); j.construidos++;
     this._finTurno('construyo');
     return { ok: true };
@@ -337,7 +337,7 @@ class MesaFundacion {
       if (this.modo !== 'multi') { this._terminarPartida('meta'); return; }
       if (!this.finDeVuelta) { this.finDeVuelta = true; this.llegoMeta = llego.asiento; }
     }
-    this.finTurnoEn = this.ahora() + this.tiempos.fin; this.limite = null; this.botEn = null;
+    this.finTurnoEn = this.ahora() + (this.modo !== 'multi' ? this.tiempos.fin : (j && this._juegaElBot(j) ? 3600 : 2600)); this.limite = null; this.botEn = null;   // (en las salas con otros, el resultado del turno se queda a la vista un rato)
   }
   _siguienteTurno() {
     this.finTurnoEn = null;
@@ -462,7 +462,7 @@ class MesaFundacion {
     let turno = null;
     if (this.fase === FASE.TURNO && this.t) {
       const t = this.t;
-      turno = { de: t.asiento, sub: t.sub, num: t.num, gana: t.gana, hexes: t.hexes, bandido: t.bandido, fijos: t.fijos, dados: t.dados, tirada: t.tirada, tiradas: R.TIRADAS, edificio: t.edificio, posibles: t.posibles, terminado: t.terminado, motivo: t.motivo, gastados: t.gastados || [] };
+      turno = { de: t.asiento, sub: t.sub, num: t.num, gana: t.gana, hexes: t.hexes, bandido: t.bandido, fijos: t.fijos, dados: t.dados, tirada: t.tirada, tiradas: R.TIRADAS, edificio: t.edificio, posibles: t.posibles, terminado: t.terminado, motivo: t.motivo, lugar: t.lugar === undefined ? null : t.lugar, gastados: t.gastados || [] };
       if (activo && t.sub === 'dados') {
         const objetivos = R.EDIFICIOS.filter(e => R.lugares(this.mapa, this.tab, yo.asiento, e).length > 0);
         turno.prob = R.tabla(objetivos, t.dados.slice(0, t.fijos), t.dados.slice(t.fijos), R.TIRADAS - t.tirada);

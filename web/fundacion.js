@@ -88,6 +88,7 @@ function fuPunto(g, p, R, sel) {
 function fuAroZona(g, zn) {
   const R = Math.round(zn.r);
   for (let a = 0; a < 360; a += 3) { if ((a / 3) % 2) continue; FU_ARTE.fr(g, Math.round(zn.x + Math.cos(a * Math.PI / 180) * R) - 1, Math.round(zn.y + Math.sin(a * Math.PI / 180) * R) - 1, 2, 2, [0.97, 0.78, 0.22]); }
+  if (zn.sinNum) return;
   const l = V.celdas('x' + zn.n), w = l.ancho + 4;
   FU_ARTE.fr(g, Math.round(zn.x - w / 2), Math.round(zn.y - 6), w, 12, [0.11, 0.07, 0.21]); FU_ARTE.fr(g, Math.round(zn.x - w / 2), Math.round(zn.y - 6), w, 1, [0.97, 0.78, 0.22]); FU_ARTE.fr(g, Math.round(zn.x - w / 2), Math.round(zn.y + 5), w, 1, [0.97, 0.78, 0.22]);
   l.celdas.forEach(p => FU_ARTE.fr(g, Math.round(zn.x - l.ancho / 2) + p[0], Math.round(zn.y - 5.5) + p[1] + 1, 1, 1, [0.97, 0.78, 0.22]));
@@ -107,6 +108,14 @@ function candidatosFU(e, geo) {
     return { id, x: p.x, y: p.y, tipo: sub };
   });
 }
+
+function puntoLugarFU(e, geo, ed, id) {   // dónde está en el mapa un lugar de construcción
+  const mapa = e.mapa;
+  if (ed === 'caballero') { const q = geo.hx(mapa.hexes[id]); return { x: q.x + 10, y: q.y + 2 }; }
+  if (ed === 'camino') { const ar = mapa.aristas[id], a = geo.v(mapa.vertices[ar.a]), b = geo.v(mapa.vertices[ar.b]); return { x: (a.x + b.x) / 2, y: (a.y + b.y) / 2 }; }
+  return geo.v(mapa.vertices[id]);
+}
+const lugarNuevoFU = t => !!(t && t.terminado && t.motivo === 'construyo' && t.lugar !== null && t.lugar !== undefined && t.edificio);
 function zonasFU(cands) {   // se agrupan en zonas para acercar la cámara a una antes de elegir el punto exacto
   const celdas = new Map();
   cands.forEach(c => { const k = Math.floor(c.x / 46) + ',' + Math.floor(c.y / 40); if (!celdas.has(k)) celdas.set(k, []); celdas.get(k).push(c); });
@@ -183,6 +192,10 @@ function repintarFU() {
     const pts = t.hexes.map(i => geo.hx(e.mapa.hexes[i])), zp = fuFitZ(pts, aw - 20, ah - 20, 20, MOV ? [3, 2] : [5, 4]);
     if (zp > zLleno) { z = zp; foco = fuCentro(pts); }
     FU.zonas = [];
+  } else if (lugarNuevoFU(t)) {
+    const pt = puntoLugarFU(e, geo, t.edificio, t.lugar), zp = fuFitZ([pt], aw - 20, ah - 20, 40, MOV ? [3] : [4, 3]);
+    if (zp > zLleno) { z = zp; foco = pt; }
+    FU.zonas = [];
   } else FU.zonas = [];
   const cx = left + aw / 2, cy = top + ah / 2;
   const kMundo = e.version + '|' + e.mapa.semilla; if (FU.kMundo !== kMundo || !FU.mundo) { FU.kMundo = kMundo; FU.mundo = dibujarMundo(e, geo); }
@@ -223,6 +236,8 @@ function superponerFU(g, e, geo, colocando, z) {
         else if (sub === 'camino') { const ar = e.mapa.aristas[s.id]; lineaCaminoFU(g, geo.v(e.mapa.vertices[ar.a]), geo.v(e.mapa.vertices[ar.b]), col); }
       }
     }
+  } else if (e.fase === 'turno' && lugarNuevoFU(t)) {
+    const pt = puntoLugarFU(e, geo, t.edificio, t.lugar); fuAroZona(g, { x: pt.x, y: pt.y, r: 9, n: 0, sinNum: true });
   } else if (e.fase === 'turno' && t && (t.sub === 'dados' || t.sub === 'construir')) fuOscurecer(g, t.sub === 'dados' ? 0.5 : 0.55);
 }
 
@@ -325,7 +340,12 @@ function pintarDockFU(e, MOV) {
   }
   if (e.fase !== 'turno' || !t) { col(info(e.fase === 'fin' ? 'Fin de la partida' : '')); return; }
   const de = fuNombreDe(e, t.de);
-  if (t.terminado) { col(info(de + (t.motivo === 'construyo' ? ' construyó' : ' pasó el turno')), reloj()); return; }
+  if (t.terminado) {
+    const art = { camino: 'un camino', pueblo: 'un pueblo', ciudad: 'una ciudad', caballero: 'un caballero' }, q = fuEl('div', 'fuQue');
+    if (t.motivo === 'construyo' && t.edificio) q.append(iconoEdificio(t.edificio, fuColor(t.de), t.edificio === 'camino' ? 3 : 4));
+    q.append(fuEl('div', '', t.motivo === 'construyo' ? (t.de === yo ? 'Construiste ' : de + ' construyó ') + (art[t.edificio] || 'algo') : (t.de === yo ? 'Pasaste el turno' : de + ' pasó el turno')));
+    col(q, reloj()); return;
+  }
   if (t.sub === 'produccion') {
     col(info(miTurno ? 'Mira qué pasó y continúa' : de + ' mira la tirada'), reloj(), miTurno ? acciones(botonFU('Continuar', () => hacerFU('seguir'), true, !FU.animando)) : null);
     return;
