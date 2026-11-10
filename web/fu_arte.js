@@ -103,13 +103,8 @@ const FU_ARTE = (() => {
   function ciudadF() { const Wd = 15, Hh = 13, g = grid(Wd, Hh), set = (x, y, c) => { if (x >= 0 && x < Wd && y >= 0 && y < Hh) g[y][x] = c; }; const techo = (cx, y0, m) => { for (let k = 0; k <= m; k++) for (let x = cx - k; x <= cx + k; x++) set(x, y0 + k, 'r'); }; const muro = (a, b, c, d) => { for (let y = c; y <= d; y++) for (let x = a; x <= b; x++) set(x, y, 'w'); }; techo(7, 0, 2); muro(5, 9, 3, 12); set(6, 5, 'v'); set(8, 5, 'v'); set(6, 8, 'v'); set(8, 8, 'v'); set(7, 11, 'd'); set(7, 12, 'd'); techo(2, 5, 2); muro(0, 4, 8, 12); set(1, 10, 'v'); set(3, 10, 'v'); set(2, 12, 'd'); techo(12, 5, 2); muro(10, 14, 8, 12); set(11, 10, 'v'); set(13, 10, 'v'); set(12, 12, 'd'); return g.map(r => r.join('')); }
   const palCasa = c => ({ r: c, w: [0.93, 0.88, 0.74], v: [0.55, 0.75, 0.95], d: [0.30, 0.18, 0.10] });
   function deFilas(filas, pal) { const c = cvs(filas[0].length, filas.length), g = c.getContext('2d'); filas.forEach((f, y) => [...f].forEach((ch, x) => { if (ch !== '.' && pal[ch]) fr(g, x, y, 1, 1, pal[ch]); })); return c; }
-  // Contorno doble: un aro oscuro pegado a la pieza y otro claro por fuera, así se lee sobre hexágonos claros y oscuros.
-  function conBorde(src) {
-    const w = src.width + 4, h = src.height + 4, c = cvs(w, h), g = c.getContext('2d');
-    const sil = (gr, col) => { const t = cvs(w, h), tg = t.getContext('2d'); for (let dy = -gr; dy <= gr; dy++) for (let dx = -gr; dx <= gr; dx++) tg.drawImage(src, 2 + dx, 2 + dy); tg.globalCompositeOperation = 'source-in'; tg.fillStyle = col; tg.fillRect(0, 0, w, h); return t; };
-    g.drawImage(sil(2, 'rgb(252,248,236)'), 0, 0); g.drawImage(sil(1, 'rgb(14,8,32)'), 0, 0); g.drawImage(src, 2, 2);
-    return c;
-  }
+  // (las piezas llevan 2 píxeles de margen transparente: el diseño nuevo con contorno propio se elige aparte)
+  function conBorde(src) { const c = cvs(src.width + 4, src.height + 4); c.getContext('2d').drawImage(src, 2, 2); return c; }
   const cachePz = {};
   const memo = (k, f) => cachePz[k] || (cachePz[k] = f());
   const casa = c => memo('casa' + c, () => conBorde(deFilas(casaF(), palCasa(c))));
