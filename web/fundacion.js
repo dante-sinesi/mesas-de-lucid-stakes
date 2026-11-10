@@ -157,9 +157,10 @@ function repintarFU() {
     top = jug.offsetTop + jug.offsetHeight + 6; bottom = H - dock.offsetHeight - 4; left = 0; right = W;
   } else {
     const dockW = angosto ? 270 : 310;
-    jug.style.cssText = 'position:absolute;top:50px;left:16px;right:' + (dockW + 32) + 'px;z-index:3';
+    const simetrico = W - 2 * (dockW + 32) >= 520, margen = simetrico ? dockW + 32 : 16;   // (el mapa y los jugadores se centran en la pantalla; el panel queda a la derecha sobre su margen)
+    jug.style.cssText = 'position:absolute;top:50px;left:' + margen + 'px;right:' + (dockW + 32) + 'px;z-index:3';
     dock.style.cssText = 'position:absolute;right:16px;top:56px;width:' + dockW + 'px;z-index:3;background:rgba(18,10,34,.92);border:3px solid #3a2766;padding:10px 12px 8px;display:flex;flex-direction:column;align-items:center;gap:6px;box-sizing:border-box';
-    top = jug.offsetTop + jug.offsetHeight + 8; bottom = H - 10; left = 16; right = W - dockW - 28;
+    top = jug.offsetTop + jug.offsetHeight + 8; bottom = H - 10; left = margen; right = W - dockW - 28;
   }
   // --- los dados en 3D, sobre el tablero ---
   const verDados = !!(t && t.sub === 'dados' && e.fase === 'turno');
