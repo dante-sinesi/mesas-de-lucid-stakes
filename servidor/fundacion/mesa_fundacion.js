@@ -465,6 +465,7 @@ class MesaFundacion {
       turno = { de: t.asiento, sub: t.sub, num: t.num, gana: t.gana, hexes: t.hexes, bandido: t.bandido, fijos: t.fijos, dados: t.dados, tirada: t.tirada, tiradas: R.TIRADAS, edificio: t.edificio, posibles: t.posibles, terminado: t.terminado, motivo: t.motivo, lugar: t.lugar === undefined ? null : t.lugar, gastados: t.gastados || [] };
       if (activo && t.sub === 'dados') {
         const objetivos = R.EDIFICIOS.filter(e => R.lugares(this.mapa, this.tab, yo.asiento, e).length > 0);
+        turno.motivos = {}; R.EDIFICIOS.filter(e => !objetivos.includes(e)).forEach(e => { turno.motivos[e] = R.motivoSinLugar(this.mapa, this.tab, yo.asiento, e); });
         turno.prob = R.tabla(objetivos, t.dados.slice(0, t.fijos), t.dados.slice(t.fijos), R.TIRADAS - t.tirada);
         turno.alcanza = R.posibles(this.mapa, this.tab, yo.asiento, t.dados);
       }

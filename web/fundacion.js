@@ -395,10 +395,13 @@ function pintarDockFU(e, MOV) {
     const kA = t.tirada + '|' + FU.objetivo + '|' + e.ronda;
     if (FU.autoKey !== kA && !FU.animando) { FU.autoKey = kA; FU.keep = autoGuardarFU(FU.objetivo, t); marcarDadosFU(); }
     const chips = fuEl('div', 'fuFilas'), ic = MOV ? 20 : 24;
-    eds.forEach(ed => {
-      const c = fuEl('div', 'fuFila' + (ed === FU.objetivo ? ' on' : '')); c.append(iconoEdificio(ed, fuColor(yo), 2));
-      const f = fuEl('div', 'fuCosto'), cub = cubiertosFU(ed, t.dados); FU_COSTOS[ed].forEach((k, i) => { const im = iconoRecFU(k, ic); if (!cub[i]) im.style.opacity = '.3'; f.append(im); });
-      c.append(f); ponerMedalla(c, meds[ed]); c.onclick = () => { FU.objetivo = ed; FU.autoKey = null; Sonido.play('clic'); repintarFU(); }; chips.append(c);
+    ['camino', 'pueblo', 'ciudad', 'caballero'].forEach(ed => {
+      const sirve = eds.includes(ed), c = fuEl('div', 'fuFila' + (ed === FU.objetivo && sirve ? ' on' : '') + (sirve ? '' : ' off')); c.append(iconoEdificio(ed, fuColor(yo), 2));
+      const f = fuEl('div', 'fuCosto'), cub = cubiertosFU(ed, t.dados); FU_COSTOS[ed].forEach((k, i) => { const im = iconoRecFU(k, ic); if (!sirve || !cub[i]) im.style.opacity = '.3'; f.append(im); });
+      c.append(f);
+      if (sirve) { ponerMedalla(c, meds[ed]); c.onclick = () => { FU.objetivo = ed; FU.autoKey = null; Sonido.play('clic'); repintarFU(); }; }
+      else c.append(fuEl('div', 'fuMotivo', (t.motivos && t.motivos[ed]) || 'No se puede construir ahora'));
+      chips.append(c);
     });
     const quedan = t.tiradas - t.tirada;
     const tirar = botonFU('Tirar ' + (6 - t.fijos - FU.keep.size), () => tirarFU(), true, quedan > 0 && !FU.animando);

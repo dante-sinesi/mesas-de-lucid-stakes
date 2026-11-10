@@ -629,3 +629,8 @@ img, canvas { -webkit-user-drag: none; }
 .fuFilaJ { flex-wrap: nowrap !important; display: flex !important; }
 .fuFilaJ .dmJ { flex: 1 1 0; min-width: 0; max-width: 170px; }
 .fuFilaJ .dmNombre { max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+.fuFila { flex-wrap: wrap; }
+.fuFila.off { cursor: default; border-color: #2c1f4d; background: rgba(255,255,255,.02); }
+.fuFila.off > canvas:first-child { opacity: .45; }
+.fuMotivo { flex-basis: 100%; font-size: 12px; line-height: 1.25; color: var(--suave); padding: 0 0 2px; }

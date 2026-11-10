@@ -134,6 +134,14 @@ function pagar(costo, dados) {
 }
 const alcanza = (costo, dados) => pagar(costo, dados).ok;
 // Los edificios que se pueden construir ahora: alcanzan los dados, quedan piezas y hay dónde ponerlos (la ciudad pide un pueblo tuyo).
+// Por qué no hay dónde construir un edificio (para decírselo al jugador).
+function motivoSinLugar(mapa, tab, p, edificio) {
+  const q = quedan(tab, p);
+  if (edificio === 'camino') return q.camino <= 0 ? 'Ya pusiste tus ' + PIEZAS.camino + ' caminos' : 'No hay lugar junto a tus caminos y pueblos';
+  if (edificio === 'pueblo') return q.pueblo <= 0 ? 'Ya usaste tus ' + PIEZAS.pueblo + ' pueblos: mejora uno a ciudad' : 'Ningún camino tuyo llega a una esquina libre a dos pasos de otros pueblos';
+  if (edificio === 'ciudad') return q.ciudad <= 0 ? 'Ya tienes tus ' + PIEZAS.ciudad + ' ciudades' : 'Primero necesitas un pueblo';
+  return q.caballero <= 0 ? 'Ya pusiste tus ' + PIEZAS.caballero + ' caballeros' : 'Necesitas un edificio en un terreno donde aún no tengas caballero';
+}
 function posibles(mapa, tab, p, dados) { return EDIFICIOS.filter(e => alcanza(COSTOS[e], dados) && lugares(mapa, tab, p, e).length > 0); }
 
 // ---------- la probabilidad de lograr un edificio ----------
@@ -239,7 +247,7 @@ function puntos(tab, p, car) {
 }
 
 module.exports = {
-  RECURSOS, CARAS, ORO, COSTOS, EDIFICIOS, PIEZAS, DADOS, TIRADAS, TOPE_FIJOS, METAS, CAMINO_MIN, EJERCITO_MIN, BONO, RECURSO_DE,
+  motivoSinLugar, RECURSOS, CARAS, ORO, COSTOS, EDIFICIOS, PIEZAS, DADOS, TIRADAS, TOPE_FIJOS, METAS, CAMINO_MIN, EJERCITO_MIN, BONO, RECURSO_DE,
   rng, mezclar, crearMapa, nuevoTablero, piezas, quedan, lugaresPueblo, lugaresCamino, lugaresCiudad, lugaresCaballero, lugares, poner, ordenInicial,
   pagar, alcanza, posibles, probabilidad, tabla, tirarNumeros, produccion, moverBandido, hexesDe, carreras, puntos,
 };

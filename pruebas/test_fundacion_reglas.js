@@ -129,5 +129,12 @@ check(R.ordenInicial(3).join() === '0,1,2,2,1,0', 'la colocación inicial va en 
   R.poner(t, 'caballero', 0, 2); car = R.carreras(t, 3, car); check(car.ejercito === 0, 'con 3 caballeros se lo quitan');
 }
 
+{   // el motivo de lo que no se puede construir
+  const m = R.crearMapa(7, 3), t = R.nuevoTablero(m); const usados = [];
+  for (const v of m.vertices) { if (usados.length >= 5) break; if (!usados.some(u => m.vertices[u].vecinos.includes(v.id))) { usados.push(v.id); R.poner(t, 'pueblo', 0, v.id); } }
+  check(R.lugares(m, t, 0, 'pueblo').length === 0 && /5 pueblos/.test(R.motivoSinLugar(m, t, 0, 'pueblo')), 'con los 5 pueblos puestos se explica por qué no hay otro');
+  check(/pueblo/.test(R.motivoSinLugar(m, R.nuevoTablero(m), 0, 'ciudad')), 'sin pueblos, la ciudad pide primero un pueblo');
+}
+
 console.log('pruebas de las reglas de Fundación terminadas, fallos:', fallos);
 process.exit(fallos ? 1 : 0);
