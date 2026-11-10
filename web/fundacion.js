@@ -41,7 +41,7 @@ function abrirAyudaFU() {
   const m = $('ayuda'), caja = m.querySelector('.caja'); caja.textContent = '';
   caja.append(fuEl('h3', '', 'Cómo se juega'));
   [['1', 'Salen dos dados de número: los hexágonos con esa suma te dan recursos si tienes un edificio al lado. Con 7, el bandido salta y bloquea un hexágono.'],
-   ['2', 'Guardas los dados que sirven y vuelves a tirar el resto (3 tiradas). El oro vale: 2 oros son un recurso.'],
+   ['2', 'Guardas los dados que sirven y vuelves a tirar el resto (3 tiradas). El oro vale: 2 oros son un recurso. Los dados marcados que no gastes (hasta 2) se guardan para tu próximo turno.'],
    ['3', 'Con los dados construyes un camino, un pueblo, una ciudad o un caballero. El caballero protege tu hexágono del bandido.'],
    ['4', 'Gana quien más puntos tenga al llegar a la meta (se juega la vuelta completa). Pueblo 1, ciudad 2, camino más largo y ejército 2 cada uno.']].forEach(([n, t]) => {
     const f = fuEl('div', 'fuAyudaFila'); f.append(fuEl('b', '', n), fuEl('span', '', t)); caja.append(f);
@@ -164,6 +164,7 @@ function repintarFU() {
   if (MOV) {
     jug.style.cssText = 'position:absolute;top:50px;left:8px;right:8px;width:auto;z-index:3';
     dock.style.cssText = 'position:absolute;left:0;right:0;bottom:0;z-index:3;background:#170e2c;border:3px solid #3a2766;padding:10px 12px 8px;display:flex;flex-direction:column;align-items:center;gap:6px;box-sizing:border-box';
+    jug.style.setProperty('--cols', Math.min(e.jugadores.length, 4));   // (la propiedad se pierde al reescribir el estilo de arriba)
     top = jug.offsetTop + jug.offsetHeight + 6; bottom = H - dock.offsetHeight - 4; left = 0; right = W;
   } else {
     const dockW = angosto ? 270 : 310;
@@ -178,11 +179,10 @@ function repintarFU() {
   const verDados = !!(t && t.sub === 'dados' && e.fase === 'turno');
   dados.hidden = !verDados;
   if (verDados) {
-    const ancho = MOV ? Math.min(W - 24, 360) : 640, alto = MOV ? 250 : 300;
+    const ancho = MOV ? Math.min(W - 24, 360) : 640, alto = MOV ? 200 : 300;
     dados.style.cssText = 'position:absolute;z-index:2;width:' + ancho + 'px;' + (MOV ? 'left:' + Math.round((W - ancho) / 2) + 'px;bottom:' + (dock.offsetHeight + 2) + 'px' : 'left:' + Math.round((left + right - ancho) / 2) + 'px;bottom:8px');
     const kAj = ancho + 'x' + alto + 'x' + W; if (FU.kAjuste !== kAj) { FU.kAjuste = kAj; FU.escena.maxAlto = alto; FU.escena.ajustar(); }
     dadosFU(e);
-    bottom = MOV ? Math.min(bottom, H - dock.offsetHeight - 120) : bottom;
   }
   prodFU(e, MOV, left, right, dock, W);
   // --- el mapa con su cámara ---
@@ -191,8 +191,8 @@ function repintarFU() {
   const cands = candidatosFU(e, geo); FU.candidatos = cands;
   const colocando = cands.length > 0;
   let z, foco, zonas = [];
-  const zsLleno = MOV ? [3, 2, 1] : [6, 5, 4, 3, 2, 1];
-  const zLleno = zsLleno.find(zz => WORLD.w * zz <= aw && WORLD.h * zz <= ah) || 1;
+  const dpr = Math.min(window.devicePixelRatio || 1, 3), ajuste = Math.min(aw / WORLD.w, ah / WORLD.h) * 0.98;
+  const zLleno = Math.max(1, Math.floor(Math.min(MOV ? 4 : 6, ajuste) * dpr)) / dpr;   // (cada píxel del arte ocupa un número entero de píxeles de la pantalla)
   z = zLleno; foco = { x: geo.WW / 2, y: geo.WH / 2 };
   if (colocando) {
     const zs = MOV ? [4, 3, 2] : [5, 4, 3, 2];
@@ -241,14 +241,14 @@ function pasoCamFU(ahora) {
 }
 function dibujarCamFU() {
   const pl = FU.pl, v = FU.vista; if (!pl || !v || !FU.mundo) return;
-  const c = $('fuMapa'), W = pl.W, H = pl.H;
-  if (c.width !== W) c.width = W; if (c.height !== H) c.height = H;
+  const c = $('fuMapa'), W = pl.W, H = pl.H, dpr = Math.min(window.devicePixelRatio || 1, 3);
+  if (c.width !== Math.round(W * dpr)) c.width = Math.round(W * dpr); if (c.height !== Math.round(H * dpr)) c.height = Math.round(H * dpr);
   c.style.width = W + 'px'; c.style.height = H + 'px';
   const g = c.getContext('2d'); g.setTransform(1, 0, 0, 1, 0, 0); g.imageSmoothingEnabled = false;
-  g.fillStyle = 'rgb(15,54,79)'; g.fillRect(0, 0, W, H);
-  const z = v.z, quieto = !FU.anim;
-  let ox = v.fx - v.cx / z, oy = v.fy - v.cy / z; if (quieto) { ox = Math.round(ox); oy = Math.round(oy); }   // (en reposo cae justo en píxeles enteros: nítido)
-  g.setTransform(z, 0, 0, z, -ox * z, -oy * z);
+  g.fillStyle = 'rgb(15,54,79)'; g.fillRect(0, 0, c.width, c.height);
+  const quieto = !FU.anim, z = quieto ? Math.max(1, Math.round(v.z * dpr)) / dpr : v.z, S = z * dpr;
+  let ox = v.fx - v.cx / z, oy = v.fy - v.cy / z; if (quieto) { ox = Math.round(ox * S) / S; oy = Math.round(oy * S) / S; }   // (en reposo cae justo en píxeles enteros: nítido)
+  g.setTransform(S, 0, 0, S, -ox * S, -oy * S);
   g.drawImage(FU.mundo, 0, 0);
   superponerFU(g, pl.e, pl.geo, pl.colocando, z);
   g.setTransform(1, 0, 0, 1, 0, 0);
@@ -304,7 +304,7 @@ function pintarJugadoresFU(e, MOV) {
   const caja = $('fuJugadores'), llave = JSON.stringify([e.turnoDe, e.yo, MOV, e.carreras, e.jugadores.map(j => [j.asiento, j.apodo, j.puntos, j.bot, j.conectado, j.expulsado, j.reserva])]);
   if (caja.dataset.llave === llave) return;
   caja.dataset.llave = llave; caja.textContent = '';
-  const n = e.jugadores.length; caja.className = 'dmJugadores' + (n > 3 ? ' compacto' : '') + (MOV ? '' : ' fuFilaJ');
+  const n = e.jugadores.length; caja.className = 'dmJugadores' + (MOV ? ' fuJugMov' : (n > 3 ? ' compacto' : '') + ' fuFilaJ'); caja.style.setProperty('--cols', Math.min(n, 4));
   e.jugadores.forEach(j => {
     const d = fuEl('div', 'dmJ' + (j.asiento === e.turnoDe ? ' turno' : '') + (j.asiento === e.yo ? ' soy' : '') + (j.conectado || j.bot ? '' : ' off'));
     d.style.borderTop = '5px solid ' + fuRgb(fuColor(j.asiento));
@@ -377,7 +377,7 @@ function pintarDockFU(e, MOV) {
     const ini = e.inicial;
     if (ini.de !== yo) { col(info(fuNombreDe(e, ini.de) + ' pone su ' + (ini.sub === 'pueblo' ? 'pueblo' : 'camino')), reloj()); return; }
     const quei = fuEl('div', 'fuQue'); quei.append(iconoEdificio(ini.sub === 'pueblo' ? 'pueblo' : 'camino', fuColor(yo), ini.sub === 'pueblo' ? 4 : 3), fuEl('div', '', 'Pon tu ' + (ini.sub === 'pueblo' ? 'pueblo' : 'camino') + ' (' + (Math.floor(ini.idx / e.jugadores.length) + 1) + ' de 2)'));
-    col(quei, info(FU.sel === null ? 'Toca un punto del mapa' : 'Confirma el lugar'), reloj(), acciones(botonFU('Confirmar', () => confirmarLugarFU(), true, FU.sel !== null)));
+    col(quei, info(FU.sel === null ? 'Toca un punto del mapa' : 'Confirma el lugar'), reloj(), acciones(...[FU.zona !== null ? botonFU('Atrás', () => { FU.zona = null; FU.sel = null; repintarFU(); }) : null, botonFU('Confirmar', () => confirmarLugarFU(), true, FU.sel !== null)].filter(Boolean)));
     return;
   }
   if (e.fase !== 'turno' || !t) { col(info(e.fase === 'fin' ? 'Fin de la partida' : '')); return; }
@@ -410,7 +410,7 @@ function pintarDockFU(e, MOV) {
     const quedan = t.tiradas - t.tirada;
     const tirar = botonFU('Tirar ' + (6 - t.fijos - FU.keep.size), () => tirarFU(), true, quedan > 0 && !FU.animando);
     if (quedan > 0 && FU.objetivo && meds[FU.objetivo] !== undefined) ponerMedalla(tirar, meds[FU.objetivo]);
-    col(fuEl('div', 'fuAyuda', FU.objetivo ? 'Quieres construir: ' + FU_NOMBRE_ED[FU.objetivo].toLowerCase() + '. Guarda los dados que sirvan; los recursos apagados te faltan.' : 'Tira para juntar los recursos de un edificio.'), chips, info('Tirada ' + t.tirada + ' de ' + t.tiradas), (FU.keep.size || t.fijos) ? fuEl('div', 'fuAyuda', 'Los dados marcados que no gastes se guardan para tu próximo turno (hasta 2).') : null, reloj(), acciones(tirar, botonFU('Construir', () => hacerFU('terminar', { reservar: [...FU.keep] }), false, !FU.animando)));
+    col(MOV ? null : fuEl('div', 'fuAyuda', FU.objetivo ? 'Quieres construir: ' + FU_NOMBRE_ED[FU.objetivo].toLowerCase() + '. Guarda los dados que sirvan; los recursos apagados te faltan.' : 'Tira para juntar los recursos de un edificio.'), chips, info('Tirada ' + t.tirada + ' de ' + t.tiradas), (FU.keep.size || t.fijos) ? fuEl('div', 'fuAyuda', MOV ? 'Lo marcado que no gastes se guarda (máx. 2).' : 'Los dados marcados que no gastes se guardan para tu próximo turno (hasta 2).') : null, reloj(), acciones(tirar, botonFU('Construir', () => hacerFU('terminar', { reservar: [...FU.keep] }), false, !FU.animando)));
     return;
   }
   if (t.sub === 'construir') {
@@ -427,7 +427,7 @@ function pintarDockFU(e, MOV) {
   if (t.sub === 'colocar') {
     if (!miTurno) { col(info(de + ' elige dónde poner su ' + (t.edificio || '').toLowerCase()), reloj()); return; }
     const zonas = FU.zonasMostrar && FU.zonasMostrar.length;
-    const atras = t.posibles.length > 1 ? botonFU('Atrás', () => { if (FU.zona !== null) { FU.zona = null; FU.sel = null; repintarFU(); } else hacerFU('atras'); }) : botonFU('Pasar', () => hacerFU('pasar'));
+    const atras = (FU.zona !== null || t.posibles.length > 1) ? botonFU('Atrás', () => { if (FU.zona !== null) { FU.zona = null; FU.sel = null; repintarFU(); } else hacerFU('atras'); }) : botonFU('Pasar', () => hacerFU('pasar', { reservar: [...FU.keep] }));   // (dentro de una zona, «Atrás» vuelve al mapa para elegir otra)
     const nomEd = FU_NOMBRE_ED[t.edificio] || 'edificio', que = fuEl('div', 'fuQue'); if (t.edificio) que.append(iconoEdificio(t.edificio, fuColor(yo), t.edificio === 'camino' ? 3 : 4));
     que.append(fuEl('div', '', 'Vas a poner: ' + nomEd.toLowerCase()));
     col(que, info(zonas ? 'Toca una zona' : 'Toca un punto y confirma'), reloj(), acciones(atras, botonFU('Confirmar', () => confirmarLugarFU(), true, FU.sel !== null && !zonas)));

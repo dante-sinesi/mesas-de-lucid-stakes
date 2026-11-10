@@ -105,7 +105,7 @@ function abrirReglas(e) {
   caja.append(nuevoEl('h3', '', 'Reglas · ' + nombreJuego(e.juego)));
   if (e.juego === 'fundacion') {
     g1.append(campoSelect('Jugadores', 'rJug', asientos, e.maxAsientos), campoSelect('Tiempo por fase', 'rTiempo', tiempo, e.tiempoModo || 'normal'));
-    g2.append(campoSelect('Meta', 'rMeta', [[8, 'Corta · 8 puntos'], [10, 'Clásica · 10 puntos'], [12, 'Larga · 12 puntos']], e.meta));
+    g2.append(campoSelect('Meta', 'rMeta', [[8, 'Corta · 8 pts'], [10, 'Clásica · 10 pts'], [12, 'Larga · 12 pts']], e.meta));
     caja.append(g1, g2);
   } else if (e.juego === 'trecejack') {
     g1.append(campoSelect('Jugadores', 'rJug', asientos, e.maxAsientos), campoSelect('Tiempo por turno', 'rTiempo', tiempo, e.tiempoModo || 'normal'));
