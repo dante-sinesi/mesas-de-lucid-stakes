@@ -79,6 +79,14 @@ const FU_ARTE = (() => {
     const l = V.celdas(String(n)), rojo = n === 6 || n === 8, w = l.ancho, x0 = Math.round(cx + 0.5 - w / 2), y0 = Math.round(cy + 0.5 - 5.5);
     l.celdas.forEach(p => fr(g, x0 + p[0], y0 + p[1], 1, 1, rojo ? [0.78, 0.15, 0.12] : TINTA));
   }
+  const cacheA = {};
+  // El borde del hexágono solo (el interior queda transparente): sirve para marcar un terreno sin tapar lo que hay encima.
+  function aroHex(col, rw) {
+    const key = col.join(',') + '|' + rw; if (cacheA[key]) return cacheA[key];
+    const c = cvs(WD, HT), g = c.getContext('2d'), ins = (x, y) => { const a = x / WD, b = y / HT; return a >= 0 && a <= 1 && b >= 0 && b <= 1 && b >= 0.5 * Math.abs(a - 0.5) && b <= 1 - 0.5 * Math.abs(a - 0.5); };
+    for (let j = 0; j < HT; j++) for (let i = 0; i < WD; i++) { const x = i + 0.5, y = j + 0.5; if (!ins(x, y)) continue; if (!(ins(x - rw, y) && ins(x + rw, y) && ins(x, y - rw) && ins(x, y + rw))) fr(g, i, j, 1, 1, col); }
+    return cacheA[key] = c;
+  }
   const cacheT = {};
   // op: { rim: color del borde, rimW: grosor, dim: oscurecido }
   function tile(tipo, n, op) {
@@ -140,5 +148,5 @@ const FU_ARTE = (() => {
     return c;
   }
 
-  return { WD, HT, PASO, RECURSOS, SIMB, EST, tile, casa, ciudad, camino, caballero, bandido, dado2d, icono, CANDADO, deFilas, fr, cvs, ficha, PH };
+  return { WD, HT, PASO, RECURSOS, SIMB, EST, tile, aroHex, casa, ciudad, camino, caballero, bandido, dado2d, icono, CANDADO, deFilas, fr, cvs, ficha, PH };
 })();

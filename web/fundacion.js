@@ -26,6 +26,7 @@ function abrirFU() {
     $('fInvitar').appendChild(V.invitar()); $('fInvitar').onclick = abrirInvitar;
     $('fSalir').appendChild(V.puerta()); $('fSalir').onclick = confirmarSalir;
     $('fSonido').onclick = () => { Sonido.setActivo(!Sonido.activo); pintarSonidoFU(); Sonido.play('clic'); };
+    FU.tParp = setInterval(() => { if (FU.parpadea && !$('fu').hidden && !FU.anim) dibujarCamFU(); }, 180);   // (la marca dorada y blanca titila)
     $('fuMapa').addEventListener('pointerdown', tocarMapaFU);
     window.addEventListener('resize', () => { clearTimeout(FU.tRes); FU.tRes = setTimeout(() => { if (!$('fu').hidden && FU.e) repintarFU(); }, 120); });
   }
@@ -68,26 +69,34 @@ function lineaCaminoFU(g, A, B, col) {
   for (let i = 0; i <= n; i++) { const x = a.x + (b.x - a.x) * i / n, y = a.y + (b.y - a.y) * i / n; FU_ARTE.fr(g, Math.round(x - 2), Math.round(y - 2), 4, 4, [col[0] * 0.45, col[1] * 0.45, col[2] * 0.45]); }
   for (let i = 0; i <= n; i++) { const x = a.x + (b.x - a.x) * i / n, y = a.y + (b.y - a.y) * i / n; FU_ARTE.fr(g, Math.round(x - 1), Math.round(y - 1), 2, 2, col); }
 }
+// Dónde va cada caballero de un hexágono (esquina de la figura respecto del centro): abajo de la ficha del número, que así se sigue leyendo.
+function posCabFU(n, i) {
+  const T = { 1: [[-6, 3]], 2: [[-12, 3], [0, 3]], 3: [[-15, 4], [-6, 1], [3, 4]], 4: [[-16, 2], [-8, 5], [0, 5], [5, 2]] };
+  return (T[Math.min(n, 4)] || T[4])[Math.min(i, 3)];
+}
 // El mundo: los hexágonos con lo que hay puesto encima.
 function dibujarMundo(e, geo) {
   const A = FU_ARTE, mapa = e.mapa, tab = e.tab, c = A.cvs(geo.WW, geo.WH), g = c.getContext('2d'); g.imageSmoothingEnabled = false;
   A.fr(g, 0, 0, geo.WW, geo.WH, [0.06, 0.21, 0.31]);
   mapa.hexes.forEach(h => { const p = geo.hx(h), img = A.tile(h.tipo, h.num, h.id === tab.bandido ? { dim: true } : {}); g.drawImage(img, Math.round(p.x - A.WD / 2), Math.round(p.y - A.HT / 2)); });
   tab.aris.forEach((p, id) => { if (p < 0) return; const ar = mapa.aristas[id]; lineaCaminoFU(g, geo.v(mapa.vertices[ar.a]), geo.v(mapa.vertices[ar.b]), fuColor(p)); });
-  tab.vert.forEach((o, id) => { if (!o) return; const p = geo.v(mapa.vertices[id]), img = o[1] ? A.ciudad(fuColor(o[0])) : A.casa(fuColor(o[0])); g.drawImage(img, Math.round(p.x - img.width / 2), Math.round(p.y - img.height + 4)); });
-  tab.cab.forEach((lista, id) => lista.forEach((p, i) => { const q = geo.hx(mapa.hexes[id]); g.drawImage(A.caballero(fuColor(p)), Math.round(q.x - 18 + i * 12), Math.round(q.y - 7)); }));
+  // Los pueblos, las ciudades, los caballeros y el bandido se dibujan de arriba hacia abajo (por el pie de cada figura): lo de abajo tapa a lo de arriba.
+  const figuras = [];
+  tab.vert.forEach((o, id) => { if (!o) return; const p = geo.v(mapa.vertices[id]), img = o[1] ? A.ciudad(fuColor(o[0])) : A.casa(fuColor(o[0])); figuras.push({ y: p.y + 4, f: () => g.drawImage(img, Math.round(p.x - img.width / 2), Math.round(p.y - img.height + 4)) }); });
+  tab.cab.forEach((lista, id) => lista.forEach((p, i) => { const q = geo.hx(mapa.hexes[id]), o = posCabFU(lista.length, i), img = A.caballero(fuColor(p)); figuras.push({ y: q.y + o[1] + img.height, f: () => g.drawImage(img, Math.round(q.x + o[0]), Math.round(q.y + o[1])) }); }));
   const b = geo.hx(mapa.hexes[tab.bandido]);
-  for (let i = -5; i <= 5; i++) { A.fr(g, Math.round(b.x + i), Math.round(b.y + i), 1, 1, [1, 0.42, 0.36]); A.fr(g, Math.round(b.x - i), Math.round(b.y + i), 1, 1, [1, 0.42, 0.36]); }
-  g.drawImage(A.bandido(), Math.round(b.x + 6), Math.round(b.y - 8));
+  figuras.push({ y: b.y + 6, f: () => { for (let i = -5; i <= 5; i++) { A.fr(g, Math.round(b.x + i), Math.round(b.y + i), 1, 1, [1, 0.42, 0.36]); A.fr(g, Math.round(b.x - i), Math.round(b.y + i), 1, 1, [1, 0.42, 0.36]); } g.drawImage(A.bandido(), Math.round(b.x + 6), Math.round(b.y - 8)); } });
+  figuras.sort((u, v) => u.y - v.y).forEach(x => x.f());
   return c;
 }
+const fuTitila = () => (Math.floor(performance.now() / 360) % 2 ? [1, 1, 1] : [0.97, 0.78, 0.25]);   // (lo que marca algo titila entre dorado y blanco)
 const fuOscurecer = (g, a) => { g.fillStyle = 'rgba(8,6,20,' + a + ')'; g.fillRect(-9999, -9999, 99999, 99999); };
 function fuPunto(g, p, R, sel) {
   for (let j = -7; j <= 7; j++) for (let k = -7; k <= 7; k++) { const d = Math.hypot(k, j); if (d <= R + 1.2 && d > R) FU_ARTE.fr(g, Math.round(p.x) + k, Math.round(p.y) + j, 1, 1, sel ? [1, 1, 1] : [0.2, 0.12, 0.05]); else if (d <= R) FU_ARTE.fr(g, Math.round(p.x) + k, Math.round(p.y) + j, 1, 1, [0.97, 0.78, 0.22]); }
 }
 function fuAroZona(g, zn) {
   const R = Math.round(zn.r);
-  for (let a = 0; a < 360; a += 3) { if ((a / 3) % 2) continue; FU_ARTE.fr(g, Math.round(zn.x + Math.cos(a * Math.PI / 180) * R) - 1, Math.round(zn.y + Math.sin(a * Math.PI / 180) * R) - 1, 2, 2, [0.97, 0.78, 0.22]); }
+  for (let a = 0; a < 360; a += 3) { if ((a / 3) % 2) continue; FU_ARTE.fr(g, Math.round(zn.x + Math.cos(a * Math.PI / 180) * R) - 1, Math.round(zn.y + Math.sin(a * Math.PI / 180) * R) - 1, 2, 2, zn.col || [0.97, 0.78, 0.22]); }
   if (zn.sinNum) return;
   const l = V.celdas('x' + zn.n), w = l.ancho + 4;
   FU_ARTE.fr(g, Math.round(zn.x - w / 2), Math.round(zn.y - 6), w, 12, [0.11, 0.07, 0.21]); FU_ARTE.fr(g, Math.round(zn.x - w / 2), Math.round(zn.y - 6), w, 1, [0.97, 0.78, 0.22]); FU_ARTE.fr(g, Math.round(zn.x - w / 2), Math.round(zn.y + 5), w, 1, [0.97, 0.78, 0.22]);
@@ -245,9 +254,10 @@ function dibujarCamFU() {
 
 // Lo que se dibuja sobre el mapa según la etapa.
 function superponerFU(g, e, geo, colocando, z) {
-  const t = e.turno, A = FU_ARTE;
+  const t = e.turno, A = FU_ARTE; FU.parpadea = false;
   if (e.fase === 'turno' && t && t.sub === 'produccion') {
-    t.hexes.forEach(i => { const h = e.mapa.hexes[i], p = geo.hx(h); g.drawImage(A.tile(h.tipo, h.num, { rim: [0.97, 0.78, 0.25], rimW: 2.4 }), Math.round(p.x - A.WD / 2), Math.round(p.y - A.HT / 2)); });
+    FU.parpadea = true; const marca = fuTitila();
+    t.hexes.forEach(i => { const h = e.mapa.hexes[i], p = geo.hx(h); g.drawImage(A.aroHex(marca, 2.4), Math.round(p.x - A.WD / 2), Math.round(p.y - A.HT / 2)); });
     const miosDe = h => h.vertices.some(v => { const o = e.tab.vert[v]; return o && o[0] === t.de; });
     t.gana.length && t.hexes.forEach(i => { const h = e.mapa.hexes[i]; if (!miosDe(h) || e.tab.bandido === i) return; const r = FU_TIPO_RECURSO[h.tipo], p = geo.hx(h); if (r !== undefined) g.drawImage(A.dado2d(FU_NOMBRE_REC[r]), Math.round(p.x - 8), Math.round(p.y - A.HT / 2 - 12)); });
   } else if (colocando) {
@@ -265,7 +275,7 @@ function superponerFU(g, e, geo, colocando, z) {
       }
     }
   } else if (e.fase === 'turno' && lugarNuevoFU(t)) {
-    const pt = puntoLugarFU(e, geo, t.edificio, t.lugar); fuAroZona(g, { x: pt.x, y: pt.y, r: 9, n: 0, sinNum: true });
+    const pt = puntoLugarFU(e, geo, t.edificio, t.lugar); FU.parpadea = true; fuAroZona(g, { x: pt.x, y: pt.y, r: 9, n: 0, sinNum: true, col: fuTitila() });
   } else if (e.fase === 'turno' && t && (t.sub === 'dados' || t.sub === 'construir')) fuOscurecer(g, t.sub === 'dados' ? 0.5 : 0.55);
 }
 
