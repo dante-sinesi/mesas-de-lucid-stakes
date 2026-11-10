@@ -130,7 +130,7 @@ async function crearSolo(juego, modo) {
 // Una sala privada con tres bots: la sala de espera deja cambiar los bots y las reglas antes de empezar.
 async function crearContraBots(juego) {
   apodoSolo();
-  const r = await api('/api/crear', Object.assign(reglasBase(juego), { asientos: 4, bots: 3, publica: false }));
+  const r = await api('/api/crear', Object.assign(reglasBase(juego), { asientos: juego === 'fundacion' ? 8 : 4, bots: 3, publica: false }));
   if (!r.ok) return avisoSolo(r.error || 'No se pudo crear la sala');
   const e = await entrar(r.sala, '');
   if (!e.ok) avisoSolo(e.error);
@@ -140,7 +140,7 @@ function avisoSolo(msg) { irEntrada(); $('errorInicio').textContent = msg || '';
 // ---------- crear sala ----------
 
 // Las reglas con las que nace una sala nueva (después se cambian en la sala de espera).
-const reglasBase = juego => (juego === 'fundacion' ? { juego, modoFU: 'multi', metaFU: 10, tiempo: 'normal', asientos: 4 } : juego === 'trecejack'
+const reglasBase = juego => (juego === 'fundacion' ? { juego, modoFU: 'multi', metaFU: 10, tiempo: 'normal', asientos: 8 } : juego === 'trecejack'
   ? { juego, modoTJ: 'multi', mazosTJ: 5, especiales: true, tiempo: 'normal', asientos: 6 }
   : { juego, modoDM: 'multi', metaDM: 10000, tomarDados: false, hostil: true, cupo: false, tiempo: 'normal', asientos: 6 });
 const Crear = { juego: 'trecejack', publica: false };

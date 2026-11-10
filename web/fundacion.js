@@ -162,15 +162,17 @@ function repintarFU() {
   pintarDockFU(e, MOV);
   let top, bottom, left, right;
   if (MOV) {
-    jug.style.cssText = 'position:absolute;top:50px;left:8px;right:8px;z-index:3';
+    jug.style.cssText = 'position:absolute;top:50px;left:8px;right:8px;width:auto;z-index:3';
     dock.style.cssText = 'position:absolute;left:0;right:0;bottom:0;z-index:3;background:#170e2c;border:3px solid #3a2766;padding:10px 12px 8px;display:flex;flex-direction:column;align-items:center;gap:6px;box-sizing:border-box';
     top = jug.offsetTop + jug.offsetHeight + 6; bottom = H - dock.offsetHeight - 4; left = 0; right = W;
   } else {
     const dockW = angosto ? 270 : 310;
-    const simetrico = W - 2 * (dockW + 32) >= 520, margen = simetrico ? dockW + 32 : 16;   // (el mapa y los jugadores se centran en la pantalla; el panel queda a la derecha sobre su margen)
-    jug.style.cssText = 'position:absolute;top:50px;left:' + margen + 'px;right:' + (dockW + 32) + 'px;width:auto;z-index:3';   // (width:auto: la clase de las tarjetas pide 100 % y empujaba la fila a la derecha)
-    dock.style.cssText = 'position:absolute;right:16px;top:56px;width:' + dockW + 'px;z-index:3;background:rgba(18,10,34,.92);border:3px solid #3a2766;padding:10px 12px 8px;display:flex;flex-direction:column;align-items:center;gap:6px;box-sizing:border-box';
-    top = jug.offsetTop + jug.offsetHeight + 8; bottom = H - 10; left = margen; right = W - dockW - 28;
+    const muchos = e.jugadores.length > 4;   // (con 5 a 8 jugadores la fila ocupa todo el ancho, para que entren los nombres, y el panel baja debajo de ella)
+    const simetrico = !muchos && W - 2 * (dockW + 32) >= 520, margen = muchos ? 16 : (simetrico ? dockW + 32 : 16);   // (el mapa y los jugadores se centran en la pantalla; el panel queda a la derecha sobre su margen)
+    jug.style.cssText = 'position:absolute;top:50px;left:' + margen + 'px;right:' + (muchos ? 16 : dockW + 32) + 'px;width:auto;z-index:3';   // (width:auto: la clase de las tarjetas pide 100 % y empujaba la fila a la derecha)
+    const arriba = muchos ? jug.offsetTop + jug.offsetHeight + 8 : 56;
+    dock.style.cssText = 'position:absolute;right:16px;top:' + arriba + 'px;width:' + dockW + 'px;z-index:3;background:rgba(18,10,34,.92);border:3px solid #3a2766;padding:10px 12px 8px;display:flex;flex-direction:column;align-items:center;gap:6px;box-sizing:border-box';
+    top = jug.offsetTop + jug.offsetHeight + 8; bottom = H - 10; left = dockW + 32 > W - 2 * 320 ? 16 : dockW + 32; right = W - dockW - 28;   // (el mapa se centra en la pantalla; en pantallas angostas usa todo el ancho que queda)
   }
   // --- los dados en 3D, sobre el tablero ---
   const verDados = !!(t && t.sub === 'dados' && e.fase === 'turno');
@@ -374,7 +376,7 @@ function pintarDockFU(e, MOV) {
   if (e.fase === 'inicial' && e.inicial) {
     const ini = e.inicial;
     if (ini.de !== yo) { col(info(fuNombreDe(e, ini.de) + ' pone su ' + (ini.sub === 'pueblo' ? 'pueblo' : 'camino')), reloj()); return; }
-    const quei = fuEl('div', 'fuQue'); quei.append(iconoEdificio(ini.sub === 'pueblo' ? 'pueblo' : 'camino', fuColor(yo), ini.sub === 'pueblo' ? 4 : 3), fuEl('div', '', 'Pon tu ' + (ini.sub === 'pueblo' ? 'pueblo' : 'camino') + ' (' + (Math.floor(ini.idx / 2) + 1) + ' de ' + Math.ceil(ini.total / e.jugadores.length) + ')'));
+    const quei = fuEl('div', 'fuQue'); quei.append(iconoEdificio(ini.sub === 'pueblo' ? 'pueblo' : 'camino', fuColor(yo), ini.sub === 'pueblo' ? 4 : 3), fuEl('div', '', 'Pon tu ' + (ini.sub === 'pueblo' ? 'pueblo' : 'camino') + ' (' + (Math.floor(ini.idx / e.jugadores.length) + 1) + ' de 2)'));
     col(quei, info(FU.sel === null ? 'Toca un punto del mapa' : 'Confirma el lugar'), reloj(), acciones(botonFU('Confirmar', () => confirmarLugarFU(), true, FU.sel !== null)));
     return;
   }
