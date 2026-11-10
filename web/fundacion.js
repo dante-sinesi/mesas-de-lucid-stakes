@@ -70,9 +70,10 @@ function lineaCaminoFU(g, A, B, col) {
   for (let i = 0; i <= n; i++) { const x = a.x + (b.x - a.x) * i / n, y = a.y + (b.y - a.y) * i / n; FU_ARTE.fr(g, Math.round(x - 1), Math.round(y - 1), 2, 2, col); }
 }
 // Dónde va cada caballero de un hexágono (esquina de la figura respecto del centro): abajo de la ficha del número, que así se sigue leyendo.
-function posCabFU(n, i) {
-  const T = { 1: [[-6, 3]], 2: [[-12, 3], [0, 3]], 3: [[-15, 4], [-6, 1], [3, 4]], 4: [[-16, 2], [-8, 5], [0, 5], [5, 2]] };
-  return (T[Math.min(n, 4)] || T[4])[Math.min(i, 3)];
+function posCabFU(n, i) {   // devuelve [x, y, chico]: con 3 o más caballeros se dibujan en versión chica, alrededor de la ficha y lejos de los pueblos
+  const T = { 1: [[-6, 3]], 2: [[-12, 3], [0, 3]] }, M = { 3: [[-15, -5], [8, -5], [-3, 8]], 4: [[-15, -5], [8, -5], [-9, 8], [2, 8]] };
+  if (n <= 2) return T[n][Math.min(i, n - 1)].concat([false]);
+  return (M[Math.min(n, 4)])[Math.min(i, 3)].concat([true]);
 }
 // El mundo: los hexágonos con lo que hay puesto encima.
 function dibujarMundo(e, geo) {
@@ -83,7 +84,7 @@ function dibujarMundo(e, geo) {
   // Los pueblos, las ciudades, los caballeros y el bandido se dibujan de arriba hacia abajo (por el pie de cada figura): lo de abajo tapa a lo de arriba.
   const figuras = [];
   tab.vert.forEach((o, id) => { if (!o) return; const p = geo.v(mapa.vertices[id]), img = o[1] ? A.ciudad(fuColor(o[0])) : A.casa(fuColor(o[0])); figuras.push({ y: p.y + 4, f: () => g.drawImage(img, Math.round(p.x - img.width / 2), Math.round(p.y - img.height + 4)) }); });
-  tab.cab.forEach((lista, id) => lista.forEach((p, i) => { const q = geo.hx(mapa.hexes[id]), o = posCabFU(lista.length, i), img = A.caballero(fuColor(p)); figuras.push({ y: q.y + o[1] + img.height, f: () => g.drawImage(img, Math.round(q.x + o[0]), Math.round(q.y + o[1])) }); }));
+  tab.cab.forEach((lista, id) => lista.forEach((p, i) => { const q = geo.hx(mapa.hexes[id]), o = posCabFU(lista.length, i), img = o[2] ? A.caballeroMini(fuColor(p)) : A.caballero(fuColor(p)); figuras.push({ y: q.y + o[1] + img.height, f: () => g.drawImage(img, Math.round(q.x + o[0]), Math.round(q.y + o[1])) }); }));
   const b = geo.hx(mapa.hexes[tab.bandido]);
   figuras.push({ y: b.y + 6, f: () => { for (let i = -5; i <= 5; i++) { A.fr(g, Math.round(b.x + i), Math.round(b.y + i), 1, 1, [1, 0.42, 0.36]); A.fr(g, Math.round(b.x - i), Math.round(b.y + i), 1, 1, [1, 0.42, 0.36]); } g.drawImage(A.bandido(), Math.round(b.x + 6), Math.round(b.y - 8)); } });
   figuras.sort((u, v) => u.y - v.y).forEach(x => x.f());

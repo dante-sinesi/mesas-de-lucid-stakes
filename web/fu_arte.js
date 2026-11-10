@@ -134,6 +134,8 @@ const FU_ARTE = (() => {
   const camino = c => memo('camino' + c, () => deFilas(['eeeeeeeeeeeeee', 'kkkkkkkkkkkkkk', 'kkkkkkkkkkkkkk', 'eeeeeeeeeeeeee'], { e: [c[0] * 0.55, c[1] * 0.55, c[2] * 0.55], k: c }));
   const CAB = ['....r....', '...rr....', '..mmmmm..', '.mmmmmmM.', '.mmeeemM.', '.mmmmmmM.', '..MMMMM..', '.rrrrrrr.', '.rrryrrr.', '.rrrrrrr.', '..MM.MM..', '..nn.nn..'];
   const caballero = c => memo('cab' + c, () => conBorde(deFilas(CAB, palCasa(c))));
+  const MINI = ['..r..', '.mmm.', '.mem.', '.rrr.', 'rrrrr', '.rrr.', '.n.n.'];   // el caballero chico: cuando hay 3 o más en un mismo hexágono
+  const caballeroMini = c => memo('cabm' + c, () => conBorde(deFilas(MINI, palCasa(c))));
   const BAN = ['...hhh...', '..hhhhh..', '.hhHHHhh.', '.hhesehh.', '.hhssshh.', '..hxxxh..', '.hhhhhhh.', 'hhhhhhhhH', 'hhhhhhhhH', '.hhhhhhH.', '.hh...hh.', '.nn...nn.'];
   const bandido = () => memo('bandido', () => conBorde(deFilas(BAN, palCasa([0.5, 0.5, 0.5]))));
   const CANDADO = ['.###.', '#...#', '#...#', '#####', '##.##', '#####'];
@@ -148,5 +150,5 @@ const FU_ARTE = (() => {
     return c;
   }
 
-  return { WD, HT, PASO, RECURSOS, SIMB, EST, tile, aroHex, casa, ciudad, camino, caballero, bandido, dado2d, icono, CANDADO, deFilas, fr, cvs, ficha, PH };
+  return { WD, HT, PASO, RECURSOS, SIMB, EST, tile, aroHex, casa, ciudad, camino, caballero, caballeroMini, bandido, dado2d, icono, CANDADO, deFilas, fr, cvs, ficha, PH };
 })();
