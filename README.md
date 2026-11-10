@@ -4,7 +4,7 @@ Mesas de juego multijugador en tiempo real, para jugar en el navegador (celular 
 
 [![Ver el trailer](docs/media/portada.jpg)](docs/media/trailer.mp4)
 
-**▶ [Ver el trailer (1 minuto)](docs/media/trailer.mp4)**
+**🎲 [Jugar ahora: mesas.dsinesi.com](https://mesas.dsinesi.com)** · **▶ [Ver el trailer (1 minuto)](docs/media/trailer.mp4)**
 
 ## Los juegos
 
