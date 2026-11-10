@@ -64,4 +64,17 @@ function seguirTirando(mapa, tab, p, dados, fijos, tiradasQuedan) {
 // El edificio que elige entre los posibles.
 function elegirEdificio(posibles) { return posibles.slice().sort((a, b) => VALOR[b] - VALOR[a])[0] || null; }
 
-module.exports = { VALOR, valorVertice, mejorLugar, guardar, seguirTirando, elegirEdificio, pips };
+// Qué dados que sobraron conviene dejar en reserva para el turno siguiente: los que más acercan al edificio más valioso que todavía se puede construir.
+function reservar(mapa, tab, p, dados, usados, max) {
+  const libres = []; for (let i = 0; i < dados.length; i++) if (!usados.has(i)) libres.push(i);
+  let mejor = { score: 0, idx: [] };
+  for (const e of R.EDIFICIOS) {
+    if (!R.lugares(mapa, tab, p, e).length) continue;
+    const costo = R.COSTOS[e].slice(), total = costo.reduce((x, y) => x + y, 0), idx = [];
+    for (const i of libres) { const c = dados[i]; if (c < 5 && costo[c] > 0) { costo[c]--; idx.push(i); } }
+    const score = VALOR[e] * idx.length / total; if (score > mejor.score) mejor = { score, idx };
+  }
+  return mejor.idx.slice(0, max);
+}
+
+module.exports = { reservar, VALOR, valorVertice, mejorLugar, guardar, seguirTirando, elegirEdificio, pips };

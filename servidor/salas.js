@@ -187,11 +187,11 @@ class Salas {
         case 'empezar': r = m.empezar(token); break;
         case 'seguir': r = m.seguir(token); break;
         case 'tirar': r = m.tirar(token, datos.guardar); break;
-        case 'terminar': r = m.terminarDados(token); break;
+        case 'terminar': r = m.terminarDados(token, datos.reservar); break;
         case 'elegir': r = m.elegir(token, datos.edificio); break;
         case 'atras': r = m.atras(token); break;
         case 'colocar': r = m.colocar(token, datos.lugar); break;
-        case 'pasar': r = m.pasar(token); break;
+        case 'pasar': r = m.pasar(token, datos.reservar); break;
         case 'nueva': r = m.nuevaPartida(token); break;
         case 'pausar': r = m.pausar(token); break;
         case 'reanudar': r = m.reanudar(token); break;

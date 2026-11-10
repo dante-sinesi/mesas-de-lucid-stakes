@@ -48,7 +48,7 @@ class MesaFundacion {
 
   jugador(token) { return this.jugadores.find(j => j.token === token) || null; }
   porAsiento(asiento) { return this.jugadores.find(j => j.asiento === asiento) || null; }
-  static _nuevo(token, apodo, asiento) { return { token, apodo, asiento, conectado: true, bot: false, expulsado: false, fallos: 0, turnos: 0, automaticos: 0, construidos: 0 }; }
+  static _nuevo(token, apodo, asiento) { return { token, apodo, asiento, conectado: true, bot: false, expulsado: false, fallos: 0, turnos: 0, automaticos: 0, construidos: 0, reserva: [] }; }
   anfitrion() { return this.jugadores.filter(j => j.conectado && !j.bot).sort((a, b) => a.asiento - b.asiento)[0] || null; }
   _humanos() { return this.jugadores.filter(j => !j.bot); }
 
@@ -283,8 +283,9 @@ class MesaFundacion {
   _iniciarTurno(asiento) {
     const nums = R.tirarNumeros(this.azar);
     if (nums.suma === 7) R.moverBandido(this.mapa, this.tab, this.azar);
-    const gana = R.produccion(this.mapa, this.tab, nums.suma, MAX_ASIENTOS)[asiento] || [];
-    this.t = { asiento, sub: 'produccion', num: nums, gana, hexes: nums.suma === 7 ? [] : R.hexesDe(this.mapa, nums.suma), bandido: this.tab.bandido, fijos: gana.length, dados: gana.slice(), tirada: 0, edificio: null, posibles: [], terminado: false, motivo: null };
+    const jug = this.porAsiento(asiento), res = ((jug && jug.reserva) || []).slice(0, R.CFG.reservaMax); if (jug) jug.reserva = [];
+    const gana = (R.produccion(this.mapa, this.tab, nums.suma, MAX_ASIENTOS)[asiento] || []).slice(0, Math.max(0, R.TOPE_FIJOS - res.length)), fijosL = res.concat(gana);
+    this.t = { asiento, sub: 'produccion', num: nums, gana, reserva: res, nReserva: res.length, hexes: nums.suma === 7 ? [] : R.hexesDe(this.mapa, nums.suma), bandido: this.tab.bandido, fijos: fijosL.length, dados: fijosL.slice(), tirada: 0, edificio: null, posibles: [], terminado: false, motivo: null };
     this.finTurnoEn = null;
     this._fijarLimite();
   }
@@ -327,8 +328,18 @@ class MesaFundacion {
     return { ok: true };
   }
   _puntosDe(asiento) { return R.puntos(this.tab, asiento, this.carreras); }
+  // Los dados que se guardan para el turno siguiente: los marcados (o los que mejor sirven, si nadie marcó) que no se gastaron, y la reserva anterior sin usar; hasta R.CFG.reservaMax.
+  _calcularReserva(j) {
+    const t = this.t; if (!j || !t || !R.CFG.reservaMax) { if (j) j.reserva = []; return; }
+    const usados = new Set(t.gastados || []);
+    if (!t.reservaSel) { j.reserva = Bot.reservar(this.mapa, this.tab, j.asiento, t.dados, usados, R.CFG.reservaMax).map(i => t.dados[i]); return; }   // (un bot, o el tiempo agotado)
+    const sel = t.reservaSel, cand = [];
+    for (let i = 0; i < R.DADOS; i++) if (!usados.has(i) && (i < (t.nReserva || 0) || sel.includes(i))) cand.push(i);
+    j.reserva = cand.slice(0, R.CFG.reservaMax).map(i => t.dados[i]);
+  }
   _finTurno(motivo) {
     const t = this.t, j = this.porAsiento(t.asiento);
+    this._calcularReserva(j);
     if (j) j.turnos++;
     t.terminado = true; t.motivo = motivo; t.sub = 'fin';
     this.carreras = R.carreras(this.tab, MAX_ASIENTOS, this.carreras);
@@ -406,7 +417,8 @@ class MesaFundacion {
   }
   seguir(token) { const s = this._suTurno(token, ['produccion']); if (s.error) return { ok: false, error: s.error }; return this._hecho(s.j, this._seguir(s.j)); }
   tirar(token, guardar) { const s = this._suTurno(token, ['dados']); if (s.error) return { ok: false, error: s.error }; return this._hecho(s.j, this._tirar(s.j, Array.isArray(guardar) ? guardar.map(Number) : [])); }
-  terminarDados(token) { const s = this._suTurno(token, ['dados']); if (s.error) return { ok: false, error: s.error }; return this._hecho(s.j, this._terminarDados(s.j)); }
+  _anotarReserva(reservar) { if (Array.isArray(reservar)) this.t.reservaSel = reservar.filter(i => Number.isInteger(i) && i >= 0 && i < R.DADOS); }
+  terminarDados(token, reservar) { const s = this._suTurno(token, ['dados']); if (s.error) return { ok: false, error: s.error }; this._anotarReserva(reservar); return this._hecho(s.j, this._terminarDados(s.j)); }
   elegir(token, edificio) { const s = this._suTurno(token, ['construir']); if (s.error) return { ok: false, error: s.error }; return this._hecho(s.j, this._elegir(s.j, String(edificio))); }
   atras(token) {
     const s = this._suTurno(token, ['colocar']); if (s.error) return { ok: false, error: s.error };
@@ -414,7 +426,7 @@ class MesaFundacion {
     this.t.sub = 'construir'; this.t.edificio = null; this._fijarLimite();
     return this._hecho(s.j, { ok: true });
   }
-  pasar(token) { const s = this._suTurno(token, ['dados', 'construir', 'colocar']); if (s.error) return { ok: false, error: s.error }; this._finTurno('paso'); return this._hecho(s.j, { ok: true }); }
+  pasar(token, reservar) { const s = this._suTurno(token, ['dados', 'construir', 'colocar']); if (s.error) return { ok: false, error: s.error }; this._anotarReserva(reservar); this._finTurno('paso'); return this._hecho(s.j, { ok: true }); }
 
   // ---------- una partida nueva ----------
 
@@ -462,7 +474,7 @@ class MesaFundacion {
     let turno = null;
     if (this.fase === FASE.TURNO && this.t) {
       const t = this.t;
-      turno = { de: t.asiento, sub: t.sub, num: t.num, gana: t.gana, hexes: t.hexes, bandido: t.bandido, fijos: t.fijos, dados: t.dados, tirada: t.tirada, tiradas: R.TIRADAS, edificio: t.edificio, posibles: t.posibles, terminado: t.terminado, motivo: t.motivo, lugar: t.lugar === undefined ? null : t.lugar, gastados: t.gastados || [] };
+      turno = { de: t.asiento, sub: t.sub, num: t.num, gana: t.gana, reserva: t.reserva || [], hexes: t.hexes, bandido: t.bandido, fijos: t.fijos, dados: t.dados, tirada: t.tirada, tiradas: R.TIRADAS, edificio: t.edificio, posibles: t.posibles, terminado: t.terminado, motivo: t.motivo, lugar: t.lugar === undefined ? null : t.lugar, gastados: t.gastados || [] };
       if (activo && t.sub === 'dados') {
         const objetivos = R.EDIFICIOS.filter(e => R.lugares(this.mapa, this.tab, yo.asiento, e).length > 0);
         turno.motivos = {}; R.EDIFICIOS.filter(e => !objetivos.includes(e)).forEach(e => { turno.motivos[e] = R.motivoSinLugar(this.mapa, this.tab, yo.asiento, e); });
@@ -475,7 +487,7 @@ class MesaFundacion {
       modo: this.modo, fase: this.fase, limite: this.limite, meta: this.meta, ronda: this.ronda, finDeVuelta: this.finDeVuelta, llegoMeta: this.llegoMeta, maxAsientos: this.maxAsientos, tiempoModo: this.tiempoModo,
       turnoDe: this.fase === FASE.TURNO && this.t ? this.t.asiento : (this.fase === FASE.INICIAL && this.inicial ? this._actor().asiento : null),
       yo: yo ? yo.asiento : null, reemplazado: !!(yo && yo.reemplazado), anfitrion: this.anfitrion() ? this.anfitrion().asiento : null,
-      jugadores: this.jugadores.map(j => { const c = this.tab ? R.piezas(this.tab, j.asiento) : { pueblo: 0, ciudad: 0, camino: 0, caballero: 0 }; return { asiento: j.asiento, apodo: j.apodo, conectado: j.conectado, bot: !!j.bot, expulsado: !!j.expulsado, puntos: this.tab ? this._puntosDe(j.asiento) : 0, pueblos: c.pueblo, ciudades: c.ciudad, caminos: c.camino, caballeros: c.caballero, quedan: this.tab ? R.quedan(this.tab, j.asiento) : null, turnos: j.turnos }; }),
+      jugadores: this.jugadores.map(j => { const c = this.tab ? R.piezas(this.tab, j.asiento) : { pueblo: 0, ciudad: 0, camino: 0, caballero: 0 }; return { asiento: j.asiento, apodo: j.apodo, conectado: j.conectado, bot: !!j.bot, expulsado: !!j.expulsado, puntos: this.tab ? this._puntosDe(j.asiento) : 0, pueblos: c.pueblo, ciudades: c.ciudad, caminos: c.camino, caballeros: c.caballero, quedan: this.tab ? R.quedan(this.tab, j.asiento) : null, turnos: j.turnos, reserva: (j.reserva || []).slice() }; }),
       inicial: this.fase === FASE.INICIAL && this.inicial ? { de: this._actor().asiento, sub: this.inicial.sub, idx: this.inicial.idx, total: this.inicial.plan.length, ultimoPueblo: this.inicial.ultimoPueblo } : null,
       turno, carreras: this.carreras, eventos: this.eventos.slice(), contadorEventos: this.contadorEventos, fin: this.fin, orden: this.orden,
     };

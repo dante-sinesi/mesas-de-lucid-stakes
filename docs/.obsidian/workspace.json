@@ -62,9 +62,37 @@
               "icon": "lucide-file",
               "title": "Brainstorming_Chatgpt"
             }
+          },
+          {
+            "id": "bb65cf9553529233",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "file:Z:/Almacenamiento/Documentos/Cloude Code/Curriculum/LinkedIn - textos.md",
+                "mode": "source",
+                "source": false
+              },
+              "icon": "lucide-file",
+              "title": "LinkedIn - textos"
+            }
+          },
+          {
+            "id": "dc78d5287b81ccde",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "file:Z:/Almacenamiento/Documentos/Cloude Code/dsinesi.com/docs/00 - Esquema del sitio.md",
+                "mode": "source",
+                "source": false
+              },
+              "icon": "lucide-file",
+              "title": "00 - Esquema del sitio"
+            }
           }
         ],
-        "currentTab": 3
+        "currentTab": 5
       }
     ],
     "direction": "vertical"
@@ -231,15 +259,16 @@
       "bases:Crear nueva base": false
     }
   },
-  "active": "a17cfaee31931e80",
+  "active": "dc78d5287b81ccde",
   "lastOpenFiles": [
+    "file:Z:/Almacenamiento/Documentos/Cloude Code/Curriculum/LinkedIn - textos.md",
+    "file:Z:/Almacenamiento/Documentos/Cloude Code/dsinesi.com/00 - Esquema del sitio.md",
     "rulepoly.md",
     "rulepoly.md.tmp.16236.d1f7246c3c94",
     "principios_diseno.md",
     "principios_diseno.md.tmp.16236.0e9da6eadf49",
     "file:Z:/Almacenamiento/Documentos/Cloude Code/Lucid Stakes Multijugador (contexto)/Entrada y salas (decidido)/LEEME.md",
     "file:Z:/Almacenamiento/Documentos/Cloude Code/Curriculum/Reglas para los CVs.md",
-    "file:Z:/Almacenamiento/Documentos/Cloude Code/Curriculum/LinkedIn - textos.md",
     "file:Z:/Almacenamiento/Documentos/Cloude Code/Curriculum/Plan de búsqueda.md",
     "diseno.md",
     "file:C:/Users/Dante/OneDrive - UCA/Escritorio/Bran/Mesas_project-summary.md",

@@ -15,6 +15,7 @@ const DADOS = 6;               // dados de recursos de cada turno
 const TIRADAS = 3;             // tiradas por turno
 const TOPE_FIJOS = 4;          // dados fijados por la producción
 const METAS = [8, 10, 12];
+const CFG = { reservaMax: 2 };   // cuántos dados útiles se pueden guardar para el turno siguiente (0 = sin reserva)
 const CAMINO_MIN = 5, EJERCITO_MIN = 2, BONO = 2;
 const DIRS_VERTICE = [[0, -2], [1, -1], [1, 1], [0, 2], [-1, 1], [-1, -1]];   // las 6 esquinas de un hexágono, en (a, y)
 const DIRS_HEX = [[1, 0], [1, -1], [0, -1], [-1, 0], [-1, 1], [0, 1]];         // los 6 vecinos de un hexágono, en (q, r)
@@ -247,7 +248,7 @@ function puntos(tab, p, car) {
 }
 
 module.exports = {
-  motivoSinLugar, RECURSOS, CARAS, ORO, COSTOS, EDIFICIOS, PIEZAS, DADOS, TIRADAS, TOPE_FIJOS, METAS, CAMINO_MIN, EJERCITO_MIN, BONO, RECURSO_DE,
+  CFG, motivoSinLugar, RECURSOS, CARAS, ORO, COSTOS, EDIFICIOS, PIEZAS, DADOS, TIRADAS, TOPE_FIJOS, METAS, CAMINO_MIN, EJERCITO_MIN, BONO, RECURSO_DE,
   rng, mezclar, crearMapa, nuevoTablero, piezas, quedan, lugaresPueblo, lugaresCamino, lugaresCiudad, lugaresCaballero, lugares, poner, ordenInicial,
   pagar, alcanza, posibles, probabilidad, tabla, tirarNumeros, produccion, moverBandido, hexesDe, carreras, puntos,
 };

@@ -299,7 +299,7 @@ function tocarMapaFU(ev) {
 // ---------- los jugadores ----------
 
 function pintarJugadoresFU(e, MOV) {
-  const caja = $('fuJugadores'), llave = JSON.stringify([e.turnoDe, e.yo, MOV, e.carreras, e.jugadores.map(j => [j.asiento, j.apodo, j.puntos, j.bot, j.conectado, j.expulsado])]);
+  const caja = $('fuJugadores'), llave = JSON.stringify([e.turnoDe, e.yo, MOV, e.carreras, e.jugadores.map(j => [j.asiento, j.apodo, j.puntos, j.bot, j.conectado, j.expulsado, j.reserva])]);
   if (caja.dataset.llave === llave) return;
   caja.dataset.llave = llave; caja.textContent = '';
   const n = e.jugadores.length; caja.className = 'dmJugadores' + (n > 3 ? ' compacto' : '') + (MOV ? '' : ' fuFilaJ');
@@ -312,6 +312,7 @@ function pintarJugadoresFU(e, MOV) {
     const ins = fuEl('div', 'fuInsignias');
     if (e.carreras && e.carreras.camino === j.asiento) { const c = FU_ARTE.camino(fuColor(j.asiento)); c.style.cssText = 'width:' + c.width * 2 + 'px;height:' + c.height * 2 + 'px;image-rendering:pixelated'; ins.append(c); }
     if (e.carreras && e.carreras.ejercito === j.asiento) { const c = FU_ARTE.caballero(fuColor(j.asiento)); c.style.cssText = 'width:' + c.width + 'px;height:' + c.height + 'px;image-rendering:pixelated'; ins.append(c); }
+    (j.reserva || []).forEach(k => { const ic = iconoRecFU(k, 12); ic.style.display = 'inline-block'; ic.title = 'Dado en reserva'; ins.append(ic); });
     if (ins.childNodes.length) d.append(ins);
     caja.append(d);
   });
@@ -407,7 +408,7 @@ function pintarDockFU(e, MOV) {
     const quedan = t.tiradas - t.tirada;
     const tirar = botonFU('Tirar ' + (6 - t.fijos - FU.keep.size), () => tirarFU(), true, quedan > 0 && !FU.animando);
     if (quedan > 0 && FU.objetivo && meds[FU.objetivo] !== undefined) ponerMedalla(tirar, meds[FU.objetivo]);
-    col(fuEl('div', 'fuAyuda', FU.objetivo ? 'Quieres construir: ' + FU_NOMBRE_ED[FU.objetivo].toLowerCase() + '. Guarda los dados que sirvan; los recursos apagados te faltan.' : 'Tira para juntar los recursos de un edificio.'), chips, info('Tirada ' + t.tirada + ' de ' + t.tiradas), reloj(), acciones(tirar, botonFU('Construir', () => hacerFU('terminar'), false, !FU.animando)));
+    col(fuEl('div', 'fuAyuda', FU.objetivo ? 'Quieres construir: ' + FU_NOMBRE_ED[FU.objetivo].toLowerCase() + '. Guarda los dados que sirvan; los recursos apagados te faltan.' : 'Tira para juntar los recursos de un edificio.'), chips, info('Tirada ' + t.tirada + ' de ' + t.tiradas), (FU.keep.size || t.fijos) ? fuEl('div', 'fuAyuda', 'Los dados marcados que no gastes se guardan para tu próximo turno (hasta 2).') : null, reloj(), acciones(tirar, botonFU('Construir', () => hacerFU('terminar', { reservar: [...FU.keep] }), false, !FU.animando)));
     return;
   }
   if (t.sub === 'construir') {
@@ -418,7 +419,7 @@ function pintarDockFU(e, MOV) {
       const f = fuEl('div', 'fuCosto'); FU_COSTOS[ed].forEach(k => { const im = FU_ARTE.dado2d(FU_NOMBRE_REC[k]), cc = FU_ARTE.cvs(15, 15); cc.getContext('2d').drawImage(im, 0, 0); cc.style.cssText = 'width:30px;height:30px;image-rendering:pixelated'; f.append(cc); });
       c.append(f, fuEl('div', 'fuNombre', FU_NOMBRE_ED[ed])); c.onclick = () => { FU.objetivo = ed; Sonido.play('clic'); repintarFU(); }; cs.append(c);
     });
-    col(cs, info('Elige qué construir'), reloj(), acciones(botonFU('Pasar', () => hacerFU('pasar')), botonFU('Elegir lugar', () => hacerFU('elegir', { edificio: elegido }), true)));
+    col(cs, info('Elige qué construir'), reloj(), acciones(botonFU('Pasar', () => hacerFU('pasar', { reservar: [...FU.keep] })), botonFU('Elegir lugar', () => hacerFU('elegir', { edificio: elegido }), true)));
     return;
   }
   if (t.sub === 'colocar') {
@@ -470,7 +471,9 @@ function textoProdFU(e) {
     const h = e.mapa.hexes[t.bandido];
     lin.append(fuEl('div', '', 'Salió 7: el bandido salta a ' + FU_NOMBRE_TIPO[h.tipo] + (h.num ? ' ' + h.num : '') + '. Ese terreno no produce.'));
     lin.append(fuEl('div', 'suave', (mio ? 'No ganas' : de + ' no gana') + ' ningún recurso'));
-  } else if (t.gana.length) {
+  } else if (t.gana.length || (t.reserva && t.reserva.length)) {
+    if (t.reserva && t.reserva.length) { const rr = fuEl('div', 'fuProdGana'); rr.append(fuEl('span', '', (mio ? 'Tu reserva: ' : 'Reserva de ' + de + ': '))); t.reserva.forEach(k => rr.append(iconoRecFU(k, 28))); lin.append(rr); }
+    if (!t.gana.length) { lin.append(fuEl('div', 'suave', mio ? 'Ya están fijos en tus dados.' : 'Ya están fijos en sus dados.')); return; }
     const r = fuEl('div', 'fuProdGana'); r.append(fuEl('span', '', (mio ? 'Ganas ' : de + ' gana ') + t.gana.length + (t.gana.length === 1 ? ' recurso:' : ' recursos:')));
     t.gana.forEach(k => r.append(iconoRecFU(k, 28)));
     lin.append(r, fuEl('div', 'suave', mio ? 'Quedan fijos en tus dados: no se vuelven a tirar.' : 'Quedan fijos en sus dados.'));

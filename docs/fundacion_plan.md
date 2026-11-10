@@ -58,3 +58,5 @@ Calibrar costos y ritmo con partidas reales; compensar el orden de turno; zonas 
 - bj-106: los bots (y quien tiene el turno jugado por un bot) esperan 5,5 s tras la tirada de números, 2,8 s entre tiradas de recursos y 2,2 s al elegir y colocar, para que todos vean; al terminar un turno en una sala con otros el resultado queda 2,6 s (3,6 s si jugó un bot). Quien construye se ve en el panel («Ana construyó un pueblo») y en el mapa, con la cámara acercada y un aro en el lugar (`turno.lugar`).
 
 - bj-107: si quien armó una sala de espera se va, los bots y las reglas se quedan 30 s y la sala sigue en la lista; quien entra encuentra la sala como estaba (en plena partida, sin humanos, la sala se cierra como antes).
+
+- Reserva de dados (bj-116): con 2 dados de reserva las partidas bajan de 26 a 21 rondas (2 jugadores), de 29 a 25 (4) y de 31 a 28 (8); con 3, a 20, 23 y 25.

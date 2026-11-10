@@ -73,3 +73,6 @@ Maqueta interactiva en `prototipos/catan_pantallas/index.html` (copia en la carp
 - **Parecido a la Generala:** hay que ver si basta con mapa, producción y carreras para que se sienta otro juego.
 - **Descartado por ahora (suma demasiada complejidad):** cartas de desarrollo y objetivos secretos. La variabilidad la dan la isla mezclada, el bandido y los dados. Lo único que podría revisarse más adelante son dados especiales, como en el Diez mil.
 - Aspecto en cubitos: hexágonos de cubitos con relieve por recurso, los dados con caras de recurso y las piezas de cada color (los de los asientos).
+
+## Reserva de dados (bj-116)
+Al terminar el turno, hasta 2 dados que no se gastaron se quedan para el turno siguiente: los marcados por el jugador (o, si no marcó, los que más acercan al edificio más valioso; así juegan los bots y el tiempo agotado) y los de la reserva anterior sin usar. Empiezan fijos antes que lo que gana la producción (tope de 4 fijos en total). Se ven en la tarjeta del jugador y en la ventana de producción. El número es `R.CFG.reservaMax`; `node simulador/reserva.js` compara 0 a 3 con bots.
