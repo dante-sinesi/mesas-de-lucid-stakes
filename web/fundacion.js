@@ -75,10 +75,10 @@ function dibujarMundo(e, geo) {
   mapa.hexes.forEach(h => { const p = geo.hx(h), img = A.tile(h.tipo, h.num, h.id === tab.bandido ? { dim: true } : {}); g.drawImage(img, Math.round(p.x - A.WD / 2), Math.round(p.y - A.HT / 2)); });
   tab.aris.forEach((p, id) => { if (p < 0) return; const ar = mapa.aristas[id]; lineaCaminoFU(g, geo.v(mapa.vertices[ar.a]), geo.v(mapa.vertices[ar.b]), fuColor(p)); });
   tab.vert.forEach((o, id) => { if (!o) return; const p = geo.v(mapa.vertices[id]), img = o[1] ? A.ciudad(fuColor(o[0])) : A.casa(fuColor(o[0])); g.drawImage(img, Math.round(p.x - img.width / 2), Math.round(p.y - img.height + 4)); });
-  tab.cab.forEach((lista, id) => lista.forEach((p, i) => { const q = geo.hx(mapa.hexes[id]); g.drawImage(A.caballero(fuColor(p)), Math.round(q.x - 16 + i * 11), Math.round(q.y - 5)); }));
+  tab.cab.forEach((lista, id) => lista.forEach((p, i) => { const q = geo.hx(mapa.hexes[id]); g.drawImage(A.caballero(fuColor(p)), Math.round(q.x - 18 + i * 12), Math.round(q.y - 7)); }));
   const b = geo.hx(mapa.hexes[tab.bandido]);
   for (let i = -5; i <= 5; i++) { A.fr(g, Math.round(b.x + i), Math.round(b.y + i), 1, 1, [1, 0.42, 0.36]); A.fr(g, Math.round(b.x - i), Math.round(b.y + i), 1, 1, [1, 0.42, 0.36]); }
-  g.drawImage(A.bandido(), Math.round(b.x + 5), Math.round(b.y - 6));
+  g.drawImage(A.bandido(), Math.round(b.x + 6), Math.round(b.y - 8));
   return c;
 }
 const fuOscurecer = (g, a) => { g.fillStyle = 'rgba(8,6,20,' + a + ')'; g.fillRect(-9999, -9999, 99999, 99999); };
@@ -258,9 +258,9 @@ function superponerFU(g, e, geo, colocando, z) {
       const s = FU.candidatos.find(c => c.id === FU.sel);
       if (s) {
         const sub = s.tipo, col = fuColor(e.yo);
-        if (sub === 'pueblo') { const im = A.casa(col); g.drawImage(im, Math.round(s.x - 6), Math.round(s.y - 11)); }
-        else if (sub === 'ciudad') { const im = A.ciudad(col); g.drawImage(im, Math.round(s.x - 9), Math.round(s.y - 11)); }
-        else if (sub === 'caballero') { g.drawImage(A.caballero(col), Math.round(s.x - 6), Math.round(s.y - 8)); }
+        if (sub === 'pueblo') { const im = A.casa(col); g.drawImage(im, Math.round(s.x - 6), Math.round(s.y - 10)); }
+        else if (sub === 'ciudad') { const im = A.ciudad(col); g.drawImage(im, Math.round(s.x - 8), Math.round(s.y - 10)); }
+        else if (sub === 'caballero') { g.drawImage(A.caballero(col), Math.round(s.x - 5), Math.round(s.y - 8)); }
         else if (sub === 'camino') { const ar = e.mapa.aristas[s.id]; lineaCaminoFU(g, geo.v(e.mapa.vertices[ar.a]), geo.v(e.mapa.vertices[ar.b]), col); }
       }
     }

@@ -99,21 +99,35 @@ const FU_ARTE = (() => {
 
   // ---------- las piezas ----------
   const grid = (w, h) => Array.from({ length: h }, () => Array(w).fill('.'));
-  function casaF() { const Wd = 9, Hh = 9, g = grid(Wd, Hh); for (let k = 0; k <= 4; k++) for (let x = 4 - k; x <= 4 + k; x++) g[k][x] = 'r'; for (let y = 5; y <= 8; y++) for (let x = 1; x <= 7; x++) g[y][x] = 'w'; g[6][2] = 'v'; g[6][6] = 'v'; g[7][4] = 'd'; g[8][4] = 'd'; return g.map(r => r.join('')); }
-  function ciudadF() { const Wd = 15, Hh = 13, g = grid(Wd, Hh), set = (x, y, c) => { if (x >= 0 && x < Wd && y >= 0 && y < Hh) g[y][x] = c; }; const techo = (cx, y0, m) => { for (let k = 0; k <= m; k++) for (let x = cx - k; x <= cx + k; x++) set(x, y0 + k, 'r'); }; const muro = (a, b, c, d) => { for (let y = c; y <= d; y++) for (let x = a; x <= b; x++) set(x, y, 'w'); }; techo(7, 0, 2); muro(5, 9, 3, 12); set(6, 5, 'v'); set(8, 5, 'v'); set(6, 8, 'v'); set(8, 8, 'v'); set(7, 11, 'd'); set(7, 12, 'd'); techo(2, 5, 2); muro(0, 4, 8, 12); set(1, 10, 'v'); set(3, 10, 'v'); set(2, 12, 'd'); techo(12, 5, 2); muro(10, 14, 8, 12); set(11, 10, 'v'); set(13, 10, 'v'); set(12, 12, 'd'); return g.map(r => r.join('')); }
-  const palCasa = c => ({ r: c, w: [0.93, 0.88, 0.74], v: [0.55, 0.75, 0.95], d: [0.30, 0.18, 0.10] });
+  const set = (g, x, y, ch) => { if (y >= 0 && y < g.length && x >= 0 && x < g[0].length) g[y][x] = ch; };
+  const rect = (g, x0, y0, x1, y1, ch) => { for (let y = y0; y <= y1; y++) for (let x = x0; x <= x1; x++) set(g, x, y, ch); };
+  const tri = (g, cx, y0, h) => { for (let k = 0; k < h; k++) for (let x = cx - k; x <= cx + k; x++) set(g, x, y0 + k, k > 0 && x === cx - k ? 'L' : (k > 0 && x === cx + k ? 'R' : 'r')); };   // techo a dos aguas: luz a la izquierda, sombra a la derecha
+  function casaF() { const g = grid(11, 10); tri(g, 5, 0, 6); rect(g, 1, 6, 9, 9, 'w'); rect(g, 9, 6, 9, 9, 'W'); rect(g, 2, 7, 3, 8, 'v'); rect(g, 7, 7, 8, 8, 'v'); rect(g, 4, 7, 6, 9, 'd'); return g.map(r => r.join('')); }
+  function ciudadF() {
+    const g = grid(15, 14); tri(g, 7, 0, 4); set(g, 7, 0, 'y'); rect(g, 5, 4, 9, 13, 'w'); rect(g, 9, 4, 9, 13, 'W'); [[6, 6], [8, 6], [6, 9], [8, 9]].forEach(([x, y]) => set(g, x, y, 'v')); rect(g, 7, 11, 7, 13, 'd');
+    tri(g, 2, 6, 3); rect(g, 0, 9, 4, 13, 'w'); rect(g, 4, 9, 4, 13, 'W'); set(g, 1, 11, 'v'); set(g, 3, 11, 'v'); rect(g, 2, 12, 2, 13, 'd');
+    tri(g, 12, 6, 3); rect(g, 10, 9, 14, 13, 'w'); rect(g, 14, 9, 14, 13, 'W'); set(g, 11, 11, 'v'); set(g, 13, 11, 'v'); rect(g, 12, 12, 12, 13, 'd');
+    return g.map(r => r.join(''));
+  }
+  const mulC = (c, k) => c.map(v => Math.min(1, v * k)), luzC = c => c.map(v => Math.min(1, v * 1.22 + 0.10));
+  const palCasa = c => ({ r: c, R: mulC(c, 0.58), L: luzC(c), w: [0.97, 0.93, 0.82], W: [0.74, 0.66, 0.52], v: [0.50, 0.76, 0.98], d: [0.40, 0.22, 0.09], y: [0.98, 0.82, 0.25], m: [0.84, 0.88, 0.95], M: [0.55, 0.61, 0.74], n: [0.27, 0.29, 0.40], e: [0.10, 0.07, 0.16], s: [0.96, 0.78, 0.60], h: [0.22, 0.15, 0.36], H: [0.40, 0.30, 0.60], x: [1, 0.42, 0.36] });
   function deFilas(filas, pal) { const c = cvs(filas[0].length, filas.length), g = c.getContext('2d'); filas.forEach((f, y) => [...f].forEach((ch, x) => { if (ch !== '.' && pal[ch]) fr(g, x, y, 1, 1, pal[ch]); })); return c; }
-  // (las piezas llevan 2 píxeles de margen transparente: el diseño nuevo con contorno propio se elige aparte)
-  function conBorde(src) { const c = cvs(src.width + 4, src.height + 4); c.getContext('2d').drawImage(src, 2, 2); return c; }
+  // Contorno oscuro de un píxel, pegado a la pieza (el mismo tono de los bordes de los hexágonos).
+  function conBorde(src) {
+    const w = src.width + 2, h = src.height + 2, c = cvs(w, h), g = c.getContext('2d'), t = cvs(w, h), tg = t.getContext('2d');
+    for (let dy = -1; dy <= 1; dy++) for (let dx = -1; dx <= 1; dx++) tg.drawImage(src, 1 + dx, 1 + dy);
+    tg.globalCompositeOperation = 'source-in'; tg.fillStyle = 'rgb(18,10,36)'; tg.fillRect(0, 0, w, h);
+    g.drawImage(t, 0, 0); g.drawImage(src, 1, 1); return c;
+  }
   const cachePz = {};
   const memo = (k, f) => cachePz[k] || (cachePz[k] = f());
   const casa = c => memo('casa' + c, () => conBorde(deFilas(casaF(), palCasa(c))));
   const ciudad = c => memo('ciudad' + c, () => conBorde(deFilas(ciudadF(), palCasa(c))));
   const camino = c => memo('camino' + c, () => deFilas(['eeeeeeeeeeeeee', 'kkkkkkkkkkkkkk', 'kkkkkkkkkkkkkk', 'eeeeeeeeeeeeee'], { e: [c[0] * 0.55, c[1] * 0.55, c[2] * 0.55], k: c }));
-  const CAB = ['....r....', '...hhh...', '..hhhhh..', '..hvvvh..', '..hhhhh..', '.rrrrrrr.', 'rrrrrrrrr', 'rrrrrrrrr', '.rr...rr.', '.rr...rr.', '.ss...ss.'];
-  const caballero = c => memo('cab' + c, () => conBorde(deFilas(CAB, { r: c, h: [0.72, 0.76, 0.84], v: [0.12, 0.10, 0.18], s: [0.25, 0.18, 0.12] })));
-  const BAN = ['...hhh...', '..hhhhh..', 'hhhhhhhhh', '..sssss..', '..mwmwm..', '..sssss..', '.kkkkkkk.', 'kkkkkkkkk', 'kkkkkkkkk', '.kkkkkkk.', '.kk...kk.', '.bb...bb.'];
-  const bandido = () => memo('bandido', () => conBorde(deFilas(BAN, { h: [0.16, 0.12, 0.24], k: [0.32, 0.22, 0.46], s: [0.95, 0.78, 0.60], m: [0.06, 0.05, 0.10], w: [1, 1, 1], b: [0.30, 0.18, 0.08] })));
+  const CAB = ['....r....', '...rr....', '..mmmmm..', '.mmmmmmM.', '.mmeeemM.', '.mmmmmmM.', '..MMMMM..', '.rrrrrrr.', '.rrryrrr.', '.rrrrrrr.', '..MM.MM..', '..nn.nn..'];
+  const caballero = c => memo('cab' + c, () => conBorde(deFilas(CAB, palCasa(c))));
+  const BAN = ['...hhh...', '..hhhhh..', '.hhHHHhh.', '.hhesehh.', '.hhssshh.', '..hxxxh..', '.hhhhhhh.', 'hhhhhhhhH', 'hhhhhhhhH', '.hhhhhhH.', '.hh...hh.', '.nn...nn.'];
+  const bandido = () => memo('bandido', () => conBorde(deFilas(BAN, palCasa([0.5, 0.5, 0.5]))));
   const CANDADO = ['.###.', '#...#', '#...#', '#####', '##.##', '#####'];
 
   // ---------- el icono del juego: un pueblo y una ciudad inclinados, con la sombra dura de los otros iconos ----------
