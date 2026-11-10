@@ -8,7 +8,7 @@
 const RECURSOS = ['madera', 'ladrillo', 'lana', 'trigo', 'mineral'];
 const ORO = 5;                                            // la sexta cara del dado de recursos: comodín (2 oros valen 1 recurso)
 const CARAS = RECURSOS.concat(['oro']);                   // el valor de una cara es su índice (0 a 5)
-const COSTOS = { camino: [1, 1, 0, 0, 0], pueblo: [1, 1, 1, 1, 0], ciudad: [0, 0, 0, 2, 3], caballero: [0, 0, 1, 1, 1] };   // por recurso: madera, ladrillo, lana, trigo, mineral
+const COSTOS = { camino: [1, 1, 0, 0, 0], pueblo: [1, 1, 1, 1, 0], ciudad: [0, 0, 0, 2, 2], caballero: [0, 0, 1, 1, 1] };   // por recurso: madera, ladrillo, lana, trigo, mineral
 const EDIFICIOS = ['camino', 'pueblo', 'ciudad', 'caballero'];
 const PIEZAS = { camino: 15, pueblo: 5, ciudad: 4, caballero: 3 };
 const DADOS = 6;               // dados de recursos de cada turno

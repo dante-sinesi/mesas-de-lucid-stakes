@@ -60,3 +60,5 @@ Calibrar costos y ritmo con partidas reales; compensar el orden de turno; zonas 
 - bj-107: si quien armó una sala de espera se va, los bots y las reglas se quedan 30 s y la sala sigue en la lista; quien entra encuentra la sala como estaba (en plena partida, sin humanos, la sala se cierra como antes).
 
 - Reserva de dados (bj-116): con 2 dados de reserva las partidas bajan de 26 a 21 rondas (2 jugadores), de 29 a 25 (4) y de 31 a 28 (8); con 3, a 20, 23 y 25.
+
+- bj-118: la ciudad cuesta 2 de mineral y 2 de trigo (antes 3 y 2): probabilidad de lograrla en un turno de 8 % a 34 %; ver docs/fundacion_costo_ciudad.md.

@@ -30,7 +30,7 @@ check(JSON.stringify(R.crearMapa(3, 4).hexes.map(h => [h.tipo, h.num])) !== JSON
 const C = R.COSTOS;
 check(R.alcanza(C.camino, [0, 1, 4, 4, 4, 4]) && !R.alcanza(C.camino, [0, 0, 4, 4, 4, 4]), 'un camino pide madera y ladrillo');
 check(R.alcanza(C.pueblo, [0, 1, 2, 3, 4, 4]) && !R.alcanza(C.pueblo, [0, 1, 2, 4, 4, 4]), 'un pueblo pide madera, ladrillo, lana y trigo');
-check(R.alcanza(C.ciudad, [4, 4, 4, 3, 3, 0]) && !R.alcanza(C.ciudad, [4, 4, 3, 3, 3, 0]), 'una ciudad pide 3 de mineral y 2 de trigo');
+check(R.alcanza(C.ciudad, [4, 4, 3, 3, 0, 0]) && !R.alcanza(C.ciudad, [4, 3, 3, 0, 0, 0]), 'una ciudad pide 2 de mineral y 2 de trigo');
 check(R.alcanza(C.camino, [0, 5, 5, 4, 4, 4]), '2 oros valen un recurso que falta (madera)');
 check(!R.alcanza(C.camino, [0, 5, 4, 4, 4, 4]), 'un solo oro no alcanza');
 check(R.alcanza(C.camino, [5, 5, 5, 5, 4, 4]), '4 oros valen madera y ladrillo');
@@ -47,7 +47,7 @@ check(cerca(R.probabilidad(C.pueblo, [0, 1, 2], 3, 1), 1 - (Math.pow(4 / 6, 3) +
   const p2 = R.probabilidad(C.pueblo, [0, 1, 2], 3, 2); check(p2 > R.probabilidad(C.pueblo, [0, 1, 2], 3, 1) && p2 <= 1, 'una tirada más sube la probabilidad');
   check(p2 > 0.7 && p2 < 0.8, 'con 2 tiradas el pueblo (falta el trigo) ronda el 75 %');
 }
-check(R.probabilidad(C.ciudad, [], 5, 3) < 0.1 && R.probabilidad(C.ciudad, [], 5, 3) > 0, 'una ciudad desde cero con 5 dados es muy difícil pero posible');
+check(R.probabilidad(C.ciudad, [], 5, 3) < 0.5 && R.probabilidad(C.ciudad, [], 5, 3) > 0.1, 'una ciudad desde cero con 5 dados es difícil pero posible');
 check(R.probabilidad(C.pueblo, [0, 1, 2, 3], 2, 1) === 1, 'un pueblo ya completo es 100 %');
 check(R.probabilidad(C.camino, [5, 5, 5, 5], 2, 1) === 1 && R.probabilidad(C.camino, [5, 5], 4, 1) > 0 && R.probabilidad(C.camino, [5, 5], 4, 1) < 1, 'los oros guardados cuentan como comodines (hacen falta 2 por recurso)');
 { const t = R.tabla(['camino', 'pueblo'], [0], [1, 2, 3, 5, 4], 1); check(t.camino.length === 32 && t.pueblo.length === 32, 'la tabla tiene una entrada por cada conjunto de dados guardados'); check(t.camino[1 << 0] === 100, 'guardando el ladrillo (con la madera fijada) el camino es 100 %'); check(t.camino[0] < 100 && t.camino[0] > 0, 'sin guardar nada hay una probabilidad intermedia'); }

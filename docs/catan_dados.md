@@ -24,7 +24,7 @@ Hay una **cuenta regresiva** por turno, como el Diez mil. Meta de ritmo: unos 20
 |---|---|---|---|
 | Camino | madera + ladrillo | 0 | contiguo a un camino o pueblo tuyo |
 | Pueblo | madera + ladrillo + lana + trigo | 1 | llega un camino tuyo y se respeta la distancia |
-| Ciudad | 3 mineral + 2 trigo | +1 (mejora un pueblo suyo) | un pueblo tuyo |
+| Ciudad | 2 mineral + 2 trigo | +1 (mejora un pueblo suyo) | un pueblo tuyo |
 | Caballero | lana + trigo + mineral | 0 | se pone sobre un hexágono donde tengas un edificio: si el bandido cae ahí, no te afecta |
 
 Piezas por jugador: 15 caminos, 5 pueblos, 4 ciudades (como en Catan) y **3 caballeros** (uno por jugador en cada hexágono, sin moverse). (Costos tomados de Catan; se ajustan al medir.)

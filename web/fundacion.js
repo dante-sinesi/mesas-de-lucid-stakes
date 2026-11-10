@@ -8,7 +8,7 @@ const FU_VALOR = { ciudad: 3, pueblo: 2.6, caballero: 1.3, camino: 1 };
 const FU_TIPO_RECURSO = { bosque: 0, colinas: 1, pastos: 2, campos: 3, montana: 4 };
 const FU_NOMBRE_REC = ['madera', 'ladrillo', 'lana', 'trigo', 'mineral', 'oro'];
 const FU_NOMBRE_ED = { camino: 'Camino', pueblo: 'Pueblo', ciudad: 'Ciudad', caballero: 'Caballero' };
-const FU_COSTOS = { camino: [0, 1], pueblo: [0, 1, 2, 3], ciudad: [4, 4, 4, 3, 3], caballero: [2, 3, 4] };   // las caras que cuesta cada edificio
+const FU_COSTOS = { camino: [0, 1], pueblo: [0, 1, 2, 3], ciudad: [4, 4, 3, 3], caballero: [2, 3, 4] };   // las caras que cuesta cada edificio
 const fuColor = asiento => Mesas.COLORES[asiento % Mesas.COLORES.length];
 const fuRgb = c => 'rgb(' + c.map(v => Math.round(v * 255)).join(',') + ')';
 const fuEl = (t, c, x) => { const n = document.createElement(t); if (c) n.className = c; if (x !== undefined) n.textContent = x; return n; };
