@@ -103,15 +103,22 @@ const FU_ARTE = (() => {
   function ciudadF() { const Wd = 15, Hh = 13, g = grid(Wd, Hh), set = (x, y, c) => { if (x >= 0 && x < Wd && y >= 0 && y < Hh) g[y][x] = c; }; const techo = (cx, y0, m) => { for (let k = 0; k <= m; k++) for (let x = cx - k; x <= cx + k; x++) set(x, y0 + k, 'r'); }; const muro = (a, b, c, d) => { for (let y = c; y <= d; y++) for (let x = a; x <= b; x++) set(x, y, 'w'); }; techo(7, 0, 2); muro(5, 9, 3, 12); set(6, 5, 'v'); set(8, 5, 'v'); set(6, 8, 'v'); set(8, 8, 'v'); set(7, 11, 'd'); set(7, 12, 'd'); techo(2, 5, 2); muro(0, 4, 8, 12); set(1, 10, 'v'); set(3, 10, 'v'); set(2, 12, 'd'); techo(12, 5, 2); muro(10, 14, 8, 12); set(11, 10, 'v'); set(13, 10, 'v'); set(12, 12, 'd'); return g.map(r => r.join('')); }
   const palCasa = c => ({ r: c, w: [0.93, 0.88, 0.74], v: [0.55, 0.75, 0.95], d: [0.30, 0.18, 0.10] });
   function deFilas(filas, pal) { const c = cvs(filas[0].length, filas.length), g = c.getContext('2d'); filas.forEach((f, y) => [...f].forEach((ch, x) => { if (ch !== '.' && pal[ch]) fr(g, x, y, 1, 1, pal[ch]); })); return c; }
+  // Contorno doble: un aro oscuro pegado a la pieza y otro claro por fuera, así se lee sobre hexágonos claros y oscuros.
+  function conBorde(src) {
+    const w = src.width + 4, h = src.height + 4, c = cvs(w, h), g = c.getContext('2d');
+    const sil = (gr, col) => { const t = cvs(w, h), tg = t.getContext('2d'); for (let dy = -gr; dy <= gr; dy++) for (let dx = -gr; dx <= gr; dx++) tg.drawImage(src, 2 + dx, 2 + dy); tg.globalCompositeOperation = 'source-in'; tg.fillStyle = col; tg.fillRect(0, 0, w, h); return t; };
+    g.drawImage(sil(2, 'rgb(252,248,236)'), 0, 0); g.drawImage(sil(1, 'rgb(14,8,32)'), 0, 0); g.drawImage(src, 2, 2);
+    return c;
+  }
   const cachePz = {};
   const memo = (k, f) => cachePz[k] || (cachePz[k] = f());
-  const casa = c => memo('casa' + c, () => deFilas(casaF(), palCasa(c)));
-  const ciudad = c => memo('ciudad' + c, () => deFilas(ciudadF(), palCasa(c)));
+  const casa = c => memo('casa' + c, () => conBorde(deFilas(casaF(), palCasa(c))));
+  const ciudad = c => memo('ciudad' + c, () => conBorde(deFilas(ciudadF(), palCasa(c))));
   const camino = c => memo('camino' + c, () => deFilas(['eeeeeeeeeeeeee', 'kkkkkkkkkkkkkk', 'kkkkkkkkkkkkkk', 'eeeeeeeeeeeeee'], { e: [c[0] * 0.55, c[1] * 0.55, c[2] * 0.55], k: c }));
   const CAB = ['....r....', '...hhh...', '..hhhhh..', '..hvvvh..', '..hhhhh..', '.rrrrrrr.', 'rrrrrrrrr', 'rrrrrrrrr', '.rr...rr.', '.rr...rr.', '.ss...ss.'];
-  const caballero = c => memo('cab' + c, () => deFilas(CAB, { r: c, h: [0.72, 0.76, 0.84], v: [0.12, 0.10, 0.18], s: [0.25, 0.18, 0.12] }));
+  const caballero = c => memo('cab' + c, () => conBorde(deFilas(CAB, { r: c, h: [0.72, 0.76, 0.84], v: [0.12, 0.10, 0.18], s: [0.25, 0.18, 0.12] })));
   const BAN = ['...hhh...', '..hhhhh..', 'hhhhhhhhh', '..sssss..', '..mwmwm..', '..sssss..', '.kkkkkkk.', 'kkkkkkkkk', 'kkkkkkkkk', '.kkkkkkk.', '.kk...kk.', '.bb...bb.'];
-  const bandido = () => memo('bandido', () => deFilas(BAN, { h: [0.16, 0.12, 0.24], k: [0.32, 0.22, 0.46], s: [0.95, 0.78, 0.60], m: [0.06, 0.05, 0.10], w: [1, 1, 1], b: [0.30, 0.18, 0.08] }));
+  const bandido = () => memo('bandido', () => conBorde(deFilas(BAN, { h: [0.16, 0.12, 0.24], k: [0.32, 0.22, 0.46], s: [0.95, 0.78, 0.60], m: [0.06, 0.05, 0.10], w: [1, 1, 1], b: [0.30, 0.18, 0.08] })));
   const CANDADO = ['.###.', '#...#', '#...#', '#####', '##.##', '#####'];
 
   // ---------- el icono del juego: un pueblo y una ciudad inclinados, con la sombra dura de los otros iconos ----------

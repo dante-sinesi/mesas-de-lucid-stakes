@@ -17,7 +17,7 @@ const fuEl = (t, c, x) => { const n = document.createElement(t); if (c) n.classN
 
 function abrirFU() {
   if (!FU.escena) {
-    FU.escena = new D3.Escena($('fuDadosLienzo'), $('fuDados'), { maxAlto: 250, forzarGrilla: true, sinMesa: true, velocidad: 1.1, dprMax: 1.5 });
+    FU.escena = new D3.Escena($('fuDadosLienzo'), $('fuDados'), { maxAlto: 250, forzarGrilla: true, sinMesa: true, velocidad: 1.9, dprMax: 1.5 });
     FU.escena.configurar(Array(6).fill('recurso'));
     FU.escena.alTocar = tocarDadoFU;
     FU.escena.alAterrizar = () => { if (!document.hidden) Sonido.play('ficha'); };
@@ -75,10 +75,10 @@ function dibujarMundo(e, geo) {
   mapa.hexes.forEach(h => { const p = geo.hx(h), img = A.tile(h.tipo, h.num, h.id === tab.bandido ? { dim: true } : {}); g.drawImage(img, Math.round(p.x - A.WD / 2), Math.round(p.y - A.HT / 2)); });
   tab.aris.forEach((p, id) => { if (p < 0) return; const ar = mapa.aristas[id]; lineaCaminoFU(g, geo.v(mapa.vertices[ar.a]), geo.v(mapa.vertices[ar.b]), fuColor(p)); });
   tab.vert.forEach((o, id) => { if (!o) return; const p = geo.v(mapa.vertices[id]), img = o[1] ? A.ciudad(fuColor(o[0])) : A.casa(fuColor(o[0])); g.drawImage(img, Math.round(p.x - img.width / 2), Math.round(p.y - img.height + 4)); });
-  tab.cab.forEach((lista, id) => lista.forEach((p, i) => { const q = geo.hx(mapa.hexes[id]); g.drawImage(A.caballero(fuColor(p)), Math.round(q.x - 14 + i * 9), Math.round(q.y - 3)); }));
+  tab.cab.forEach((lista, id) => lista.forEach((p, i) => { const q = geo.hx(mapa.hexes[id]); g.drawImage(A.caballero(fuColor(p)), Math.round(q.x - 16 + i * 11), Math.round(q.y - 5)); }));
   const b = geo.hx(mapa.hexes[tab.bandido]);
   for (let i = -5; i <= 5; i++) { A.fr(g, Math.round(b.x + i), Math.round(b.y + i), 1, 1, [1, 0.42, 0.36]); A.fr(g, Math.round(b.x - i), Math.round(b.y + i), 1, 1, [1, 0.42, 0.36]); }
-  g.drawImage(A.bandido(), Math.round(b.x + 7), Math.round(b.y - 4));
+  g.drawImage(A.bandido(), Math.round(b.x + 5), Math.round(b.y - 6));
   return c;
 }
 const fuOscurecer = (g, a) => { g.fillStyle = 'rgba(8,6,20,' + a + ')'; g.fillRect(-9999, -9999, 99999, 99999); };
@@ -158,7 +158,7 @@ function repintarFU() {
   } else {
     const dockW = angosto ? 270 : 310;
     const simetrico = W - 2 * (dockW + 32) >= 520, margen = simetrico ? dockW + 32 : 16;   // (el mapa y los jugadores se centran en la pantalla; el panel queda a la derecha sobre su margen)
-    jug.style.cssText = 'position:absolute;top:50px;left:' + margen + 'px;right:' + (dockW + 32) + 'px;z-index:3';
+    jug.style.cssText = 'position:absolute;top:50px;left:' + margen + 'px;right:' + (dockW + 32) + 'px;width:auto;z-index:3';   // (width:auto: la clase de las tarjetas pide 100 % y empujaba la fila a la derecha)
     dock.style.cssText = 'position:absolute;right:16px;top:56px;width:' + dockW + 'px;z-index:3;background:rgba(18,10,34,.92);border:3px solid #3a2766;padding:10px 12px 8px;display:flex;flex-direction:column;align-items:center;gap:6px;box-sizing:border-box';
     top = jug.offsetTop + jug.offsetHeight + 8; bottom = H - 10; left = margen; right = W - dockW - 28;
   }
@@ -200,20 +200,47 @@ function repintarFU() {
   } else FU.zonas = [];
   const cx = left + aw / 2, cy = top + ah / 2;
   const kMundo = e.version + '|' + e.mapa.semilla; if (FU.kMundo !== kMundo || !FU.mundo) { FU.kMundo = kMundo; FU.mundo = dibujarMundo(e, geo); }
-  const mundo = FU.mundo, c = $('fuMapa');
-  const cw = Math.ceil(W / z), ch = Math.ceil(H / z);
-  if (c.width !== cw) c.width = cw; if (c.height !== ch) c.height = ch;
-  c.style.width = W + 'px'; c.style.height = H + 'px';
-  const g = c.getContext('2d'); g.imageSmoothingEnabled = false;
-  FU_ARTE.fr(g, 0, 0, cw, ch, [0.06, 0.21, 0.31]);
-  const ox = Math.round(foco.x - cx / z), oy = Math.round(foco.y - cy / z);
-  g.drawImage(mundo, -ox, -oy);
-  g.save(); g.translate(-ox, -oy);
-  superponerFU(g, e, geo, colocando, z);
-  g.restore();
-  FU.cam = { z, ox, oy, W, H };
+  FU.pl = { e, geo, colocando, W, H };   // (lo que hace falta para redibujar el mapa en cada cuadro de la transición)
+  irCamaraFU({ z, fx: foco.x, fy: foco.y, cx, cy, W, H });
   if (!FU.zonasMostrar) FU.zonasMostrar = [];
   FU.zonasMostrar = MOV && colocando && FU.zona === null && zonas.length && z === zLleno ? zonas : [];
+}
+
+
+// ---------- la cámara: el zoom y el movimiento por el mapa son una transición suave ----------
+
+function irCamaraFU(m) {
+  const v = FU.vista;
+  const salto = !v || Math.abs(v.cx - m.cx) > 1 || Math.abs(v.cy - m.cy) > 1 || v.W !== m.W || v.H !== m.H;
+  if (salto || sinMovimiento()) { FU.vista = Object.assign({}, m); FU.anim = null; dibujarCamFU(); return; }
+  const meta = FU.anim ? FU.anim.a : v;
+  if (Math.abs(meta.z - m.z) < 1e-6 && Math.hypot(meta.fx - m.fx, meta.fy - m.fy) < 0.5) { if (!FU.anim) dibujarCamFU(); return; }
+  FU.anim = { de: { z: v.z, fx: v.fx, fy: v.fy }, a: m, t0: performance.now(), dur: 460 };
+  if (!FU.animId) FU.animId = requestAnimationFrame(pasoCamFU);
+}
+function pasoCamFU(ahora) {
+  FU.animId = 0; const an = FU.anim; if (!an) return;
+  const t = Math.min(1, (ahora - an.t0) / an.dur), k = t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2, v = FU.vista;
+  v.z = Math.exp(Math.log(an.de.z) + (Math.log(an.a.z) - Math.log(an.de.z)) * k);   // (el zoom crece de forma pareja: se interpola en logaritmo)
+  v.fx = an.de.fx + (an.a.fx - an.de.fx) * k; v.fy = an.de.fy + (an.a.fy - an.de.fy) * k;
+  if (t >= 1) { FU.vista = Object.assign({}, an.a); FU.anim = null; }
+  dibujarCamFU();
+  if (FU.anim) FU.animId = requestAnimationFrame(pasoCamFU);
+}
+function dibujarCamFU() {
+  const pl = FU.pl, v = FU.vista; if (!pl || !v || !FU.mundo) return;
+  const c = $('fuMapa'), W = pl.W, H = pl.H;
+  if (c.width !== W) c.width = W; if (c.height !== H) c.height = H;
+  c.style.width = W + 'px'; c.style.height = H + 'px';
+  const g = c.getContext('2d'); g.setTransform(1, 0, 0, 1, 0, 0); g.imageSmoothingEnabled = false;
+  g.fillStyle = 'rgb(15,54,79)'; g.fillRect(0, 0, W, H);
+  const z = v.z, quieto = !FU.anim;
+  let ox = v.fx - v.cx / z, oy = v.fy - v.cy / z; if (quieto) { ox = Math.round(ox); oy = Math.round(oy); }   // (en reposo cae justo en píxeles enteros: nítido)
+  g.setTransform(z, 0, 0, z, -ox * z, -oy * z);
+  g.drawImage(FU.mundo, 0, 0);
+  superponerFU(g, pl.e, pl.geo, pl.colocando, z);
+  g.setTransform(1, 0, 0, 1, 0, 0);
+  FU.cam = { z, ox, oy, W, H };
 }
 
 // Lo que se dibuja sobre el mapa según la etapa.
@@ -231,9 +258,9 @@ function superponerFU(g, e, geo, colocando, z) {
       const s = FU.candidatos.find(c => c.id === FU.sel);
       if (s) {
         const sub = s.tipo, col = fuColor(e.yo);
-        if (sub === 'pueblo') { const im = A.casa(col); g.drawImage(im, Math.round(s.x - 4), Math.round(s.y - 9)); }
-        else if (sub === 'ciudad') { const im = A.ciudad(col); g.drawImage(im, Math.round(s.x - 7), Math.round(s.y - 9)); }
-        else if (sub === 'caballero') { g.drawImage(A.caballero(col), Math.round(s.x - 4), Math.round(s.y - 6)); }
+        if (sub === 'pueblo') { const im = A.casa(col); g.drawImage(im, Math.round(s.x - 6), Math.round(s.y - 11)); }
+        else if (sub === 'ciudad') { const im = A.ciudad(col); g.drawImage(im, Math.round(s.x - 9), Math.round(s.y - 11)); }
+        else if (sub === 'caballero') { g.drawImage(A.caballero(col), Math.round(s.x - 6), Math.round(s.y - 8)); }
         else if (sub === 'camino') { const ar = e.mapa.aristas[s.id]; lineaCaminoFU(g, geo.v(e.mapa.vertices[ar.a]), geo.v(e.mapa.vertices[ar.b]), col); }
       }
     }
@@ -404,7 +431,7 @@ function prodFU(e, MOV, left, right, dock, W) {
     const fila = fuEl('div', 'fuProdDados'), lienzo = document.createElement('canvas'), cont = fuEl('div', 'fuProdEsc'); cont.append(lienzo);
     const suma = fuEl('div', 'fuProdSuma'); suma.id = 'fuProdSuma'; fila.append(cont, suma);
     const texto = fuEl('div', 'fuProdTexto'); texto.id = 'fuProdTexto'; box.append(fila, texto);
-    FU.escNum = new D3.Escena(lienzo, cont, { maxAlto: 130, forzarFila: true, espaciado: 1.7, sinMesa: true, velocidad: 0.75, dprMax: 1.5, sombra: false });
+    FU.escNum = new D3.Escena(lienzo, cont, { maxAlto: 130, forzarFila: true, espaciado: 1.7, sinMesa: true, velocidad: 1.35, dprMax: 1.5, sombra: false });
     FU.escNum.configurar(['normal', 'normal']);
     FU.escNum.alAterrizar = () => { if (!document.hidden) Sonido.play('ficha'); };
     FU.escNum.alTerminar = () => { FU.prodFase = 1; FU.animando = false; if (FU.e) repintarFU(); };
