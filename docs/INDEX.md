@@ -2,6 +2,11 @@
 
 Archivo generado por `indexar_docs.py`. No editar a mano: se regenera.
 
+## Diagrama
+
+- [[clases-servidor]] [Clases del módulo servidor](diagramas/clases-servidor.md) — Diagramas de clases inferidos del módulo servidor.
+- [[modulos]] [Módulos y dependencias](diagramas/modulos.md) — Mapa de módulos y de qué módulo usa a cuál, inferido de las importaciones.
+
 ## Otro
 
 - [[ESTADO]] [Estado del proyecto](ESTADO.md) — > Documento corto y vivo. Es lo primero que se lee al abrir una sesión y lo último que se actualiza.
@@ -20,3 +25,19 @@ Archivo generado por `indexar_docs.py`. No editar a mano: se regenera.
 - [[principios_diseno]] [Principios de diseño de los juegos](principios_diseno.md) — Anotados el 9 de noviembre de 2026, a partir de lo que hace atractivos al Diez mil y al 13 Jack. Sirven de guía para el Rulepoly y para cualquier juego futuro: 
 - [[relevamiento]] [Relevamiento automático de Blackjack Web](relevamiento.md) — Informe generado por `relevar.py`: solo hechos, sin interpretación.
 - [[rulepoly]] [Rulepoly: el juego (diseño acordado)](rulepoly.md) — > **En revisión (9 nov 2026):** Dante sintió que este diseño está trabado (se parece al Diez mil, tiene demasiados sistemas y el modo solo no cerraba). Se explo
+
+## Consulta
+
+- [[01-reglas-candidatas]] [Consulta 1: Reglas de negocio candidatas (inferidas del código)](consultas/01-reglas-candidatas.md) — > **Cómo responder.** Escribir debajo de cada pregunta, en **Respuesta:**. Si estás de acuerdo con la **Propuesta**, alcanza con `ok`. Lo que quede sin responde
+
+## Interfaces
+
+- [[RI-001]] [Variables de entorno](requisitos/interfaces/RI-001.md) — 8 variables de entorno que lee el sistema.
+
+## Trazabilidad
+
+| Requisito | Tests | Código |
+|---|---|---|
+| RI-001 | — | — |
+
+Requisitos provisorios sin test: 1 (esperan confirmación; no cuentan como pendientes).

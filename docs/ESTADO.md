@@ -20,6 +20,9 @@ Subir el paquete (`node herramientas/empaquetar.js`) al hosting y comprobar que 
 
 ## Bloqueos y preguntas abiertas
 
+- Documentación inferida (provisoria): diagramas de módulos y clases del servidor, RI-001 (variables de entorno) y la consulta `docs/consultas/01-reglas-candidatas.md`, que espera tu respuesta. Ojo: 5 de sus 14 candidatas vienen de `presentacion/` y `prototipos/` (no son producto) y se pueden ignorar.
+- Faltan los requisitos funcionales y los diagramas de secuencia (con el modelo, por módulo; el análisis no ve las rutas de `salas.js`).
+
 - El build en Hostinger tuvo fallos que el usuario trataba con el soporte.
 - Zonas táctiles de la colocación inicial en celular: funcionan pero se ven apretadas.
 - Rendimiento de los dados 3D en un celular real: sin medir.
