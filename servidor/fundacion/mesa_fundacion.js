@@ -23,7 +23,7 @@ class MesaFundacion {
   constructor(op = {}) {
     this.juego = 'fundacion';
     this.modo = op.modo === 'solo' ? 'solo' : 'multi';
-    this.meta = R.METAS.includes(Number(op.meta)) ? Number(op.meta) : 10;
+    this.meta = R.METAS.includes(Number(op.meta)) ? Number(op.meta) : 8;
     this.maxAsientos = this.modo === 'multi' ? (op.asientos || MAX_ASIENTOS) : 1;
     this.clave = op.clave || null;
     this.azar = op.azar || Math.random;

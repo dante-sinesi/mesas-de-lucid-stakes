@@ -199,6 +199,7 @@ function correr(m, reloj, token, pasos) {
 }
 
 // ---------- las reglas de la sala ----------
+check(new MesaFundacion({ modo: 'multi' }).meta === 8 && new MesaFundacion({ modo: 'multi', meta: 5 }).meta === 8 && new MesaFundacion({ modo: 'multi', meta: 12 }).meta === 12, 'la meta por omisión es 8 y una meta inválida vuelve a 8');
 {
   const { m } = nueva({ modo: 'multi', asientos: 4, bots: 0 });
   m.unirse('a', 'Ana');
@@ -230,7 +231,7 @@ function correr(m, reloj, token, pasos) {
   let estado = null; salas.estado(r.sala, 'token_largo_de_prueba_1', -1, x => { estado = x; });
   check(estado && estado.ok && estado.juego === 'fundacion' && estado.mapa && estado.tab && estado.jugadores.length === 3, 'el estado trae el mapa, el tablero y los jugadores');
   check(!salas.crear({ juego: 'fundacion', modoFU: 'solo' }).publica, 'una sala solo no es pública');
-  const so = salas.crear({ juego: 'fundacion', modoFU: 'solo', metaFU: 99 }); check(so.ok && so.metaFU === 10 && so.asientos === 1 && so.tiempo === 'libre', 'una meta inválida vuelve a 10 y el solo no tiene tiempo');
+  const so = salas.crear({ juego: 'fundacion', modoFU: 'solo', metaFU: 99 }); check(so.ok && so.metaFU === 8 && so.asientos === 1 && so.tiempo === 'libre', 'una meta inválida vuelve a 8 y el solo no tiene tiempo');
 }
 
 console.log('pruebas de la mesa de Fundación terminadas, fallos:', fallos);

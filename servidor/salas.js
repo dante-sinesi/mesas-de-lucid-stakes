@@ -120,7 +120,7 @@ class Salas {
   _crearFundacion(cfg) {
     if (this.salas.size >= MAX_SALAS) return { ok: false, error: 'Hay demasiadas salas abiertas, prueba más tarde' };
     const modo = cfg.modoFU === 'solo' ? 'solo' : 'multi', tiempo = modo === 'solo' ? 'libre' : TIEMPO_VALIDO(cfg.tiempo);   // (en solitario no corre el tiempo)
-    const meta = [8, 10, 12].includes(Number(cfg.metaFU)) ? Number(cfg.metaFU) : 10;
+    const meta = [8, 10, 12].includes(Number(cfg.metaFU)) ? Number(cfg.metaFU) : 8;
     const a = Math.floor(Number(cfg.asientos)), asientos = modo === 'multi' ? (a >= 1 && a <= 8 ? a : 4) : 1, publica = this._publica(cfg, modo === 'multi');
     const conf = { asientos, publica, modoFU: modo, metaFU: meta, tiempo, bots: modo === 'multi' ? Bots.cantidadValida(cfg.bots, asientos) : 0 };
     let codigo;
