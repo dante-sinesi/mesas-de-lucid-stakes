@@ -21,7 +21,7 @@ const MAX_SALAS = 100;
 const MAX_CUERPO = 4096;
 const ACCIONES_DM = ['empezar', 'tirar', 'apartar', 'plantarse', 'voltear', 'apuesta', 'tomar', 'comprar', 'listo', 'usar', 'reaccion', 'nueva', 'salir', 'retomar', 'pausar', 'reanudar', 'tut', 'config', 'visibilidad', 'clave', 'botmas', 'botmenos'];   // las del diez mil
 const ACCIONES_TJ = ['empezar', 'pedir', 'plantarse', 'comprar', 'listo', 'reaccion', 'nueva', 'salir', 'retomar', 'pausar', 'reanudar', 'config', 'visibilidad', 'clave', 'botmas', 'botmenos'];   // las del 13 Jack
-const ACCIONES_FU = ['empezar', 'seguir', 'tirar', 'terminar', 'elegir', 'atras', 'colocar', 'pasar', 'nueva', 'salir', 'retomar', 'pausar', 'reanudar', 'config', 'visibilidad', 'clave', 'botmas', 'botmenos'];   // las de Fundación
+const ACCIONES_FU = ['empezar', 'seguir', 'descartar', 'construir', 'entregar', 'atras', 'colocar', 'pasar', 'nueva', 'salir', 'retomar', 'pausar', 'reanudar', 'config', 'visibilidad', 'clave', 'botmas', 'botmenos'];   // las de Fundación
 const LETRAS = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789';   // (sin letras que se confunden: I, L, O, 0, 1)
 
 const TIPOS = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.css': 'text/css; charset=utf-8', '.woff2': 'font/woff2', '.png': 'image/png', '.svg': 'image/svg+xml', '.ico': 'image/x-icon', '.webmanifest': 'application/manifest+json' };
@@ -186,12 +186,12 @@ class Salas {
       switch (accion) {
         case 'empezar': r = m.empezar(token); break;
         case 'seguir': r = m.seguir(token); break;
-        case 'tirar': r = m.tirar(token, datos.guardar); break;
-        case 'terminar': r = m.terminarDados(token, datos.reservar); break;
-        case 'elegir': r = m.elegir(token, datos.edificio); break;
+        case 'descartar': r = m.descartar(token, datos.quitar); break;
+        case 'construir': r = m.construir(token, datos.edificio); break;
+        case 'entregar': r = m.entregar(token, datos.id); break;
         case 'atras': r = m.atras(token); break;
         case 'colocar': r = m.colocar(token, datos.lugar); break;
-        case 'pasar': r = m.pasar(token, datos.reservar); break;
+        case 'pasar': r = m.pasar(token); break;
         case 'nueva': r = m.nuevaPartida(token); break;
         case 'pausar': r = m.pausar(token); break;
         case 'reanudar': r = m.reanudar(token); break;

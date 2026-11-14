@@ -1,11 +1,12 @@
 'use strict';
-// El jugador automático de Fundación: elige qué dados guardar, cuándo dejar de tirar, qué construir y dónde. Lo usan los bots de la sala, quien se ausenta y el servidor cuando se acaba el tiempo.
-// Piensa con las mismas reglas que el juego (reglas.js): no hace trampa ni ve más que un jugador.
+// El jugador automático de Fundación: elige qué descartar, qué construir, qué pedido entregar y dónde poner cada pieza. Lo usan los bots de la sala, quien se ausenta y la colocación inicial cuando se acaba el tiempo.
+// Piensa con las mismas reglas que el juego (reglas.js y misiones.js): no hace trampa ni ve más que un jugador.
 
 const R = require('./reglas');
+const M = require('./misiones');
 
-const VALOR = { ciudad: 3, pueblo: 2.6, caballero: 1.3, camino: 1 };   // cuánto vale cada edificio para el bot (puntos y futuro)
-const pips = n => (n ? 6 - Math.abs(7 - n) : 0);                         // los puntitos de un número: su probabilidad sobre 36
+const VALOR = { ciudad: 3, pueblo: 2.6, pedido: 2.2, caballero: 1.3, camino: 1 };   // cuánto vale cada jugada para el bot (puntos y futuro)
+const pips = n => (n ? 6 - Math.abs(7 - n) : 0);                                      // los puntitos de un número: su probabilidad sobre 36
 
 // Qué tan buen vértice es para poblar: los puntitos de sus hexágonos y que den recursos distintos.
 function valorVertice(mapa, v) {
@@ -32,49 +33,24 @@ function mejorLugar(mapa, tab, p, edificio, lugares, azar) {
 }
 const libre = (mapa, tab, v) => tab.vert[v] === null && mapa.vertices[v].vecinos.every(w => tab.vert[w] === null);
 
-// Los dados que guarda: los que ayudan al edificio que más conviene perseguir (valor por probabilidad con las tiradas que quedan).
-// `dados`: las 6 caras; `fijos`: cuántos están fijados (los primeros); `tiradasQuedan`: tiradas que quedan después de la actual.
-function guardar(mapa, tab, p, dados, fijos, tiradasQuedan) {
-  const libres = []; for (let i = fijos; i < dados.length; i++) libres.push(i);
-  let mejor = { score: -1, keep: [] };
-  for (const e of R.EDIFICIOS) {
-    if (!R.lugares(mapa, tab, p, e).length) continue;
-    const costo = R.COSTOS[e], cuenta = [0, 0, 0, 0, 0, 0]; dados.slice(0, fijos).forEach(c => { cuenta[c]++; });
-    const keep = [];
-    libres.forEach(i => { const c = dados[i]; if (c < 5 && cuenta[c] < costo[c]) { cuenta[c]++; keep.push(i); } });
-    let falta = 0; for (let r = 0; r < 5; r++) falta += Math.max(0, costo[r] - cuenta[r]);
-    libres.forEach(i => { if (dados[i] === 5 && !keep.includes(i) && falta > 0) keep.push(i); });
-    const guard = dados.slice(0, fijos).concat(keep.map(i => dados[i]));
-    const prob = R.probabilidad(costo, guard, dados.length - guard.length, tiradasQuedan);
-    const score = VALOR[e] * prob;
-    if (score > mejor.score) mejor = { score, keep, e };
-  }
+// Qué hace en su turno con esta mano: entregar un pedido, construir algo (y qué) o pasar. Se llama de a una jugada: después de cada una vuelve a decidir.
+function decidir(mapa, tab, p, mano, grupo, azar) {
+  let mejor = { tipo: 'pasar', valor: 0 };
+  for (const e of R.posibles(mapa, tab, p, mano)) if (VALOR[e] > mejor.valor) mejor = { tipo: 'construir', edificio: e, valor: VALOR[e] };
+  if (grupo) for (const m of grupo.activas) if (m.por === null && M.PEDIDOS[m.id] && M.entrega(m.id, mano) && VALOR.pedido > mejor.valor) mejor = { tipo: 'entregar', id: m.id, valor: VALOR.pedido };
   return mejor;
 }
 
-// ¿Conviene seguir tirando? No si ya se alcanza lo mejor a lo que se puede aspirar.
-function seguirTirando(mapa, tab, p, dados, fijos, tiradasQuedan) {
-  if (tiradasQuedan <= 0) return false;
-  const pos = R.posibles(mapa, tab, p, dados);
-  const actual = pos.length ? Math.max.apply(null, pos.map(e => VALOR[e])) : 0;
-  const g = guardar(mapa, tab, p, dados, fijos, tiradasQuedan);
-  return g.score > actual + 0.05;
-}
-
-// El edificio que elige entre los posibles.
-function elegirEdificio(posibles) { return posibles.slice().sort((a, b) => VALOR[b] - VALOR[a])[0] || null; }
-
-// Qué dados que sobraron conviene dejar en reserva para el turno siguiente: los que más acercan al edificio más valioso que todavía se puede construir.
-function reservar(mapa, tab, p, dados, usados, max) {
-  const libres = []; for (let i = 0; i < dados.length; i++) if (!usados.has(i)) libres.push(i);
-  let mejor = { score: 0, idx: [] };
-  for (const e of R.EDIFICIOS) {
-    if (!R.lugares(mapa, tab, p, e).length) continue;
-    const costo = R.COSTOS[e].slice(), total = costo.reduce((x, y) => x + y, 0), idx = [];
-    for (const i of libres) { const c = dados[i]; if (c < 5 && costo[c] > 0) { costo[c]--; idx.push(i); } }
-    const score = VALOR[e] * idx.length / total; if (score > mejor.score) mejor = { score, idx };
+// Las tarjetas que descarta cuando tiene de más: primero las que sobran del recurso más abundante que no hace falta para un pueblo o una ciudad.
+function descartar(mapa, tab, p, mano, n) {
+  const quitar = R.manoVacia(), m = mano.slice();
+  const falta = r => Math.max(R.COSTOS.pueblo[r], R.COSTOS.ciudad[r]);
+  for (let k = 0; k < n; k++) {
+    let mejor = -1, mejorV = -Infinity;
+    for (let r = 0; r < 5; r++) { if (m[r] <= 0) continue; const v = (m[r] - falta(r)) * 10 + m[r]; if (v > mejorV) { mejorV = v; mejor = r; } }
+    m[mejor]--; quitar[mejor]++;
   }
-  return mejor.idx.slice(0, max);
+  return quitar;
 }
 
-module.exports = { reservar, VALOR, valorVertice, mejorLugar, guardar, seguirTirando, elegirEdificio, pips };
+module.exports = { VALOR, valorVertice, mejorLugar, decidir, descartar, pips };
