@@ -5,14 +5,14 @@ Estado: **diseño cerrado en el brainstorming (`brainstorm_fundacion_v2.md`), na
 Qué es **decidido** y qué está **por calibrar** se marca en cada sección. Los requisitos numerados están en `fundacion_v2_requisitos.md`; el flujo, en `catan_flujo.md`; las pantallas, en `fundacion_v2_pantallas.md`; el plan de programación, en `fundacion_v2_plan.md`.
 
 ## La idea en una frase
-Una isla común de hexágonos. Con cada tirada de dos dados **cobran todos** los jugadores que tienen un pueblo o una ciudad junto a los hexágonos con ese número; cada recurso es una **tarjeta** que va a tu mano (máximo 6). En tu turno **gastas tarjetas** en construir caminos, pueblos, ciudades y caballeros, o las **entregas** para cumplir pedidos. El primero en llegar a la meta de puntos gana.
+Una isla común de hexágonos. Cada ronda tiene **5 tiradas** de dos dados, repartidas entre los turnos; con cada una **cobran todos** los jugadores que tienen un pueblo o una ciudad junto a los hexágonos con ese número; cada recurso es una **tarjeta** que va a tu mano (máximo 6). En tu turno haces **una acción**: **gastas tarjetas** en construir un camino, pueblo, ciudad o caballero, o las **entregas** para cumplir un pedido. El primero en llegar a la meta de puntos gana.
 
 ## Qué cambia respecto de la versión 1
 - **Se eliminan los dados de recursos** (guardar, volver a tirar, reserva, tope de 4 dados fijados, medallas de porcentaje) y el **oro**, que era una cara de esos dados.
 - Los recursos vienen del **número que sale** y de los **edificios** que tocan ese hexágono.
 - **Cobran todos** en cada tirada, no solo quien tiene el turno.
 - Hay **mano de tarjetas** con tope de 6 y un **descarte** al empezar el turno.
-- Se pueden hacer **todas las construcciones que alcancen** en un turno.
+- Se hace **una sola acción por turno** y las 5 tiradas de la ronda se reparten entre los turnos (ver ADR-007).
 - Aparecen las **misiones y pedidos** (una fuente de puntos y una válvula contra el mal reparto).
 - **No hay intercambio.**
 - El turno pasa a tener un solo reloj y el **tiempo agotado pasa el turno solo**.
@@ -32,7 +32,7 @@ Una isla común de hexágonos. Con cada tirada de dos dados **cobran todos** los
 - **No hay intercambio** (ni entre jugadores ni con un banco). Lo que sobra solo se descarta o se entrega en un pedido.
 
 ## El turno
-1. **Tirada (automática y compartida).** Se tiran 2 dados de número al empezar el turno. Con un número distinto de 7, **cobran todos**: cada hexágono con ese número, no bloqueado, da a cada jugador **1 tarjeta de su recurso por cada pueblo** y **2 por cada ciudad** que lo toque. Con 7, ver «El bandido». La tirada no tiene reloj.
+1. **Tiradas (automáticas y compartidas).** Las 5 tiradas de la ronda se reparten entre los turnos (con 4 jugadores: 1, 1, 1 y 2; con 8 hay turnos sin tirada; solo, las 5 son del único turno). Al empezar el turno se tiran las que le tocan (2 dados de número cada una). Con un número distinto de 7, **cobran todos**: cada hexágono con ese número, no bloqueado, da a cada jugador **1 tarjeta de su recurso por cada pueblo** y **2 por cada ciudad** que lo toque. Con 7, ver «El bandido». La tirada no tiene reloj.
 2. **Descarte** (solo quien tiene el turno y solo si tiene más de 6).
 3. **Construir y entregar:** el jugador hace **todas las acciones que le alcancen**, en el orden que quiera: construir, entregar pedidos, y después **pasar** (o se le acaba el reloj).
 
@@ -76,7 +76,7 @@ Dos marcadores que **cambian de dueño** si otro jugador los supera, como en Cat
 - Ausencia y desconexión siguen como en 13 Jack y Diez mil: un bot toma el lugar y lo conserva; si el jugador vuelve, retoma.
 
 ## Fin de la partida
-- **Objetivo: la meta de puntos. Por omisión 8** (decidido por Dante tras la calibración; también se puede elegir 10 o 12). Con 8, una partida dura unos 45 turnos con 4 jugadores (ver `fundacion_v2_calibracion.md`).
+- **Objetivo: la meta de puntos. Por omisión 20** (también hay 14, corta). Cada jugador juega entre 20 y 27 turnos y el 22 a 34 % de ellos sin hacer nada (ver ADR-007 y `fundacion_v2_calibracion.md`).
 - **Vuelta completa** cuando alguien llega, para que todos tengan los mismos turnos. Gana quien tiene más puntos; el empate lo gana quien llegó con menos turnos.
 - **Solo:** se gana por **meta de puntos** (sin reloj de partida); el resultado son los **turnos que tardaste** y se guarda la mejor marca. Las reglas son las mismas en cualquier modo.
 - La pantalla final es la de los otros juegos (ranking, **Nueva partida**, **Compartir** como imagen PNG, **Salir**).

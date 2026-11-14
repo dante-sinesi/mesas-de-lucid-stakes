@@ -153,3 +153,8 @@ Se adoptan **el camino de solo 1 madera** y **el pedido de «3 tarjetas cualesqu
 - **Consecuencia directa del objetivo:** si cada uno juega 20 a 30 turnos, la partida de 8 jugadores tiene unos 160 turnos y dura unos 45 minutos con bots (más con personas). El tiempo crece con los jugadores porque cada jugador juega lo mismo.
 - **Otras combinaciones:** 4 tiradas por ronda y meta 20 dan 23 a 28 turnos pero 38 a 40 % de vacíos con 4 a 8 jugadores (fuera de rango); 6 tiradas con meta 20 dan 19 a 22 turnos y 12 a 27 % de vacíos (más aceleradas).
 - **Reglas que cambiarían:** la tirada deja de ser una por turno (algunos turnos no tienen tirada), un turno admite una sola acción y la meta pasa a 20, con más puntos que vienen de misiones y pedidos. Falta que Dante lo decida; no se programó.
+
+
+## Resultado adoptado
+
+Se adoptó la combinación de 5 tiradas por ronda, una acción por turno y meta 20 ([[ADR-007]]). Con 100 partidas de bots por cantidad de jugadores: 26,6 turnos por jugador con 1 jugador, 22,9 con 2, 22,1 con 3, 22,6 con 4, 20,1 con 5, 20,0 con 6, 20,3 con 7 y 19,9 con 8; turnos sin hacer nada entre 22 % y 34 %; las 800 partidas terminan.

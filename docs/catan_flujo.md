@@ -31,7 +31,7 @@ Bots: se agregan y quitan desde la sala de espera, como en los otros juegos (jug
    3. **Construir y entregar** (con reloj): el jugador hace todas las acciones que le alcancen, en cualquier orden.
       - **Construir:** elige el edificio (solo se ofrecen los que alcanzan; si no alcanza ninguno, la ventana lo dice y el botón es «Pasar»), después el lugar (la cámara se acerca; en el celular, si hay demasiados lugares, primero la zona) y confirma. Puede construir varias veces.
       - **Entregar un pedido:** elige un pedido que pueda cumplir; la ventana muestra las tarjetas que se entregan (no se eligen) y los botones «Atrás» y «Entregar». Un pedido que no puede cumplir no abre la ventana: avisa.
-      - **Pasar:** termina el turno.
+      - **Pasar:** termina el turno. Construir o entregar es la acción del turno: al hacerla el turno termina solo.
 4. **Fin del turno:** se recalculan las misiones de condición y las carreras; si hubo un pedido entregado, **se repone al terminar el turno de quien lo entregó**; se cuenta un turno más para el vencimiento de cada pedido.
 5. **Meta:** cuando alguien llega, se completa la vuelta para que todos jueguen los mismos turnos. Gana quien tiene más puntos; el empate lo gana quien llegó con menos turnos.
 6. **Solo:** termina al llegar a la meta de puntos; el resultado son los turnos y se guarda la mejor marca.
@@ -47,6 +47,8 @@ La tirada y la cobranza son iguales para todos. Después ven el nombre del jugad
 - **Piezas agotadas** (15 caminos, 5 pueblos, 4 ciudades, 3 caballeros por jugador): ese edificio no se ofrece.
 - **Sin lugares válidos** para un edificio que alcanza: no se ofrece.
 - **Sin nada que hacer** (no alcanza para construir ni entregar): el turno se puede pasar al instante («Pasar»).
+- **Turno sin tirada** (con muchos jugadores): empieza directo en el descarte o en el turno, sin dados.
+- **Turno con varias tiradas:** los dados ruedan una vez por tirada («tirada 1 de 2») y al final se ven las ganancias sumadas.
 - **Pedido sin tarjetas suficientes:** no abre la ventana (no se pierde tiempo de turno).
 - **Mano de más de 6 fuera de tu turno:** es válido hasta tu próximo turno.
 - **Server autoritativo:** una máquina de estado propia (`MesaFundacion`, como `MesaDM` y `Mesa13`). La **mano de cada jugador es privada**: el servidor manda a cada uno su mano completa y a los demás solo la cantidad. Acciones: `descartar` (las tarjetas), `construir` (edificio) y `colocar` (lugar), `entregar` (pedido) y `pasar`; la tirada y la cobranza las hace el servidor al empezar el turno.
