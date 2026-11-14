@@ -4,6 +4,8 @@
 const path = require('path');
 const { MesaFundacion, FASE } = require(path.join(__dirname, '..', 'servidor', 'fundacion', 'mesa_fundacion.js'));
 const R = require(path.join(__dirname, '..', 'servidor', 'fundacion', 'reglas.js'));
+const M = require(path.join(__dirname, '..', 'servidor', 'fundacion', 'misiones.js'));
+const Bot = require(path.join(__dirname, '..', 'servidor', 'fundacion', 'bot.js'));
 const { Salas } = require(path.join(__dirname, '..', 'servidor', 'salas.js'));
 
 let fallos = 0;
@@ -15,15 +17,16 @@ function nueva(op) {
   const m = new MesaFundacion(Object.assign({ azar, ahora: () => reloj.t }, op));
   return { m, reloj };
 }
-// Juega por el humano lo más simple posible: pone en el primer lugar válido, tira una vez y construye lo que alcance.
+// Juega por el humano lo más simple posible: pone en el primer lugar válido, descarta al azar lo que sobra, construye lo que alcance y pasa.
+const azarH = R.rng(77);
 function jugarHumano(m, token) {
   const e = m.estado(token);
   if (e.turnoDe !== e.yo || m.finTurnoEn !== null) return false;
-  if (e.fase === 'inicial') return m.colocar(token, e.lugares[0]).ok;
+  if (e.fase === 'inicial') return m.colocar(token, Bot.mejorLugar(m.mapa, m.tab, e.yo, m.inicial.sub, e.lugares, azarH)).ok;   // (un buen lugar: sin intercambio, quien no toca un recurso no lo tiene nunca)
   const t = e.turno;
-  if (t.sub === 'produccion') return m.seguir(token).ok;
-  if (t.sub === 'dados') { if (t.tirada < 2) m.tirar(token, []); return m.terminarDados(token).ok; }
-  if (t.sub === 'construir') return m.elegir(token, t.posibles[0]).ok;
+  if (t.sub === 'tirada') return m.seguir(token).ok;
+  if (t.sub === 'descarte') return m.descartar(token, R.descarteAzar(e.mano, azarH)).ok;
+  if (t.sub === 'turno') { const e2 = ['ciudad', 'pueblo', 'camino', 'caballero'].find(x => t.posibles.includes(x)); return e2 ? m.construir(token, e2).ok : m.pasar(token).ok; }
   if (t.sub === 'colocar') return m.colocar(token, e.lugares[0]).ok;
   return false;
 }
@@ -80,33 +83,72 @@ function correr(m, reloj, token, pasos) {
   check(!m.empezar('a').ok, 'no se empieza dos veces');
   const actor = m._actor(); const hum = actor.token === 'a' ? 'b' : 'a';
   check(!m.colocar(hum, 0).ok, 'no se coloca fuera de turno');
-  check(!m.seguir('a').ok && !m.tirar('a', []).ok && !m.terminarDados('a').ok, 'no se hacen acciones del turno en la colocación inicial');
+  check(!m.seguir('a').ok && !m.descartar('a', [0, 0, 0, 0, 0]).ok && !m.construir('a', 'camino').ok && !m.entregar('a', 'par').ok, 'no se hacen acciones del turno en la colocación inicial');
   check(!m.colocar(actor.token, 999).ok && !m.colocar(actor.token, 'x').ok, 'un lugar inválido no sirve');
   check(!m.empezar('zzz').ok, 'un desconocido no puede empezar');
   // hasta el turno 1
   let pasos = 0; while (m.fase === FASE.INICIAL && pasos++ < 200) { reloj.t += 700; m.avanzar(); const e = m.estado('a'); if (e.turnoDe === 0 || e.turnoDe === e.yo) { /* nada */ } const act = m._actor(); if (act && !act.bot) { const tk = act.token; const e2 = m.estado(tk); m.colocar(tk, e2.lugares[0]); } }
   check(m.fase === FASE.TURNO, 'tras la colocación inicial empiezan los turnos');
   const t = m.t; const dueno = m.porAsiento(t.asiento);
+  check(t.sub === 'tirada' && m.tiradaHasta !== null, 'cada turno empieza con la tirada automática');
   if (!dueno.bot) {
     const tk = dueno.token;
-    check(t.sub === 'produccion' && !m.tirar(tk, []).ok, 'en la producción no se puede tirar');
-    check(m.seguir(tk).ok && m.t.sub === 'dados' && m.t.tirada === 1 && m.t.dados.length === 6, 'seguir hace la primera tirada de los 6 dados');
-    check(!m.tirar(tk, [m.t.fijos - 1]).ok || m.t.fijos === 0, 'un dado fijado no se puede guardar');
-    check(m.tirar(tk, [m.t.fijos]).ok && m.t.tirada === 2 && m.tirar(tk, []).ok && m.t.tirada === 3 && !m.tirar(tk, []).ok, 'hasta 3 tiradas');
-    const guardado = m.t.dados[m.t.fijos]; check(typeof guardado === 'number', 'los dados tienen caras');
-    check(m.pasar(tk).ok && m.finTurnoEn !== null, 'pasar termina el turno sin construir');
+    check(!m.construir(tk, 'camino').ok && !m.pasar(tk).ok, 'durante la tirada no se construye ni se pasa');
+    check(m.seguir(tk).ok && (m.t.sub === 'turno' || m.t.sub === 'descarte') && m.limite !== null, 'seguir salta la espera y arranca el reloj del turno');
+    if (m.t.sub === 'turno') check(m.pasar(tk).ok && m.finTurnoEn !== null, 'pasar termina el turno');
   }
 }
 
-// ---------- tiempo agotado: un bot juega y a la segunda vez seguida toma el lugar ----------
+// ---------- la tirada, el descarte y la mano privada ----------
+{
+  const { m, reloj } = nueva({ modo: 'multi', asientos: 3, bots: 2, meta: 12, semilla: 12 });
+  m.unirse('h', 'Hugo'); m.empezar('h');
+  let n = 0; while (!(m.fase === FASE.TURNO && m.t.sub === 'tirada' && m.t.asiento === m.jugador('h').asiento) && n++ < 3000) { reloj.t += 700; m.avanzar(); const a = m._actor(); if (m.fase === FASE.INICIAL && a && !a.bot) m.colocar('h', m.estado('h').lugares[0]); }
+  check(m.fase === FASE.TURNO && m.t.sub === 'tirada', 'se llega al turno del humano');
+  const h = m.jugador('h');
+  // la mano es privada: cada jugador ve la suya y de los demás solo cuántas tarjetas tienen
+  const e = m.estado('h'), otro = e.jugadores.find(x => x.asiento !== h.asiento);
+  check(Array.isArray(e.mano) && e.mano.length === 5 && typeof otro.tarjetas === 'number' && otro.mano === undefined, 'el estado trae mi mano y de los demás solo la cantidad');
+  const vecino = m.jugadores.find(x => x.asiento !== h.asiento && x.bot);
+  vecino.mano = [5, 0, 0, 0, 0];
+  check(!JSON.stringify(m.estado('h')).includes('[5,0,0,0,0]'), 'la mano de otro jugador no viaja en mi estado');
+  // descarte obligatorio con más de 6 tarjetas
+  h.mano = [3, 3, 3, 0, 0];
+  check(m.seguir('h').ok && m.t.sub === 'descarte' && m.t.exceso === 3, 'con 9 tarjetas, primero hay que descartar 3');
+  check(!m.construir('h', 'camino').ok && !m.pasar('h').ok, 'con un descarte pendiente no se construye ni se pasa');
+  check(!m.descartar('h', [1, 1, 0, 0, 0]).ok && !m.descartar('h', [0, 0, 0, 0, 3]).ok, 'hay que descartar justo lo que sobra y de lo que se tiene');
+  check(m.descartar('h', [1, 1, 1, 0, 0]).ok && m.t.sub === 'turno' && R.totalMano(h.mano) === 6, 'se descarta y se sigue con el turno');
+  // entregar un pedido
+  const ped = m.grupo.activas.find(x => M.PEDIDOS[x.id]);
+  h.mano = M.PEDIDOS[ped.id].costo ? M.PEDIDOS[ped.id].costo.slice() : [3, 0, 0, 0, 0];
+  const antes = m._puntosDe(h.asiento), ant = R.totalMano(h.mano);
+  check(m.estado('h').turno.entregables.includes(ped.id), 'el estado ofrece los pedidos que se pueden entregar');
+  check(m.entregar('h', ped.id).ok && R.totalMano(h.mano) === 0 && m._puntosDe(h.asiento) === antes + M.PV && ant > 0, 'entregar un pedido gasta las tarjetas y da puntos');
+  check(!m.entregar('h', ped.id).ok, 'un pedido ya entregado no se entrega dos veces');
+  check(m.pasar('h').ok && !m.grupo.activas.some(x => x.id === ped.id && x.por !== null) && m.grupo.activas.length === 4, 'al terminar el turno, el pedido entregado se repone');
+  check(!m.entregar('h', 'par').ok, 'fuera de turno no se entrega');
+}
+
+// ---------- si se acaba el reloj, el turno se pasa solo (y se descarta al azar lo que faltaba) ----------
+{
+  const { m, reloj } = nueva({ modo: 'multi', asientos: 2, bots: 1, semilla: 14 });
+  m.unirse('h', 'Hugo'); m.empezar('h');
+  let n = 0; while (!(m.fase === FASE.TURNO && m.t.sub === 'tirada' && m.t.asiento === m.jugador('h').asiento) && n++ < 3000) { reloj.t += 700; m.avanzar(); const a = m._actor(); if (m.fase === FASE.INICIAL && a && !a.bot) m.colocar('h', m.estado('h').lugares[0]); }
+  const h = m.jugador('h'); h.mano = [2, 2, 2, 1, 1];
+  const turnos = h.turnos;
+  m.seguir('h'); check(m.t.sub === 'descarte', 'con 8 tarjetas hay que descartar');
+  reloj.t += m.tiempos.turno + 100; m.avanzar();
+  check(m.t.terminado || m.finTurnoEn !== null || m.t.asiento !== h.asiento, 'al agotarse el reloj el turno se pasa solo');
+  check(R.totalMano(h.mano) === 6 && h.turnos === turnos + 1 && h.automaticos === 1, 'se descartó al azar lo que sobraba y se contó el tiempo agotado');
+}
+
+// ---------- tiempo agotado seguido: a la segunda vez, un bot toma el lugar ----------
 {
   const { m, reloj } = nueva({ modo: 'multi', asientos: 2, bots: 1, semilla: 4 });
   m.unirse('d', 'Dante'); m.empezar('d');
-  // la colocación inicial con el humano al día
   let n = 0; while (m.fase === FASE.INICIAL && n++ < 300) { reloj.t += 700; m.avanzar(); const a = m._actor(); if (a && !a.bot) m.colocar(a.token, m.estado(a.token).lugares[0]); }
   check(m.fase === FASE.TURNO, 'empiezan los turnos');
-  // se deja pasar el tiempo en los turnos del humano
-  let esperaHumano = 0, vistoExpulsado = false;
+  let vistoExpulsado = false;
   for (let i = 0; i < 400 && m.fase === FASE.TURNO; i++) {
     reloj.t += 3000; m.avanzar();
     const j = m.jugador('d'); if (j.expulsado) { vistoExpulsado = true; break; }
@@ -115,6 +157,22 @@ function correr(m, reloj, token, pasos) {
   check(dj.automaticos >= 2 && vistoExpulsado, 'tras 2 tiempos agotados seguidos, el jugador queda reemplazado por un bot (automáticos ' + dj.automaticos + ')');
   check(m.estado('d').jugadores.find(x => x.asiento === dj.asiento).expulsado === true, 'el estado lo informa');
   check(m.unirse('d').ok && m.jugador('d').expulsado === false && m.jugador('d').fallos === 0, 'al volver a entrar recupera su lugar');
+}
+
+// ---------- el reloj que se muestra: el de una persona y el de un bot ----------
+{
+  const { m, reloj } = nueva({ modo: 'multi', asientos: 2, bots: 1, semilla: 21 });
+  m.unirse('h', 'Hugo'); m.empezar('h');
+  const e0 = m.estado('h'); const actor = m._actor();
+  check(e0.limiteDur === (actor.bot ? m.tiempos.botIni : m.tiempos.inicial), 'la colocación inicial muestra el reloj de una persona (30 s) o el de un bot (corto)');
+  let n = 0; while (m.fase === FASE.INICIAL && n++ < 400) { reloj.t += 700; m.avanzar(); const a = m._actor(); if (a && !a.bot) m.colocar('h', m.estado('h').lugares[0]); }
+  let visto = { bot: null, humano: null };
+  for (let i = 0; i < 4000 && (visto.bot === null || visto.humano === null) && m.fase === FASE.TURNO; i++) {
+    reloj.t += 700; m.avanzar(); const t = m.t, a = m._actor();
+    if (t && a && (t.sub === 'turno' || t.sub === 'descarte') && m.limiteDur) { if (a.bot) visto.bot = m.limiteDur; else visto.humano = m.limiteDur; }
+    const j = m.jugador('h'); if (a === j) { const e = m.estado('h'); if (e.turno && e.turno.sub === 'turno') m.pasar('h'); else if (e.turno && e.turno.sub === 'descarte') m.descartar('h', R.descarteAzar(e.mano, azarH, e.manoMax)); else if (e.turno && e.turno.sub === 'tirada') m.seguir('h'); }
+  }
+  check(visto.bot === m.tiempos.bot && visto.humano === m.tiempos.turno, 'en el turno, la persona tiene 45 s y al bot se le muestra un reloj corto (así la barra corre en todos los turnos)');
 }
 
 // ---------- guardar y recuperar a mitad de la partida ----------
@@ -131,11 +189,41 @@ function correr(m, reloj, token, pasos) {
   check(m2.fase === FASE.FIN, 'la partida recuperada se puede terminar');
 }
 
+// ---------- una sala guardada con la versión 1 vuelve a la espera ----------
+{
+  const { m } = nueva({ modo: 'multi', asientos: 2, bots: 1, semilla: 2 });
+  m.unirse('a', 'Ana'); m.empezar('a');
+  const viejo = JSON.parse(JSON.stringify(m.guardar())); delete viejo.v; viejo.jugadores.forEach(j => { delete j.mano; delete j.pvExtra; });
+  const m2 = MesaFundacion.desde(viejo, {});
+  check(m2.fase === FASE.ESPERA && m2.jugadores.length === 2, 'una partida guardada con la versión 1 vuelve a la sala de espera');
+}
+
+// ---------- al reiniciar el servidor: las salas de Fundación de la versión 1 en plena partida no se recuperan, y una sala dañada no pierde a las demás ----------
+{
+  const fs = require('fs'), archivo = path.join(__dirname, 'tmp_salas_prueba.json'), reloj = { t: 9000000 };
+  const a = new Salas({ archivo: null, ahora: () => reloj.t });
+  const r1 = a.crear({ juego: 'fundacion', modoFU: 'multi', asientos: 3, bots: 2, publica: true }); a.entrar(r1.sala, 'token_largo_de_prueba_a', 'Ana'); a.accion(r1.sala, 'token_largo_de_prueba_a', 'empezar');
+  const r2 = a.crear({ juego: 'fundacion', modoFU: 'multi', asientos: 4, bots: 1, publica: true }); a.entrar(r2.sala, 'token_largo_de_prueba_b', 'Beto');
+  const r3 = a.crear({ juego: 'diezmil', modoDM: 'multi', asientos: 3, publica: true }); a.entrar(r3.sala, 'token_largo_de_prueba_c', 'Cami');
+  const datos = { ROTA: { mesa: null } };   // (una sala dañada que va primero)
+  for (const [c, sala] of a.salas) datos[c] = { creada: sala.creada, uso: sala.uso, publica: !!sala.publica, mesa: sala.mesa.guardar() };
+  check(datos[r1.sala].mesa.fase === 'inicial' && datos[r1.sala].mesa.v === 2, 'la sala en partida se guarda como de la versión 2');
+  delete datos[r1.sala].mesa.v; datos[r1.sala].mesa.jugadores.forEach(j => { delete j.mano; delete j.pvExtra; });   // (como la dejaba la versión 1)
+  fs.writeFileSync(archivo, JSON.stringify(datos));
+  try {
+    const b = new Salas({ archivo, ahora: () => reloj.t });
+    check(!b.salas.has(r1.sala), 'la sala de la versión 1 en plena partida no se recupera (no deja una sala fantasma)');
+    check(b.salas.has(r2.sala) && b.salas.get(r2.sala).mesa.fase === 'espera', 'una sala de Fundación en la sala de espera se recupera');
+    check(b.salas.has(r3.sala), 'las salas de otros juegos se recuperan, aunque haya una dañada');
+  } finally { fs.unlinkSync(archivo); }
+}
+
 // ---------- las reglas de la sala ----------
+check(new MesaFundacion({ modo: 'multi' }).meta === 8 && new MesaFundacion({ modo: 'multi', meta: 5 }).meta === 8 && new MesaFundacion({ modo: 'multi', meta: 12 }).meta === 12, 'la meta por omisión es 8 y una meta inválida vuelve a 8');
 {
   const { m } = nueva({ modo: 'multi', asientos: 4, bots: 0 });
   m.unirse('a', 'Ana');
-  check(m.configurar('a', { asientos: 6, meta: 12, tiempo: 'extendido' }).ok && m.maxAsientos === 6 && m.meta === 12 && m.tiempoModo === 'extendido' && m.tiempos.dados === 50000, 'el anfitrión cambia jugadores, meta y tiempo');
+  check(m.configurar('a', { asientos: 6, meta: 12, tiempo: 'extendido' }).ok && m.maxAsientos === 6 && m.meta === 12 && m.tiempoModo === 'extendido' && m.tiempos.turno === 90000, 'el anfitrión cambia jugadores, meta y tiempo');
   check(!m.configurar('a', { asientos: 0 }).ok && !m.configurar('a', { asientos: 9 }).ok && m.configurar('a', { asientos: 1 }).ok, 'de 1 a 8 jugadores');
   m.configurar('a', { meta: 7 }); check(m.meta === 12, 'una meta inválida no cambia nada');
   m.configurar('a', { asientos: 4 });
@@ -163,7 +251,7 @@ function correr(m, reloj, token, pasos) {
   let estado = null; salas.estado(r.sala, 'token_largo_de_prueba_1', -1, x => { estado = x; });
   check(estado && estado.ok && estado.juego === 'fundacion' && estado.mapa && estado.tab && estado.jugadores.length === 3, 'el estado trae el mapa, el tablero y los jugadores');
   check(!salas.crear({ juego: 'fundacion', modoFU: 'solo' }).publica, 'una sala solo no es pública');
-  const so = salas.crear({ juego: 'fundacion', modoFU: 'solo', metaFU: 99 }); check(so.ok && so.metaFU === 10 && so.asientos === 1 && so.tiempo === 'libre', 'una meta inválida vuelve a 10 y el solo no tiene tiempo');
+  const so = salas.crear({ juego: 'fundacion', modoFU: 'solo', metaFU: 99 }); check(so.ok && so.metaFU === 8 && so.asientos === 1 && so.tiempo === 'libre', 'una meta inválida vuelve a 8 y el solo no tiene tiempo');
 }
 
 console.log('pruebas de la mesa de Fundación terminadas, fallos:', fallos);

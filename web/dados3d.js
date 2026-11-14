@@ -194,7 +194,7 @@ const D3 = (() => {
     // `lienzo`: el canvas; `contenedor`: de quien toma el ancho; opciones: { maxAlto }
     constructor(lienzo, contenedor, opciones = {}) {
       this.lienzo = lienzo; this.contenedor = contenedor; this.ctx = lienzo.getContext('2d');
-      this.maxAlto = opciones.maxAlto || 9999; this.forzarFila = !!opciones.forzarFila; this.espaciado = opciones.espaciado; this.forzarGrilla = !!opciones.forzarGrilla; this.sinMesa = !!opciones.sinMesa; this.velocidad = opciones.velocidad; this.sombra = opciones.sombra !== false; this.dprMax = opciones.dprMax;   // (opciones de Fundación: en fila o en dos filas de 3, sin la mesa de fieltro)
+      this.maxAlto = opciones.maxAlto || 9999; this.forzarFila = !!opciones.forzarFila; this.espaciado = opciones.espaciado; this.forzarGrilla = !!opciones.forzarGrilla; this.sinMesa = !!opciones.sinMesa; this.velocidad = opciones.velocidad; this.sombra = opciones.sombra !== false; this.dprMax = opciones.dprMax; this.escalaMax = opciones.escalaMax; this.sinValores = !!opciones.sinValores; this.sombraFiel = !!opciones.sombraFiel;   // (opciones de Fundación: en fila o en dos filas de 3, sin la mesa de fieltro)
       this.mesaCaras = carasDe(voxelesMesa(), TABLE_VOX, [-TABLE_X / 2, 0, -TABLE_Z / 2]);
       this.modelos = {};
       this.dados = [];          // por lugar: { tipo, valor, pos, R, squash, apartado, seleccionado, brillo, anim }
@@ -265,7 +265,7 @@ const D3 = (() => {
       const dpr = Math.min(window.devicePixelRatio || 1, this.dprMax || 2), ancho = Math.max(this.contenedor.clientWidth || (window.innerWidth - 24), 200);
       this.modo = this.forzarGrilla ? 'grilla' : ((this.forzarFila || ancho >= 560) ? 'fila' : 'grilla');
       const nD = Math.max(this.dados.length, 1), vw = this.modo === 'fila' ? (this.forzarFila ? Math.max((nD - 1) * (this.espaciado || 0.86) + 1.5, 2.2) : 9.75) : 5.6, vh = this.modo === 'fila' ? (this.forzarFila ? 2.7 : 3.22) : 4.4;
-      this.sc = Math.min(ancho / vw, 118, this.maxAlto / vh);
+      this.sc = Math.min(ancho / vw, this.escalaMax || 118, this.maxAlto / vh);
       this.W = Math.round(this.sc * vw); this.H = Math.round(this.sc * vh);
       this.lienzo.style.width = this.W + 'px'; this.lienzo.style.height = this.H + 'px';
       this.lienzo.width = Math.round(this.W * dpr); this.lienzo.height = Math.round(this.H * dpr);
@@ -307,7 +307,16 @@ const D3 = (() => {
         const rec = this.sombra;   // (los dados llevan su sombra, salvo en las escenas que la desactivan: ahí solo se ve el aro dorado si están elegidos)
         if (!d.seleccionado && !rec) return;
         const alto = Math.max(d.pos[1] - HALF - (d.apartado || d.seleccionado ? 0.15 : 0), 0), cerca = 1 - Math.min(Math.max(alto / DROP, 0), 1), m = 0.5 * (0.55 + 0.7 * cerca);
-        const P = [[-1, -1], [1, -1], [1, 1], [-1, 1]].map(([s, t]) => this.proy([d.pos[0] + s * m, 0.012, d.pos[2] + t * m]));
+        let P = [[-1, -1], [1, -1], [1, 1], [-1, 1]].map(([s, t]) => this.proy([d.pos[0] + s * m, 0.012, d.pos[2] + t * m]));
+        if (this.sombraFiel) {   // la sombra es la silueta del cubo (girado como esté) proyectada hacia abajo, sobre el plano de la mesa y con su perspectiva
+          const h = this._modelo(d.tipo).lado / 2, pts = [];
+          for (const sx of [-1, 1]) for (const sy of [-1, 1]) for (const sz of [-1, 1]) { const v = mVec(d.R, [sx * h, sy * h, sz * h]); pts.push([d.pos[0] + v[0], d.pos[2] + v[2]]); }
+          pts.sort((p, q) => p[0] - q[0] || p[1] - q[1]);
+          const cruz = (o, a, b) => (a[0] - o[0]) * (b[1] - o[1]) - (a[1] - o[1]) * (b[0] - o[0]), inf = [], sup = [];
+          for (const p of pts) { while (inf.length >= 2 && cruz(inf[inf.length - 2], inf[inf.length - 1], p) <= 0) inf.pop(); inf.push(p); }
+          for (const p of pts.slice().reverse()) { while (sup.length >= 2 && cruz(sup[sup.length - 2], sup[sup.length - 1], p) <= 0) sup.pop(); sup.push(p); }
+          P = inf.slice(0, -1).concat(sup.slice(0, -1)).map(([x, z]) => this.proy([x, 0.012, z]));
+        }
         ctx.fillStyle = d.seleccionado ? 'rgba(242,201,76,' + (rec ? (0.25 + 0.2 * cerca).toFixed(3) : '0.08') + ')' : 'rgba(0,0,0,' + (0.1 + 0.34 * cerca).toFixed(3) + ')';
         ctx.beginPath(); ctx.moveTo(P[0][0], P[0][1]); P.slice(1).forEach(q => ctx.lineTo(q[0], q[1])); ctx.closePath(); ctx.fill();
         if (d.seleccionado) { ctx.strokeStyle = 'rgba(255,224,120,.95)'; ctx.lineWidth = 2; ctx.stroke(); ctx.lineWidth = 0.7; }
@@ -338,7 +347,7 @@ const D3 = (() => {
       const px = Math.max(11, Math.round(this.sc * 0.24));
       ctx.font = '700 ' + px + 'px "Lucid Stakes", monospace'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.lineWidth = 3; ctx.lineJoin = 'round';
       this.dados.forEach((d, i) => {
-        if (d.anim || !this.pantalla[i] || !d.mostrarValor || (ESTILOS[d.tipo] && ESTILOS[d.tipo].caras)) return;
+        if (d.anim || this.sinValores || !this.pantalla[i] || !d.mostrarValor || (ESTILOS[d.tipo] && ESTILOS[d.tipo].caras)) return;
         const c = this.pantalla[i], y = c.y + this.sc * 0.66;
         ctx.strokeStyle = 'rgba(8,4,16,.85)'; ctx.strokeText(String(d.valor), c.x, y);
         ctx.fillStyle = d.apartado ? 'rgb(140,150,140)' : 'rgb(255,243,196)'; ctx.fillText(String(d.valor), c.x, y);

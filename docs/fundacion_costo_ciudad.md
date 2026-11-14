@@ -1,5 +1,8 @@
 # Costo de la ciudad: comparación con bots
 
+> **Nota:** medición de la versión 1 (con dados de recursos); queda como historia. La calibración de la versión 2 está en `fundacion_v2_calibracion.md`.
+
+
 2 partidas por caso, meta 10 puntos, reserva de dados 2. «Vacíos 7-9» = turnos sin construir cuando el jugador tiene entre 7 y 9 puntos.
 
 | Jugadores | Costo de la ciudad | Prob. de lograrla en un turno | Rondas (prom · p90) | Vacíos 7-9 pts | Racha máx. sin construir (p90) | Ciudades por jugador | Gana el 1.º |

@@ -1,0 +1,285 @@
+<!doctype html>
+<html lang="es">
+<head data-herramienta>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>fundacion-dados: direcciones · Visor de propuestas</title>
+<style data-herramienta>
+:root { color-scheme: light dark; --fondo: #e9e7e2; --panel: #f7f6f3; --tinta: #1c1b19; --suave: #5b574f; --linea: #b9b3a5; --barra: #1c1b19; --barra-tinta: #f5f1e8; --acento: #8a2d12; }
+@media (prefers-color-scheme: dark) { :root { --fondo: #232220; --panel: #2c2b28; --tinta: #efece4; --suave: #aaa595; --linea: #4a4740; --barra: #111; --acento: #f0a58a; } }
+* { box-sizing: border-box; }
+html, body { height: 100%; }
+body { margin: 0; display: flex; flex-direction: column; overflow: hidden; background: var(--fondo); color: var(--tinta); font: 14px/1.45 system-ui, sans-serif; }
+header.barra { flex: 0 0 auto; display: flex; flex-wrap: wrap; gap: 8px 16px; align-items: center; padding: 8px 16px; background: var(--barra); color: var(--barra-tinta); }
+header.barra h1 { margin: 0; font-size: 15px; font-weight: 600; }
+.grupo { display: flex; gap: 4px; align-items: center; }
+.grupo > span { color: #aaa595; margin-right: 2px; }
+button { min-height: 32px; padding: 0 12px; border: 1px solid #8a8578; border-radius: 4px; background: transparent; color: inherit; font: inherit; cursor: pointer; }
+button:hover:not(:disabled) { background: rgba(255,255,255,.14); }
+button:focus-visible, a:focus-visible, label:focus-within { outline: 2px solid #ffd166; outline-offset: 2px; }
+header button[aria-pressed="true"], header button[aria-pressed="true"]:hover:not(:disabled) { background: var(--barra-tinta); color: var(--barra); border-color: var(--barra-tinta); }
+button:disabled { opacity: .4; cursor: not-allowed; }
+div.cuerpo { flex: 1 1 auto; min-height: 0; display: flex; }
+aside.lateral { flex: 0 0 220px; width: 220px; min-height: 0; overflow-x: hidden; overflow-y: auto; padding: 8px; border-right: 1px solid var(--linea); background: var(--panel); }
+aside.lateral.cerrado { flex-basis: 52px; width: 52px; overflow: hidden; }
+aside.lateral .menu { display: grid; place-items: center; width: 36px; height: 36px; padding: 0; border-color: var(--linea); color: var(--tinta); }
+aside.lateral .menu svg { width: 20px; height: 20px; stroke: currentColor; stroke-width: 2; stroke-linecap: round; fill: none; }
+aside.lateral h2 { margin: 14px 4px 6px; font-size: 12px; font-weight: 600; letter-spacing: .04em; text-transform: uppercase; color: var(--suave); }
+aside.lateral ul { margin: 0; padding: 0; list-style: none; display: grid; gap: 4px; }
+aside.lateral li button { width: 100%; text-align: left; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; border-color: transparent; color: var(--tinta); }
+aside.lateral li button:hover:not(:disabled) { background: rgba(127,127,127,.18); }
+aside.lateral li button[aria-current="true"] { background: var(--tinta); color: var(--fondo); }
+aside.lateral .pend::after { content: " ·"; color: var(--acento); font-weight: 700; }
+aside.lateral li button[aria-current="true"].pend::after { color: inherit; }
+aside.lateral .nota-lateral { margin: 14px 4px 0; color: var(--suave); font-size: 12px; }
+aside.lateral.cerrado > :not(.menu) { display: none; }
+main { flex: 1 1 auto; min-width: 0; min-height: 0; overflow: hidden; padding: 12px 16px; display: grid; place-items: center; }
+.rejilla { display: grid; gap: 12px 16px; justify-content: center; align-items: start; }
+figure { margin: 0; min-width: 0; }
+figcaption { display: flex; gap: 8px; justify-content: space-between; height: 22px; color: var(--suave); white-space: nowrap; overflow: hidden; }
+figcaption a { color: var(--acento); }
+.marco { margin: 0 auto; overflow: hidden; border: 1px solid var(--linea); background: #fff; }
+.marco iframe { display: block; border: 0; background: #fff; transform-origin: 0 0; }
+.marco.imagen { display: grid; place-items: center; border: 0; background: transparent; }
+.marco img { display: block; width: auto; height: auto; max-width: 100%; max-height: 100%; }
+.vacio { margin: 0 auto; display: grid; place-items: center; padding: 12px; text-align: center; border: 2px dashed var(--linea); color: var(--suave); background: var(--panel); }
+.vacio.pendiente { border-color: var(--acento); color: var(--tinta); }
+</style>
+</head>
+<body data-herramienta>
+<header class="barra">
+  <h1 id="titulo"></h1>
+  <div class="grupo" id="grupo-vista" role="group" aria-label="Vista"><span>Vista</span>
+    <button type="button" data-modo="desktop">Desktop</button>
+    <button type="button" data-modo="mobile">Mobile</button>
+    <button type="button" data-modo="ambas">Ambas</button>
+  </div>
+  <div class="grupo" role="group" aria-label="Propuestas"><span>Propuestas</span>
+    <button type="button" data-diseno="una">Una</button>
+    <button type="button" data-diseno="lado">Lado a lado</button>
+  </div>
+  <label class="grupo" id="etq-notas"><input type="checkbox" id="notas"> Ver notas</label>
+  <button type="button" id="pantalla-completa" aria-pressed="false">Pantalla completa</button>
+</header>
+<div class="cuerpo">
+<aside class="lateral" id="lateral" aria-label="Alternativas y pestañas">
+  <button type="button" class="menu" id="menu" aria-label="Ocultar el panel" aria-expanded="true" aria-controls="lista"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16"/></svg></button>
+  <h2 id="tit-lista">Alternativas</h2>
+  <ul id="lista" aria-labelledby="tit-lista"></ul>
+  <h2 id="tit-pantallas">Pestañas</h2>
+  <ul id="pantallas" aria-labelledby="tit-pantallas"></ul>
+  <p class="nota-lateral" id="nota-pend" hidden>· marca lo que le falta una versión para algún modo de la app.</p>
+</aside>
+<main id="vista"></main>
+</div>
+<script type="application/json" id="manifiesto">{"titulo": "fundacion-dados: direcciones", "modos": ["desktop"], "pantallas": [{"id": "general", "titulo": "General", "propuestas": [{"id": "direccion-a", "titulo": "Direccion a", "archivo": "direccion-a.html"}, {"id": "direccion-b", "titulo": "Direccion b", "archivo": "direccion-b.html"}, {"id": "direccion-c", "titulo": "Direccion c", "archivo": "direccion-c.html"}]}]}</script>
+<script data-herramienta>
+(function () {
+  var M = JSON.parse(document.getElementById('manifiesto').textContent);
+  var VP = Object.assign({ desktop: [1280, 800], mobile: [390, 844] }, M.viewports || {});
+  var MODOS = (M.modos && M.modos.length) ? M.modos : ['desktop', 'mobile'];
+  var CAB = 22, HUECO = 12;
+  // cada pestaña puede traer su propio tamaño de vista (una portada no necesita el alto de un diagrama)
+  function VPm(modo) { return ((M.pantallas[estado.pantalla] || {}).viewports || {})[modo] || VP[modo]; }
+  var estado = { pantalla: 0, propuesta: 0, modo: MODOS.length > 1 ? 'ambas' : MODOS[0], diseno: 'una', notas: false, panel: (document.documentElement.clientWidth || 1280) >= 760 };
+  var $ = function (s) { return document.querySelector(s); };
+  var IMG = /\.(svg|png|jpe?g|webp|gif)$/i;
+
+  function el(tag, attrs, texto) {
+    var e = document.createElement(tag);
+    Object.keys(attrs || {}).forEach(function (k) { e.setAttribute(k, attrs[k]); });
+    if (texto != null) e.textContent = texto;
+    return e;
+  }
+  function url(ruta) { return /^(data:|https?:)/.test(ruta) ? ruta : ruta.split('/').map(encodeURIComponent).join('/'); }
+  function archivoDe(p, modo) { return p[modo] || p.archivo || null; }
+  function pendiente(p) { return MODOS.some(function (m) { return !archivoDe(p, m); }); }
+
+  // Al cambiar de pestaña se queda en la misma alternativa: la de igual nombre o, si esa pestaña no la tiene, la de la misma posición.
+  function irAPantalla(i) {
+    var actual = M.pantallas[estado.pantalla].propuestas[estado.propuesta];
+    estado.pantalla = i;
+    var props = M.pantallas[i].propuestas, igual = -1;
+    props.forEach(function (p, j) { if (actual && p.id === actual.id) igual = j; });
+    estado.propuesta = igual >= 0 ? igual : Math.min(estado.propuesta, props.length - 1);
+  }
+
+  function leerHash() {
+    var h = new URLSearchParams(location.hash.slice(1));
+    var pn = parseInt(h.get('pantalla'), 10), pr = parseInt(h.get('p'), 10);
+    if (pn >= 0 && pn < M.pantallas.length) estado.pantalla = pn;
+    var props = M.pantallas[estado.pantalla].propuestas;
+    if (pr >= 0 && pr < props.length) estado.propuesta = pr;
+    var m = h.get('m');
+    if (m === 'ambas' ? MODOS.length > 1 : MODOS.indexOf(m) >= 0) estado.modo = m;
+    if (h.get('c') === 'lado') estado.diseno = 'lado';
+    estado.notas = h.get('notas') === '1';
+    if (h.get('s') === '0') estado.panel = false; else if (h.get('s') === '1') estado.panel = true;
+  }
+  function guardarHash() {
+    var h = new URLSearchParams();
+    h.set('pantalla', estado.pantalla); h.set('p', estado.propuesta); h.set('m', estado.modo);
+    if (estado.diseno === 'lado') h.set('c', 'lado');
+    if (estado.notas) h.set('notas', '1');
+    h.set('s', estado.panel ? '1' : '0');
+    history.replaceState(null, '', '#' + h.toString());
+  }
+
+  // Un solo factor de escala por vista: todo entra en la ventana sin barras de desplazamiento y la
+  // versión mobile nunca queda más alta que la desktop (si hace falta, se angosta manteniendo su proporción).
+  function altoEfectivo(modo, modos) {
+    var h = VPm(modo)[1];
+    return (modo === 'mobile' && modos.indexOf('desktop') >= 0) ? Math.min(h, VPm('desktop')[1]) : h;
+  }
+  function celda(p, modo, k, modos, titulo) {
+    var fig = el('figure');
+    var ruta = archivoDe(p, modo);
+    var kk = k * altoEfectivo(modo, modos) / VPm(modo)[1];   // escala de este modo
+    var w = Math.round(VPm(modo)[0] * kk), h = Math.round(VPm(modo)[1] * kk);
+    var cap = el('figcaption');
+    // con un solo modo no hay nada que distinguir: se rotula con el título y el ancho
+    cap.appendChild(el('span', {}, [titulo, MODOS.length > 1 ? (modo === 'desktop' ? 'Desktop' : 'Mobile') : '', VPm(modo)[0] + ' px'].filter(Boolean).join(' · ')));
+    fig.appendChild(cap);
+    if (!ruta) {
+      var vacio = el('div', { 'class': 'vacio' + (MODOS.indexOf(modo) >= 0 ? ' pendiente' : '') });
+      vacio.style.width = w + 'px'; vacio.style.height = h + 'px';
+      vacio.textContent = 'Pendiente: falta la propuesta ' + modo + ' de «' + p.titulo + '».';
+      fig.appendChild(vacio);
+      return fig;
+    }
+    cap.appendChild(el('a', { href: url(ruta), target: '_blank', rel: 'noopener' }, 'abrir'));
+    var marco = el('div', { 'class': 'marco' });
+    marco.style.width = w + 'px'; marco.style.height = h + 'px';
+    if (IMG.test(ruta)) {
+      marco.className = 'marco imagen';
+      marco.appendChild(el('img', { src: url(ruta), alt: p.titulo + ' (' + modo + ')' }));
+    } else {
+      var f = el('iframe', { title: p.titulo + ' (' + modo + ')', src: url(ruta) + '?solo=1' + (estado.notas ? '&notas=1' : '') });
+      f.style.width = VPm(modo)[0] + 'px'; f.style.height = VPm(modo)[1] + 'px'; f.style.transform = 'scale(' + kk + ')';
+      marco.appendChild(f);
+    }
+    fig.appendChild(marco);
+    return fig;
+  }
+
+  function dibujar() {
+    var props = M.pantallas[estado.pantalla].propuestas;
+    var vista = $('#vista');
+    vista.innerHTML = '';
+    var dispW = Math.max(200, vista.clientWidth - 32), dispH = Math.max(160, vista.clientHeight - 24);
+    var modos = estado.modo === 'ambas' ? MODOS : [estado.modo];
+    var lado = estado.diseno === 'lado' && props.length > 1;
+    var rej = el('div', { 'class': 'rejilla' });
+    var cols = lado ? props.length : modos.length;
+    var filas = lado ? modos : [null];
+    // ancho: en una propuesta, los modos van uno al lado del otro; lado a lado, una columna por propuesta
+    var anchoNecesario = lado ? Math.max.apply(null, modos.map(function (m) { return VPm(m)[0]; })) * cols + HUECO * 1.3 * (cols - 1)
+                              : modos.reduce(function (s, m) { return s + VPm(m)[0]; }, 0) + HUECO * 1.3 * (cols - 1);
+    var altoNecesario = lado ? modos.reduce(function (s, m) { return s + altoEfectivo(m, modos) + CAB; }, 0) + HUECO * (modos.length - 1)
+                             : Math.max.apply(null, modos.map(function (m) { return altoEfectivo(m, modos); })) + CAB;
+    var k = Math.min(1, dispW / anchoNecesario, dispH / altoNecesario);
+    if (lado) {
+      rej.style.gridTemplateColumns = 'repeat(' + cols + ', auto)';
+      modos.forEach(function (m) { props.forEach(function (p) { rej.appendChild(celda(p, m, k, modos, p.titulo)); }); });
+    } else {
+      rej.style.gridTemplateColumns = 'repeat(' + cols + ', auto)';
+      var p = props[estado.propuesta];
+      modos.forEach(function (m) { rej.appendChild(celda(p, m, k, modos, '')); });
+    }
+    vista.appendChild(rej);
+  }
+
+  function lateral() {
+    var props = M.pantallas[estado.pantalla].propuestas;
+    var lista = $('#lista');
+    lista.innerHTML = '';
+    props.forEach(function (p, i) {
+      var b = el('button', { type: 'button', title: p.titulo }, p.titulo);
+      if (estado.diseno === 'una' && i === estado.propuesta) b.setAttribute('aria-current', 'true');
+      if (pendiente(p)) b.className = 'pend';
+      b.addEventListener('click', function () { estado.propuesta = i; estado.diseno = 'una'; todo(); });
+      var li = el('li'); li.appendChild(b); lista.appendChild(li);
+    });
+    var cont = $('#pantallas');
+    cont.innerHTML = '';
+    M.pantallas.forEach(function (pn, i) {
+      var b = el('button', { type: 'button', title: pn.titulo }, pn.titulo);
+      if (i === estado.pantalla) b.setAttribute('aria-current', 'true');
+      if (pn.propuestas.some(pendiente)) b.className = 'pend';
+      b.addEventListener('click', function () { irAPantalla(i); todo(); });
+      var li = el('li'); li.appendChild(b); cont.appendChild(li);
+    });
+    var varias = M.pantallas.length > 1;
+    $('#tit-pantallas').hidden = !varias; cont.hidden = !varias;
+    $('#nota-pend').hidden = !M.pantallas.some(function (pn) { return pn.propuestas.some(pendiente); });
+    var lat = $('#lateral'), menu = $('#menu');
+    lat.classList.toggle('cerrado', !estado.panel);
+    menu.setAttribute('aria-expanded', String(estado.panel));
+    menu.setAttribute('aria-label', estado.panel ? 'Ocultar el panel' : 'Mostrar el panel');
+  }
+
+  function barra() {
+    $('#grupo-vista').hidden = MODOS.length < 2;   // una app con un solo modo no muestra Desktop, Mobile ni Ambas
+    document.querySelectorAll('[data-modo]').forEach(function (b) {
+      var m = b.getAttribute('data-modo');
+      var ok = m === 'ambas' ? MODOS.length > 1 : MODOS.indexOf(m) >= 0;
+      b.disabled = !ok;
+      b.title = ok ? '' : 'Esta app no tiene modo ' + m;
+      b.setAttribute('aria-pressed', String(estado.modo === m));
+    });
+    var varias = M.pantallas[estado.pantalla].propuestas.length > 1;
+    document.querySelectorAll('[data-diseno]').forEach(function (b) {
+      b.disabled = !varias && b.getAttribute('data-diseno') === 'lado';
+      b.setAttribute('aria-pressed', String(estado.diseno === b.getAttribute('data-diseno')));
+    });
+    var hayHtml = M.pantallas.some(function (pn) { return pn.propuestas.some(function (p) { return ['desktop', 'mobile', 'archivo'].some(function (c) { return p[c] && !IMG.test(p[c]); }); }); });
+    $('#etq-notas').hidden = !hayHtml;
+    $('#notas').checked = estado.notas;
+  }
+
+  function todo() { guardarHash(); lateral(); barra(); dibujar(); }
+
+  document.title = (M.titulo || 'Propuestas') + ' · Visor de propuestas';
+  $('#titulo').textContent = M.titulo || 'Propuestas';
+  document.querySelectorAll('[data-modo]').forEach(function (b) {
+    b.addEventListener('click', function () { estado.modo = b.getAttribute('data-modo'); todo(); });
+  });
+  document.querySelectorAll('[data-diseno]').forEach(function (b) {
+    b.addEventListener('click', function () { estado.diseno = b.getAttribute('data-diseno'); todo(); });
+  });
+  $('#menu').addEventListener('click', function () { estado.panel = !estado.panel; todo(); });
+  $('#notas').addEventListener('change', function (e) { estado.notas = e.target.checked; todo(); });
+  var pc = $('#pantalla-completa');
+  if (!document.documentElement.requestFullscreen) pc.hidden = true;
+  pc.addEventListener('click', function () {
+    if (document.fullscreenElement) document.exitFullscreen(); else document.documentElement.requestFullscreen().catch(function () {});
+  });
+  document.addEventListener('fullscreenchange', function () {
+    var on = !!document.fullscreenElement;
+    pc.setAttribute('aria-pressed', String(on));
+    pc.textContent = on ? 'Salir de pantalla completa' : 'Pantalla completa';
+    dibujar();
+  });
+  window.addEventListener('resize', dibujar);
+  document.addEventListener('keydown', function (e) {
+    if (e.target.tagName === 'INPUT' || e.ctrlKey || e.metaKey || e.altKey) return;
+    var props = M.pantallas[estado.pantalla].propuestas, k = e.key.toLowerCase(), n = M.pantallas.length;
+    if (k === 'arrowright' || k === 'arrowleft') { irAPantalla((estado.pantalla + (k === 'arrowright' ? 1 : n - 1)) % n); e.preventDefault(); }
+    else if (k === 'arrowdown' || k === 'arrowup') {
+      if (estado.diseno === 'lado') estado.diseno = 'una';
+      estado.propuesta = (estado.propuesta + (k === 'arrowdown' ? 1 : props.length - 1)) % props.length; e.preventDefault();
+    }
+    else if (k === 'b') estado.panel = !estado.panel;
+    else if (k === 'd' && MODOS.indexOf('desktop') >= 0) estado.modo = 'desktop';
+    else if (k === 'm' && MODOS.indexOf('mobile') >= 0) estado.modo = 'mobile';
+    else if (k === 'a' && MODOS.length > 1) estado.modo = 'ambas';
+    else if (k === 'c' && props.length > 1) estado.diseno = estado.diseno === 'una' ? 'lado' : 'una';
+    else return;
+    todo();
+  });
+  leerHash();
+  todo();
+})();
+</script>
+</body>
+</html>

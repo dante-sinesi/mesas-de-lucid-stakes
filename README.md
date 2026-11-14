@@ -12,7 +12,7 @@ Mesas de juego multijugador en tiempo real, para jugar en el navegador (celular 
 |---|---|
 | **Diez mil** · dados | Tiras, apartas puntos y decides si te plantas o arriesgas todo. Dados 3D, objetos, tienda de mejoras y modos con amigos, escalera y carrera. |
 | **13 Jack** · cartas | Cada jugador tiene su propio mazo de 13 cartas y juega manos de 21 con patrones, combos y 19 cartas especiales. |
-| **Fundación** · dados + mapa | Un Catan de dados para 1 a 8 jugadores: el mapa te da recursos, tiras dados de recursos, los guardas y construyes caminos, pueblos, ciudades y caballeros mientras el bandido te acecha. |
+| **Fundación** · mapa + tarjetas | Un Catan rápido para 1 a 8 jugadores: con cada tirada de dos dados cobran todos las tarjetas de sus edificios (máximo 6 en la mano, privadas), y las gastan en caminos, pueblos, ciudades y caballeros o en pedidos y misiones, mientras el bandido se mueve solo. Pantalla horizontal. |
 
 ## Capturas
 
@@ -32,8 +32,8 @@ Mesas de juego multijugador en tiempo real, para jugar en el navegador (celular 
 - **Cliente sin frameworks**: HTML + JavaScript + CSS. Todo el arte es píxel plano dibujado por código en `<canvas>`; los dados 3D son un renderizador propio de cubos; el sonido se sintetiza con WebAudio.
 - **PWA instalable** con service worker versionado.
 - **Diseño adaptable**: el mismo juego en celular y en escritorio, con una cámara de mapa con zoom y zonas táctiles para elegir en pantallas chicas.
-- **Pruebas**: 15 suites de Node (`npm test`) que cubren reglas, salas, bots, partidas completas y el service worker.
-- **Balance con datos**: simuladores de partidas solo con bots (`simulador/`) que miden la duración y dónde se traba el juego según la cantidad de jugadores; ver [`docs/fundacion_estadisticas.md`](docs/fundacion_estadisticas.md) y [`docs/fundacion_costo_ciudad.md`](docs/fundacion_costo_ciudad.md).
+- **Pruebas**: 17 suites de Node (`npm test`) que cubren reglas, salas, bots, partidas completas y el service worker.
+- **Balance con datos**: simuladores de partidas solo con bots (`simulador/`) que miden la duración y dónde se traba el juego según la cantidad de jugadores; ver [`docs/fundacion_v2_calibracion.md`](docs/fundacion_v2_calibracion.md) (y, de la versión anterior, [`docs/fundacion_estadisticas.md`](docs/fundacion_estadisticas.md)) y [`docs/fundacion_costo_ciudad.md`](docs/fundacion_costo_ciudad.md).
 
 ## Cómo probarlo
 
@@ -58,7 +58,8 @@ docs/              Diseño de los juegos, estadísticas y decisiones de balance
 ## Documentación de diseño
 
 - [`docs/diseno.md`](docs/diseno.md): el proyecto hoy.
-- [`docs/catan_dados.md`](docs/catan_dados.md) y [`docs/catan_flujo.md`](docs/catan_flujo.md): reglas y pantallas de Fundación.
+- [`docs/catan_dados.md`](docs/catan_dados.md), [`docs/catan_flujo.md`](docs/catan_flujo.md) y [`docs/fundacion_v2_pantallas.md`](docs/fundacion_v2_pantallas.md): reglas, flujo y pantallas de Fundación.
+- [`docs/ESTADO.md`](docs/ESTADO.md) y [`docs/INDEX.md`](docs/INDEX.md): dónde está el proyecto y cómo navegar la documentación.
 - [`docs/fundacion_plan.md`](docs/fundacion_plan.md): plan de programación y decisiones.
 - [`docs/principios_diseno.md`](docs/principios_diseno.md): principios para diseñar juegos nuevos.
 

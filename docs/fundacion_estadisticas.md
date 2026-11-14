@@ -1,5 +1,8 @@
 # Fundación: estadísticas con bots
 
+> **Nota:** medición de la versión 1 (con dados de recursos); queda como historia. La calibración de la versión 2 está en `fundacion_v2_calibracion.md`.
+
+
 80 partidas por cantidad de jugadores, meta 10 puntos, reserva de dados 2, bots que juegan al máximo. Los minutos estiman 30 s por turno de una persona.
 
 ## Duración
