@@ -11,8 +11,8 @@ const COSTOS = { camino: [1, 0, 0, 0, 0], pueblo: [1, 1, 1, 1, 0], ciudad: [0, 0
 const EDIFICIOS = ['camino', 'pueblo', 'ciudad', 'caballero'];
 const PIEZAS = { camino: 15, pueblo: 5, ciudad: 4, caballero: 3 };
 const MANO_MAX = 6;            // tarjetas que puedes tener al empezar tu turno (si tienes más, descartas hasta 6)
-const METAS = [8, 10, 12];
-const CFG = { pedidoMin: 4, manoPorJugadorExtra: 0 };   // manoPorJugadorExtra: cuánto sube el tope de la mano por cada jugador desde el quinto (0 = no sube; palanca de calibración)   // los pedidos duran 2 turnos de cada jugador, pero nunca menos de estos turnos en total (en solitario serían solo 2): por calibrar
+const METAS = [14, 20];   // corta y estándar
+const CFG = { pedidoMin: 4, manoPorJugadorExtra: 0, tiradasPorRonda: 5, accionesPorTurno: 1 };   // tiradasPorRonda: las tiradas de cada ronda se reparten entre sus turnos (0 = una por turno); accionesPorTurno: cuántas acciones (construir o entregar) caben en un turno   // manoPorJugadorExtra: cuánto sube el tope de la mano por cada jugador desde el quinto (0 = no sube; palanca de calibración)   // los pedidos duran 2 turnos de cada jugador, pero nunca menos de estos turnos en total (en solitario serían solo 2): por calibrar
 const CAMINO_MIN = 5, EJERCITO_MIN = 2, BONO = 2;
 const DIRS_VERTICE = [[0, -2], [1, -1], [1, 1], [0, 2], [-1, 1], [-1, -1]];   // las 6 esquinas de un hexágono, en (a, y)
 const DIRS_HEX = [[1, 0], [1, -1], [0, -1], [-1, 0], [-1, 1], [0, 1]];         // los 6 vecinos de un hexágono, en (q, r)
@@ -134,6 +134,9 @@ const alcanza = (costo, mano) => costo.every((n, r) => mano[r] >= n);
 function pagar(costo, mano) { if (!alcanza(costo, mano)) return null; return mano.map((n, r) => n - costo[r]); }
 const sumarMano = (mano, extra) => mano.map((n, r) => n + (extra[r] || 0));
 // Cuántas tarjetas hay que descartar para quedar en el máximo.
+// Cuántas tiradas hay al empezar el turno que está en la posición `pos` (de 0 a n-1) de una ronda de n jugadores: las tiradas de la ronda se reparten entre sus turnos
+// (con 8 jugadores hay turnos sin tirada; con 1 jugador, sus 5 tiradas son del único turno). Así cada jugador cobra lo mismo por ronda con cualquier cantidad de jugadores.
+const tiradasDelTurno = (pos, n, k = CFG.tiradasPorRonda) => (k > 0 ? Math.floor((pos + 1) * k / n) - Math.floor(pos * k / n) : 1);
 // La mano máxima de la mesa: 6, más (si se activa la palanca) lo que suma cada jugador desde el quinto.
 const manoMax = jugadores => MANO_MAX + Math.max(0, Math.floor((jugadores - 4) * CFG.manoPorJugadorExtra));
 const exceso = (mano, max = MANO_MAX) => Math.max(0, totalMano(mano) - max);
@@ -219,7 +222,7 @@ function puntos(tab, p, car, extra) {   // `extra`: los puntos de las misiones y
 }
 
 module.exports = {
-  CFG, motivoSinLugar, RECURSOS, COSTOS, EDIFICIOS, PIEZAS, MANO_MAX, manoMax, TIPOS_19, TIPOS_37, METAS, CAMINO_MIN, EJERCITO_MIN, BONO, RECURSO_DE, PIPS,
+  CFG, motivoSinLugar, RECURSOS, COSTOS, EDIFICIOS, PIEZAS, MANO_MAX, manoMax, tiradasDelTurno, TIPOS_19, TIPOS_37, METAS, CAMINO_MIN, EJERCITO_MIN, BONO, RECURSO_DE, PIPS,
   rng, mezclar, crearMapa, esJusto, nuevoTablero, piezas, quedan, lugaresPueblo, lugaresCamino, lugaresCiudad, lugaresCaballero, lugares, poner, ordenInicial,
   manoVacia, totalMano, alcanza, pagar, sumarMano, exceso, descarteValido, descarteAzar, posibles, recursosDeVertice, tirarNumeros, produccion, moverBandido, hexesDe, carreras, puntos,
 };

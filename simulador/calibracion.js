@@ -7,16 +7,14 @@ const { MesaFundacion, FASE } = require(path.join(__dirname, '..', 'servidor', '
 const R = require(path.join(__dirname, '..', 'servidor', 'fundacion', 'reglas.js'));
 const M = require(path.join(__dirname, '..', 'servidor', 'fundacion', 'misiones.js'));
 
-const PARTIDAS = Number(process.argv[2]) || 40, META = Number(process.argv[3]) || 10, MINERAL = Number(process.argv[4]) || 3, PEDIDO_MIN = process.argv[5] === undefined ? R.CFG.pedidoMin : Number(process.argv[5]);
+const PARTIDAS = Number(process.argv[2]) || 40, META = Number(process.argv[3]) || 20, MINERAL = Number(process.argv[4]) || 3, PEDIDO_MIN = process.argv[5] === undefined ? R.CFG.pedidoMin : Number(process.argv[5]);
 const CANTIDADES = (process.argv[6] || '1,2,4,6,8').split(',').map(Number);
 R.COSTOS.ciudad = [0, 0, 0, 2, MINERAL]; R.CFG.pedidoMin = PEDIDO_MIN;
 // Las variantes a medir (se suman con +): colinas (más ladrillo y bosque en la isla) y mano (el tope de la mano sube con la mesa). El camino de solo madera y el pedido de 3 tarjetas cualesquiera ya son la regla.
 const PASO = Number(process.env.PASO_MS) || 3000;   // cuánto avanza el reloj de mentira por cada paso (más chico: tiempo más exacto, más lento)
-// TIRADAS_POR_RONDA=k: solo los primeros k turnos de cada ronda empiezan con una tirada (cobran todos); los demás turnos no tiran (0 = una tirada en cada turno, la regla de hoy).
-const K_TIRADAS = Number(process.env.TIRADAS_POR_RONDA) || 0;
-// ACCIONES=a: como máximo a acciones (construir o entregar) por turno; al llegar a a el turno termina (0 = todas las que alcancen, la regla de hoy).
-const MAX_ACCIONES = Number(process.env.ACCIONES) || 0;
-R.METAS.push(14, 16, 18, 20);   // (solo para medir: las reglas de la sala admiten 8, 10 y 12)
+// Para medir otras reglas: TIRADAS_POR_RONDA=k (0 = una por turno) y ACCIONES=a (0 = todas las que alcancen); por omisión valen las de la regla (5 y 1).
+if (process.env.TIRADAS_POR_RONDA !== undefined) R.CFG.tiradasPorRonda = Number(process.env.TIRADAS_POR_RONDA);
+if (process.env.ACCIONES !== undefined) R.CFG.accionesPorTurno = Number(process.env.ACCIONES) || 999;
 const VARIANTES = (process.argv[7] || 'base').split('+');
 if (VARIANTES.includes('colinas')) { R.TIPOS_19.colinas = 4; R.TIPOS_19.campos = 3; R.TIPOS_37.colinas = 8; R.TIPOS_37.campos = 7; }
 if (VARIANTES.includes('mano')) R.CFG.manoPorJugadorExtra = 1;
@@ -29,32 +27,18 @@ function jugar(jugadores, semilla) {
   const despues = m._despuesDeTirada.bind(m), fin = m._finTurno.bind(m), desc = m._descartar.bind(m), ent = m._entregar.bind(m), rev = m._revisarMisiones.bind(m), col = m._colocar.bind(m);
   m._despuesDeTirada = () => { m.jugadores.forEach(j => { st.maxMano = Math.max(st.maxMano, R.totalMano(j.mano)); }); despues(); };
   m._descartar = (j, q) => { const r = desc(j, q); if (r.ok) { st.descartes++; st.descartadas += R.totalMano(q); } return r; };
-  m._entregar = (j, id) => { const r = ent(j, id); if (r.ok) { st.entregas++; st.construyo[j.asiento] = true; } return r; };
+  m._entregar = (j, id) => { const r = ent(j, id); if (r.ok) { st.entregas++; if (!(m.t && m.t.terminado)) st.construyo[j.asiento] = true; } return r; };
   m._revisarMisiones = j => { const antes = j.pvExtra; rev(j); st.misiones += (j.pvExtra - antes); };
-  m._colocar = (j, l) => { const r = col(j, l); if (r.ok) st.construyo[j.asiento] = true; return r; };
+  m._colocar = (j, l) => { const r = col(j, l); if (r.ok && !(m.t && m.t.terminado)) st.construyo[j.asiento] = true; return r; };
   m._finTurno = mot => {
     const as = m.t.asiento, jx = m.porAsiento(as);
+    if (mot === 'accion') st.construyo[as] = true;   // (el turno terminó solo porque hizo su acción)
     if (!st.construyo[as] && jx) {   // un turno sin hacer nada: por qué
       const mano = jx.mano, caros = R.EDIFICIOS.filter(e => R.alcanza(R.COSTOS[e], mano));
       if (R.totalMano(mano) === 0) st.razon.manoVacia++; else if (caros.length) st.razon.sinLugar++; else { st.razon.faltaRecurso++; R.COSTOS.pueblo.forEach((n, r) => { if (mano[r] < n) st.falta[r]++; }); }
     }
     const rr = m.ronda; if (as === m.orden[m.orden.length - 1]) { const mx = Math.max.apply(null, m.jugadores.map(x => m._puntosDe(x.asiento))); st.curva[rr] = mx; }
     st.turnos++; if (st.construyo[as]) st.racha[as] = 0; else { st.vacios++; st.racha[as]++; st.rachaMax = Math.max(st.rachaMax, st.racha[as]); } st.construyo[as] = false; fin(mot); };
-  if (K_TIRADAS > 0) {
-    const orig = m._iniciarTurno.bind(m);
-    m._iniciarTurno = asiento => {
-      const n = m.orden.length, i = m.turnoIdx, veces = Math.floor((i + 1) * K_TIRADAS / n) - Math.floor(i * K_TIRADAS / n);   // las tiradas de la ronda se reparten entre sus turnos
-      if (veces > 0) { for (let k = 0; k < veces; k++) { orig(asiento); if (k < veces - 1) m._despuesDeTirada(); } return; }
-      m.t = { asiento, sub: 'tirada', num: { a: 0, b: 0, suma: 0 }, gana: [], detalle: [], hexes: [], bandidoAntes: m.tab.bandido, bandido: m.tab.bandido, edificio: null, lugar: null, terminado: false, motivo: null, exceso: 0 };
-      m.finTurnoEn = null; m.limite = null; m.botEn = null; m.tiradaHasta = null; m._despuesDeTirada();
-    };
-  }
-  if (MAX_ACCIONES > 0) {
-    let hechas = 0; const des2 = m._despuesDeTirada.bind(m), col2 = m._colocar.bind(m), ent2 = m._entregar.bind(m);
-    m._despuesDeTirada = () => { hechas = 0; des2(); };
-    const tras = r => { if (r.ok && ++hechas >= MAX_ACCIONES && m.t && !m.t.terminado) m._finTurno('paso'); return r; };
-    m._colocar = (j, l) => tras(col2(j, l)); m._entregar = (j, id) => tras(ent2(j, id));
-  }
   m._empezar(); const t0 = reloj.t;
   for (let i = 0; i < 90000 && m.fase !== FASE.FIN; i++) { reloj.t += PASO; m.avanzar(); }
   st.ms = reloj.t - t0;

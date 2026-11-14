@@ -9,6 +9,7 @@ const { TIPOS: TIPOS_DM, ORDEN_TIPOS } = require('./diezmil/reglas');
 const { Mesa13, TIEMPOS: TIEMPOS_TJ, MAZOS_VALIDOS, PUNTOS_VALIDOS } = require('./trecejack/mesa_13');
 const { ESPECIALES: ESPECIALES_TJ, ORDEN_ESPECIALES, tablaPatrones } = require('./trecejack/reglas');
 const { MesaFundacion } = require('./fundacion/mesa_fundacion');
+const RF = require('./fundacion/reglas');
 const Bots = require('./bots');
 const { TIEMPO_VALIDO, escalarTiempos } = require('./tiempo');
 
@@ -120,7 +121,7 @@ class Salas {
   _crearFundacion(cfg) {
     if (this.salas.size >= MAX_SALAS) return { ok: false, error: 'Hay demasiadas salas abiertas, prueba más tarde' };
     const modo = cfg.modoFU === 'solo' ? 'solo' : 'multi', tiempo = modo === 'solo' ? 'libre' : TIEMPO_VALIDO(cfg.tiempo);   // (en solitario no corre el tiempo)
-    const meta = [8, 10, 12].includes(Number(cfg.metaFU)) ? Number(cfg.metaFU) : 8;
+    const meta = RF.METAS.includes(Number(cfg.metaFU)) ? Number(cfg.metaFU) : 20;
     const a = Math.floor(Number(cfg.asientos)), asientos = modo === 'multi' ? (a >= 1 && a <= 8 ? a : 4) : 1, publica = this._publica(cfg, modo === 'multi');
     const conf = { asientos, publica, modoFU: modo, metaFU: meta, tiempo, bots: modo === 'multi' ? Bots.cantidadValida(cfg.bots, asientos) : 0 };
     let codigo;
@@ -343,7 +344,7 @@ class Salas {
         try {   // (una sala dañada no hace perder a las demás)
           const juego = datos[codigo].mesa.juego;
           if (juego !== 'diezmil' && juego !== 'trecejack' && juego !== 'fundacion') continue;   // (las salas de otros juegos guardadas por una versión vieja se descartan)
-          if (juego === 'fundacion' && datos[codigo].mesa.v !== 2 && datos[codigo].mesa.fase !== 'espera') continue;   // (una partida de Fundación de la versión 1 no se puede seguir: no se deja una sala fantasma)
+          if (juego === 'fundacion' && datos[codigo].mesa.v !== 3 && datos[codigo].mesa.fase !== 'espera') continue;   // (una partida de Fundación de la versión 1 no se puede seguir: no se deja una sala fantasma)
           const s = this._nueva(juego === 'fundacion' ? MesaFundacion.desde(datos[codigo].mesa, {}) : (juego === 'trecejack' ? Mesa13.desde(datos[codigo].mesa, {}) : MesaDM.desde(datos[codigo].mesa, {})));
           s.creada = datos[codigo].creada; s.uso = datos[codigo].uso; s.publica = !!datos[codigo].publica;
           this.salas.set(codigo, s);

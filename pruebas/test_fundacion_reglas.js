@@ -58,6 +58,15 @@ check(R.descarteValido([2, 0, 0, 0, 0], [0, 0, 0, 0, 0]), 'con 6 o menos, el des
   check(R.TIPOS_19 && R.TIPOS_19.colinas === 3 && R.TIPOS_37 && R.TIPOS_37.colinas === 7, 'la isla de 19 tiene 3 colinas y la de 37 tiene 7');
 }
 
+// ---------- el ritmo: tiradas repartidas por ronda, una acción por turno y las metas ----------
+check(R.CFG.tiradasPorRonda === 5 && R.CFG.accionesPorTurno === 1, 'por omisión hay 5 tiradas por ronda y una acción por turno');
+check(R.METAS.join() === '14,20', 'las metas son 14 (corta) y 20 (estándar)');
+for (let n = 1; n <= 8; n++) { const l = []; for (let i = 0; i < n; i++) l.push(R.tiradasDelTurno(i, n)); check(l.reduce((s, x) => s + x, 0) === 5, 'con ' + n + ' jugadores las tiradas de una ronda suman 5 (' + l.join(',') + ')'); }
+check(R.tiradasDelTurno(0, 1) === 5, 'solo, las 5 tiradas son del único turno');
+check([0, 1, 2, 3].map(i => R.tiradasDelTurno(i, 4)).join() === '1,1,1,2', 'con 4 jugadores: 1, 1, 1 y 2');
+check([0, 1, 2, 3, 4, 5, 6, 7].map(i => R.tiradasDelTurno(i, 8)).join() === '0,1,0,1,1,0,1,1', 'con 8 jugadores hay turnos sin tirada');
+check(R.tiradasDelTurno(2, 4, 0) === 1, 'con 0 tiradas por ronda vale una tirada por turno');
+
 // ---------- los lugares válidos ----------
 const mapa = R.crearMapa(11, 4);
 let tab = R.nuevoTablero(mapa);

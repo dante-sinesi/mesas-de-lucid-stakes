@@ -39,17 +39,17 @@ function correr(m, reloj, token, pasos) {
 
 // ---------- una partida con amigos: un humano y 3 bots ----------
 {
-  const { m, reloj } = nueva({ modo: 'multi', asientos: 4, bots: 3, meta: 8, semilla: 5 });
+  const { m, reloj } = nueva({ modo: 'multi', asientos: 4, bots: 3, meta: 14, semilla: 5 });
   check(m.jugadores.length === 3 && m.jugadores.every(j => j.bot), 'la sala nace con los bots pedidos');
   check(m.unirse('humano', 'Dante').ok && m.jugadores.length === 4, 'entra el humano y ocupa el asiento libre');
   check(m.empezar('humano').ok && m.fase === FASE.INICIAL, 'el anfitrión empieza y arranca la colocación inicial');
   check(m.estado('humano').mapa.hexes.length === 19 && m.mapa.radio === 2, 'con 4 jugadores el mapa es de 19 hexágonos');
   check(m.inicial.plan.length === 8 && m.inicial.plan.slice(0, 4).join() === m.inicial.plan.slice(4).reverse().join(), 'la colocación inicial va en serpiente');
-  correr(m, reloj, 'humano', 4000);
+  correr(m, reloj, 'humano', 12000);
   check(m.fase === FASE.FIN, 'la partida termina (fase ' + m.fase + ', ronda ' + m.ronda + ')');
   const f = m.fin;
   check(f && f.motivo === 'meta' && f.ranking.length === 4, 'termina por la meta con 4 en el ranking');
-  check(m.llegoMeta !== null && m.finDeVuelta, 'alguien llegó a la meta (8) y se jugó la vuelta completa (quien la tenía pudo perder una carrera en la última vuelta)');
+  check(m.llegoMeta !== null && m.finDeVuelta, 'alguien llegó a la meta (14) y se jugó la vuelta completa (quien la tenía pudo perder una carrera en la última vuelta)');
   check(f.ranking.every(r => r.turnos === f.ranking[0].turnos || r.turnos === f.ranking[0].turnos - 1 || r.turnos === f.ranking[0].turnos + 1), 'todos jugaron los mismos turnos (vuelta completa)');
   check(f.ranking.every((r, i) => i === 0 || f.ranking[i - 1].puntos >= r.puntos), 'el ranking va de más a menos puntos');
   const piezasTotales = m.tab.vert.filter(Boolean).length; check(piezasTotales >= 8, 'se pusieron los pueblos iniciales y los que se construyeron');
@@ -59,19 +59,19 @@ function correr(m, reloj, token, pasos) {
 
 // ---------- el mapa de 37 con 6 jugadores ----------
 {
-  const { m, reloj } = nueva({ modo: 'multi', asientos: 6, bots: 5, meta: 8, semilla: 8 });
+  const { m, reloj } = nueva({ modo: 'multi', asientos: 6, bots: 5, meta: 14, semilla: 8 });
   m.unirse('h', 'Ana'); m.empezar('h');
   check(m.mapa.hexes.length === 37, 'con 6 jugadores el mapa es de 37 hexágonos');
-  correr(m, reloj, 'h', 6000);
+  correr(m, reloj, 'h', 20000);
   check(m.fase === FASE.FIN && m.fin.ranking.length === 6, 'una partida de 6 termina');
 }
 
 // ---------- solo: mejor marca en turnos ----------
 {
-  const { m, reloj } = nueva({ modo: 'solo', meta: 8, semilla: 3 });
+  const { m, reloj } = nueva({ modo: 'solo', meta: 14, semilla: 3 });
   check(m.unirse('solo', 'Solo').ok && m.fase === FASE.INICIAL && m.maxAsientos === 1, 'en solitario se empieza al entrar');
   check(m.inicial.plan.length === 2, 'con un jugador son dos colocaciones iniciales');
-  correr(m, reloj, 'solo', 4000);
+  correr(m, reloj, 'solo', 12000);
   check(m.fase === FASE.FIN && m.fin.motivo === 'meta' && m.fin.turnos === m.fin.ranking[0].turnos && m.fin.turnos > 0, 'en solitario termina al llegar a la meta y el resultado son los turnos (' + (m.fin && m.fin.turnos) + ')');
   check(m.mapa.hexes.length === 19, 'en solitario el mapa es de 19 hexágonos');
 }
@@ -101,7 +101,7 @@ function correr(m, reloj, token, pasos) {
 
 // ---------- la tirada, el descarte y la mano privada ----------
 {
-  const { m, reloj } = nueva({ modo: 'multi', asientos: 3, bots: 2, meta: 12, semilla: 12 });
+  const { m, reloj } = nueva({ modo: 'multi', asientos: 3, bots: 2, meta: 20, semilla: 12 });
   m.unirse('h', 'Hugo'); m.empezar('h');
   let n = 0; while (!(m.fase === FASE.TURNO && m.t.sub === 'tirada' && m.t.asiento === m.jugador('h').asiento) && n++ < 3000) { reloj.t += 700; m.avanzar(); const a = m._actor(); if (m.fase === FASE.INICIAL && a && !a.bot) m.colocar('h', m.estado('h').lugares[0]); }
   check(m.fase === FASE.TURNO && m.t.sub === 'tirada', 'se llega al turno del humano');
@@ -125,8 +125,31 @@ function correr(m, reloj, token, pasos) {
   check(m.estado('h').turno.entregables.includes(ped.id), 'el estado ofrece los pedidos que se pueden entregar');
   check(m.entregar('h', ped.id).ok && R.totalMano(h.mano) === 0 && m._puntosDe(h.asiento) === antes + M.PV && ant > 0, 'entregar un pedido gasta las tarjetas y da puntos');
   check(!m.entregar('h', ped.id).ok, 'un pedido ya entregado no se entrega dos veces');
-  check(m.pasar('h').ok && !m.grupo.activas.some(x => x.id === ped.id && x.por !== null) && m.grupo.activas.length === 4, 'al terminar el turno, el pedido entregado se repone');
+  check(m.finTurnoEn !== null && m.t.motivo === 'accion' && !m.grupo.activas.some(x => x.id === ped.id && x.por !== null) && m.grupo.activas.length === 4, 'entregar es la acción del turno: termina solo y el pedido entregado se repone');
   check(!m.entregar('h', 'par').ok, 'fuera de turno no se entrega');
+}
+
+// ---------- el ritmo: tiradas repartidas por ronda y una acción por turno ----------
+{
+  function jugarBots(n, rondas) {
+    const reloj = { t: 1000000 }; const m = new MesaFundacion({ modo: 'multi', asientos: n, bots: 0, meta: 20, azar: R.rng(40 + n), ahora: () => reloj.t });
+    for (let i = 0; i < n; i++) m.jugadores.push(Object.assign(MesaFundacion._nuevo('b' + i, 'B' + i, i), { bot: true }));
+    const veces = [], subs = [], acciones = []; let hechas = 0;
+    const orig = m._iniciarTurno.bind(m), col = m._colocar.bind(m), ent = m._entregar.bind(m);
+    m._iniciarTurno = a => { orig(a); hechas = 0; veces.push(m.t.tiradas.length); subs.push(m.t.sub); };
+    m._colocar = (j, l) => { const r = col(j, l); if (r.ok) hechas++; acciones[veces.length - 1] = hechas; return r; };
+    m._entregar = (j, id) => { const r = ent(j, id); if (r.ok) hechas++; acciones[veces.length - 1] = hechas; return r; };
+    m._empezar();
+    for (let i = 0; i < 60000 && veces.length < n * rondas && m.fase !== FASE.FIN; i++) { reloj.t += 700; m.avanzar(); }
+    return { veces, subs, acciones };
+  }
+  for (const n of [1, 2, 3, 4, 8]) {
+    const { veces } = jugarBots(n, 3);
+    for (let r = 0; r < 3; r++) check(veces.slice(r * n, (r + 1) * n).reduce((x, y) => x + y, 0) === 5, 'con ' + n + ' jugadores la ronda ' + (r + 1) + ' tiene 5 tiradas (' + veces.slice(r * n, (r + 1) * n).join(',') + ')');
+  }
+  const g = jugarBots(8, 2);
+  check(g.veces.some(v => v === 0) && g.veces.every((v, i) => v !== 0 || (g.subs[i] === 'turno' || g.subs[i] === 'descarte')), 'un turno sin tirada empieza directo en el descarte o en el turno');
+  check(g.acciones.every(x => x === undefined || x <= 1) && g.acciones.some(x => x === 1), 'en ningún turno se hace más de una acción (y algunos hacen una)');
 }
 
 // ---------- si se acaba el reloj, el turno se pasa solo (y se descarta al azar lo que faltaba) ----------
@@ -177,7 +200,7 @@ function correr(m, reloj, token, pasos) {
 
 // ---------- guardar y recuperar a mitad de la partida ----------
 {
-  const { m, reloj } = nueva({ modo: 'multi', asientos: 3, bots: 2, meta: 8, semilla: 6 });
+  const { m, reloj } = nueva({ modo: 'multi', asientos: 3, bots: 2, meta: 14, semilla: 6 });
   m.unirse('h', 'Hugo'); m.empezar('h');
   correr(m, reloj, 'h', 120);
   check(m.fase === FASE.TURNO || m.fase === FASE.INICIAL, 'a mitad de la partida');
@@ -207,7 +230,7 @@ function correr(m, reloj, token, pasos) {
   const r3 = a.crear({ juego: 'diezmil', modoDM: 'multi', asientos: 3, publica: true }); a.entrar(r3.sala, 'token_largo_de_prueba_c', 'Cami');
   const datos = { ROTA: { mesa: null } };   // (una sala dañada que va primero)
   for (const [c, sala] of a.salas) datos[c] = { creada: sala.creada, uso: sala.uso, publica: !!sala.publica, mesa: sala.mesa.guardar() };
-  check(datos[r1.sala].mesa.fase === 'inicial' && datos[r1.sala].mesa.v === 2, 'la sala en partida se guarda como de la versión 2');
+  check(datos[r1.sala].mesa.fase === 'inicial' && datos[r1.sala].mesa.v === 3, 'la sala en partida se guarda con la versión del ritmo nuevo');
   delete datos[r1.sala].mesa.v; datos[r1.sala].mesa.jugadores.forEach(j => { delete j.mano; delete j.pvExtra; });   // (como la dejaba la versión 1)
   fs.writeFileSync(archivo, JSON.stringify(datos));
   try {
@@ -219,13 +242,13 @@ function correr(m, reloj, token, pasos) {
 }
 
 // ---------- las reglas de la sala ----------
-check(new MesaFundacion({ modo: 'multi' }).meta === 8 && new MesaFundacion({ modo: 'multi', meta: 5 }).meta === 8 && new MesaFundacion({ modo: 'multi', meta: 12 }).meta === 12, 'la meta por omisión es 8 y una meta inválida vuelve a 8');
+check(new MesaFundacion({ modo: 'multi' }).meta === 20 && new MesaFundacion({ modo: 'multi', meta: 8 }).meta === 20 && new MesaFundacion({ modo: 'multi', meta: 14 }).meta === 14, 'la meta por omisión es 20; 8 ya no es válida y vuelve a 20, y 14 sí');
 {
   const { m } = nueva({ modo: 'multi', asientos: 4, bots: 0 });
   m.unirse('a', 'Ana');
-  check(m.configurar('a', { asientos: 6, meta: 12, tiempo: 'extendido' }).ok && m.maxAsientos === 6 && m.meta === 12 && m.tiempoModo === 'extendido' && m.tiempos.turno === 90000, 'el anfitrión cambia jugadores, meta y tiempo');
+  check(m.configurar('a', { asientos: 6, meta: 14, tiempo: 'extendido' }).ok && m.maxAsientos === 6 && m.meta === 14 && m.tiempoModo === 'extendido' && m.tiempos.turno === 90000, 'el anfitrión cambia jugadores, meta y tiempo');
   check(!m.configurar('a', { asientos: 0 }).ok && !m.configurar('a', { asientos: 9 }).ok && m.configurar('a', { asientos: 1 }).ok, 'de 1 a 8 jugadores');
-  m.configurar('a', { meta: 7 }); check(m.meta === 12, 'una meta inválida no cambia nada');
+  m.configurar('a', { meta: 7 }); check(m.meta === 14, 'una meta inválida no cambia nada');
   m.configurar('a', { asientos: 4 });
   check(m.agregarBot('a', 3).ok && m.jugadores.length === 2 && m.jugadores[1].bot, 'se agrega un bot');
   check(m.quitarBot('a', 3).ok && m.jugadores.length === 1, 'se quita el bot');
@@ -239,19 +262,19 @@ check(new MesaFundacion({ modo: 'multi' }).meta === 8 && new MesaFundacion({ mod
 {
   const reloj = { t: 5000000 };
   const salas = new Salas({ archivo: null, ahora: () => reloj.t });
-  const r = salas.crear({ juego: 'fundacion', modoFU: 'multi', asientos: 4, metaFU: 8, publica: true, bots: 2 });
-  check(r.ok && r.juego === 'fundacion' && r.asientos === 4 && r.metaFU === 8 && r.bots === 2, 'se crea una sala de Fundación');
+  const r = salas.crear({ juego: 'fundacion', modoFU: 'multi', asientos: 4, metaFU: 14, publica: true, bots: 2 });
+  check(r.ok && r.juego === 'fundacion' && r.asientos === 4 && r.metaFU === 14 && r.bots === 2, 'se crea una sala de Fundación');
   check(salas.info(r.sala).juego === 'fundacion', 'la sala informa su juego');
   const e = salas.entrar(r.sala, 'token_largo_de_prueba_1', 'Dante');
   check(e.ok && e.juego === 'fundacion', 'se entra a la sala');
-  const pub = salas.publicas(); check(pub.length === 1 && pub[0].juego === 'fundacion' && pub[0].datos.meta === 8 && pub[0].sillas.filter(Boolean).length === 3, 'aparece en el mapa de mesas con su meta');
+  const pub = salas.publicas(); check(pub.length === 1 && pub[0].juego === 'fundacion' && pub[0].datos.meta === 14 && pub[0].sillas.filter(Boolean).length === 3, 'aparece en el mapa de mesas con su meta');
   check(!salas.accion(r.sala, 'token_largo_de_prueba_1', 'pedir').ok, 'una acción de otro juego no existe aquí');
-  check(salas.accion(r.sala, 'token_largo_de_prueba_1', 'config', { meta: 12 }).ok && salas.sala(r.sala).mesa.meta === 12, 'el anfitrión cambia la meta por la red');
+  check(salas.accion(r.sala, 'token_largo_de_prueba_1', 'config', { meta: 20 }).ok && salas.sala(r.sala).mesa.meta === 20, 'el anfitrión cambia la meta por la red');
   check(salas.accion(r.sala, 'token_largo_de_prueba_1', 'empezar').ok && salas.sala(r.sala).mesa.fase === 'inicial', 'se empieza por la red');
   let estado = null; salas.estado(r.sala, 'token_largo_de_prueba_1', -1, x => { estado = x; });
   check(estado && estado.ok && estado.juego === 'fundacion' && estado.mapa && estado.tab && estado.jugadores.length === 3, 'el estado trae el mapa, el tablero y los jugadores');
   check(!salas.crear({ juego: 'fundacion', modoFU: 'solo' }).publica, 'una sala solo no es pública');
-  const so = salas.crear({ juego: 'fundacion', modoFU: 'solo', metaFU: 99 }); check(so.ok && so.metaFU === 8 && so.asientos === 1 && so.tiempo === 'libre', 'una meta inválida vuelve a 8 y el solo no tiene tiempo');
+  const so = salas.crear({ juego: 'fundacion', modoFU: 'solo', metaFU: 99 }); check(so.ok && so.metaFU === 20 && so.asientos === 1 && so.tiempo === 'libre', 'una meta inválida vuelve a 20 y el solo no tiene tiempo');
 }
 
 console.log('pruebas de la mesa de Fundación terminadas, fallos:', fallos);
