@@ -11,7 +11,7 @@ const check = (ok, msg) => { if (!ok) { fallos++; console.log('FALLA', msg); } }
 
 // el archivo del cliente se carga en un entorno vacío: solo declara datos y funciones (lo que necesita del navegador se usa recién al dibujar)
 const codigo = fs.readFileSync(path.join(__dirname, '..', 'web', 'fundacion.js'), 'utf8');
-const C = vm.runInNewContext(codigo + '\n;({ escenaFU, entregaFU, expandirFU, FU_COSTOS, FU_MISION, FU_ICONO_MISION, FU_NOMBRE_REC })', {});
+const C = vm.runInNewContext(codigo + '\n;({ escenaFU, entregaFU, expandirFU, ganadoFU, jugadoresEnOrdenFU, claveTurnoFU, FU_COSTOS, FU_MISION, FU_ICONO_MISION, FU_NOMBRE_REC })', {});
 
 // ---------- los datos copiados del servidor ----------
 ['camino', 'pueblo', 'ciudad', 'caballero'].forEach(e => check(JSON.stringify(C.FU_COSTOS[e]) === JSON.stringify(R.COSTOS[e]), 'el costo de «' + e + '» del cliente es el del servidor'));
@@ -39,6 +39,22 @@ pedidos.forEach(id => manos.forEach(mano => {
   check(JSON.stringify(srv) === JSON.stringify(cli), 'el cliente y el servidor entregan lo mismo para «' + id + '» con la mano ' + mano.join(','));
 }));
 check(C.expandirFU([2, 0, 1, 0, 0]).join() === '0,0,2', 'una tarjeta por unidad, en el orden de los recursos');
+
+// ---------- las ganancias de las tiradas de un turno (puede haber varias o ninguna) ----------
+{
+  const t1 = { tiradas: [{ gana: [{ asiento: 1, mano: [0, 1, 0, 0, 0] }, { asiento: 0, mano: [1, 0, 0, 0, 0] }] }, { gana: [{ asiento: 0, mano: [0, 0, 2, 0, 0] }] }, { gana: [] }] };
+  check(JSON.stringify(C.ganadoFU(t1)) === JSON.stringify([{ asiento: 0, mano: [1, 0, 2, 0, 0] }, { asiento: 1, mano: [0, 1, 0, 0, 0] }]), 'se suman las ganancias de todas las tiradas del turno por jugador');
+  check(C.ganadoFU({ tiradas: [] }).length === 0 && C.ganadoFU({}).length === 0, 'un turno sin tiradas no tiene ganancias');
+  check(C.claveTurnoFU({ ronda: 3 }, { de: 1, tiradas: [{ num: { a: 3, b: 5 } }, { num: { a: 1, b: 2 } }] }) !== C.claveTurnoFU({ ronda: 3 }, { de: 1, tiradas: [{ num: { a: 3, b: 5 } }] }) && C.claveTurnoFU({ ronda: 3 }, { de: 1, tiradas: [] }) !== C.claveTurnoFU({ ronda: 4 }, { de: 1, tiradas: [] }), 'cada turno tiene su clave, también el que no tiene tiradas');
+}
+
+// ---------- los jugadores se ordenan por el orden de la ronda ----------
+{
+  const js = [{ asiento: 0 }, { asiento: 1 }, { asiento: 2 }, { asiento: 3 }];
+  check(C.jugadoresEnOrdenFU({ orden: [2, 0, 3, 1], jugadores: js }).map(j => j.asiento).join() === '2,0,3,1', 'de primero a último según el orden de la ronda');
+  check(C.jugadoresEnOrdenFU({ orden: [], jugadores: js }).map(j => j.asiento).join() === '0,1,2,3', 'sin orden todavía (sala de espera), por asiento');
+  check(C.jugadoresEnOrdenFU({ orden: [3, 1], jugadores: js }).map(j => j.asiento).join() === '3,1,0,2', 'los que no figuran en el orden van al final, por asiento');
+}
 
 console.log('pruebas del cliente de Fundación terminadas, fallos:', fallos);
 process.exit(fallos ? 1 : 0);

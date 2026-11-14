@@ -148,7 +148,7 @@ const Ayuda = (() => {
         w.append(f, el('div', 'ayVs', '↓'), caja(pieza(FU_ARTE.casa(COL_FU()), 4), flecha('→'), tarjetas([0]), el('div', 'ayAyuda', 'todos cobran')),
                  caja(pieza(FU_ARTE.ciudad(COL_FU()), 4), flecha('→'), tarjetas([3, 3]), el('div', 'ayAyuda', 'la ciudad, el doble')));
         return w;
-      }, pie: 'Con cada tirada cobran todos los que tengan un pueblo o una ciudad junto a ese número.' },
+      }, pie: 'En cada ronda hay 5 tiradas. Cobran todos los que tengan un pueblo o una ciudad junto a ese número.' },
     { titulo: 'TUS TARJETAS', hacer: () => {
         const w = el('div', 'ayApila');
         w.append(tarjetas([0, 0, 1, 2, 3, 4], 'g'), caja(rot('MÁXIMO 6', ORO, 150, 5)), caja(rot('7', [1.0, 0.54, 0.48], 40, 6), flecha('→'), el('div', 'ayAyuda', 'al empezar tu turno, descartas hasta 6')));
@@ -158,7 +158,7 @@ const Ayuda = (() => {
         const w = el('div', 'ayApila'), C = COL_FU();
         [[FU_ARTE.caminoIcono(C), [0]], [FU_ARTE.casa(C), [0, 1, 2, 3]], [FU_ARTE.ciudad(C), [3, 3, 4, 4, 4]], [FU_ARTE.caballero(C), [2, 3, 4]]].forEach(([c, costo]) => { const f = el('div', 'ayFila ayDef'); f.append(pieza(c, c.width > 12 ? 3 : 4), tarjetas(costo)); w.appendChild(f); });
         return w;
-      }, pie: 'Camino, pueblo, ciudad y caballero. Haz todo lo que te alcance.' },
+      }, pie: 'Camino, pueblo, ciudad y caballero. En tu turno haces una sola acción.' },
     { titulo: 'MISIONES Y PEDIDOS', hacer: () => {
         const w = el('div', 'ayApila');
         w.append(fila(rot('5 CAMINOS', [0.55, 0.8, 1.0], 140, 4), rot('+1', [0.55, 0.9, 0.45], 40, 5), el('div', 'ayAyuda', 'la gana quien la cumple primero')),
@@ -176,7 +176,7 @@ const Ayuda = (() => {
         const lin = (c, t, z = 3) => { const f = el('div', 'ayFila ayDef ayPuntos2'); f.append(pieza(c, z), rot(t, ORO, 64, 3)); return f; };
         w.append(lin(FU_ARTE.casa(C), '1'), lin(FU_ARTE.ciudad(C), '2'), lin(FU_ARTE.caminoIcono(C), 'MÁS LARGO 2', 3), lin(FU_ARTE.caballero(C), 'EJÉRCITO 2', 3), fila(rot('MISIÓN', [0.55, 0.8, 1.0], 100, 3), rot('1', ORO, 40, 3)));
         return w;
-      }, pie: 'Gana quien llega primero a la meta (8, 10 o 12), con la vuelta completa.' },
+      }, pie: 'Gana quien llega primero a la meta (20), con la vuelta completa.' },
   ];
   const SECCIONES_FU = [
     { rotulo: 'JUEGO', nombre: 'Cómo se juega', laminas: ['LA TIRADA', 'TUS TARJETAS', 'CONSTRUIR'] },
