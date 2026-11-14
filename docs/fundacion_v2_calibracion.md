@@ -127,3 +127,29 @@ Se adoptan **el camino de solo 1 madera** y **el pedido de «3 tarjetas cualesqu
 - Las 800 partidas terminaron (ninguna trabada). La mediana y la media casi coinciden; el p90 de la duración con bots va de 13 a 27 minutos (de 1 a 8 jugadores).
 - **Turnos sin hacer nada:** bajan de 76 % (solo) a 26 % (8 jugadores): cuantos más jugadores, más cobra cada uno y más recursos distintos tiene a mano. En todas las cantidades el motivo es el mismo: entre el 87 % y el 91 % de las veces **falta algún recurso**, y el que más falta ahora es la **madera** (después lana y trigo; el ladrillo ya no es el cuello de botella).
 - **Duración casi constante:** de 2 a 8 jugadores la partida dura entre 14 y 28 minutos; el solo y los de 2 son los más cortos.
+
+## Objetivo nuevo: 20 a 30 turnos por jugador y 20 a 35 % de turnos vacíos, con cualquier cantidad de jugadores (propuesta medida, sin programar)
+
+**Por qué hoy no se cumple:** el cobro de cada jugador entre dos turnos suyos crece con la cantidad de jugadores (con 8 se cobra 8 veces entre un turno y el siguiente; solo, una vez). Por eso con meta 8 cada jugador juega 34 turnos solo y 7 con 8 jugadores, y los turnos vacíos van de 76 % a 26 %.
+
+**Qué se probó** (`TIRADAS_POR_RONDA`, `ACCIONES` y la meta en `simulador/calibracion.js`, 24 partidas por celda y después 100 por cantidad):
+- **Tiradas por ronda fijas** (las k tiradas de la ronda se reparten entre sus turnos) en vez de una por turno: igualan el cobro por ronda entre todas las mesas.
+- **Máximo de acciones por turno:** limitar a 2 casi no cambia nada; limitar a **1** baja los turnos vacíos (no se gasta todo en un turno y se queda sin nada en el siguiente) sin alargar la partida.
+- **Meta alta:** sube los turnos por jugador sin cambiar el cobro. Las metas de 14 a 20 se midieron solo en el simulador (las reglas de la sala admiten 8, 10 y 12).
+
+**Combinación que cumple los dos objetivos: 5 tiradas por ronda, 1 acción por turno y meta 20** (100 partidas de bots por cantidad, todas terminadas):
+
+| Jugadores | Turnos por jugador (media; p10 a p90) | Turnos sin hacer nada | Turnos por partida | Tiempo con bots |
+|---|---|---|---|---|
+| 1 | 26,6 (19 a 35) | 22 % | 27 | 9 min |
+| 2 | 22,9 (18 a 28) | 23 % | 46 | 16 min |
+| 3 | 22,1 (18 a 27) | 27 % | 66 | 22 min |
+| 4 | 22,6 (18 a 28) | 30 % | 90 | 30 min |
+| 5 | 20,1 (16 a 24) | 27 % | 100 | 34 min |
+| 6 | 20,0 (16 a 24) | 30 % | 120 | 38 min |
+| 7 | 20,3 (17 a 24) | 31 % | 142 | 42 min |
+| 8 | 19,9 (17 a 23) | 34 % | 160 | 45 min |
+
+- **Consecuencia directa del objetivo:** si cada uno juega 20 a 30 turnos, la partida de 8 jugadores tiene unos 160 turnos y dura unos 45 minutos con bots (más con personas). El tiempo crece con los jugadores porque cada jugador juega lo mismo.
+- **Otras combinaciones:** 4 tiradas por ronda y meta 20 dan 23 a 28 turnos pero 38 a 40 % de vacíos con 4 a 8 jugadores (fuera de rango); 6 tiradas con meta 20 dan 19 a 22 turnos y 12 a 27 % de vacíos (más aceleradas).
+- **Reglas que cambiarían:** la tirada deja de ser una por turno (algunos turnos no tienen tirada), un turno admite una sola acción y la meta pasa a 20, con más puntos que vienen de misiones y pedidos. Falta que Dante lo decida; no se programó.
