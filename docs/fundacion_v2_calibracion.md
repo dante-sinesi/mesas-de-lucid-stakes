@@ -85,3 +85,20 @@ Con 8 jugadores la mano máxima al empezar el turno es 17 (p90 22) y se descarta
 1. **La meta de 8 o 10 puntos:** hoy el tramo final (7 a 10 puntos) es el más lento. Con meta 8 la partida termina antes del arrastre. Si se quiere mantener 10, hay que arreglar la economía del final.
 2. **El problema de fondo es el reparto**, y en especial el **ladrillo y la madera**, que piden camino y pueblo. La isla de 19 hexágonos tiene solo 3 colinas (ladrillo).
 3. Palancas posibles (todas se pueden medir con el simulador): más colinas y bosques en la isla; que el camino cueste menos; pedidos con «3 tarjetas cualesquiera»; dar más lugares de expansión; un tope de mano que crezca con la cantidad de jugadores.
+
+## Variantes medidas (4 jugadores, meta 10, 100 partidas; 2 y 8 jugadores con 40 a 60)
+
+`node simulador/calibracion.js 100 10 3 4 4 <variante>` (se suman con `+`). Ninguna está activada por omisión.
+
+| Variante | Rondas | Turnos sin hacer nada | Puntos del primero a la ronda 12 | Notas |
+|---|---|---|---|---|
+| Base | 19,5 | 60 % | 7,1 | |
+| `colinas` (4 colinas en la isla de 19) | 19,0 | 59 % | 7,0 | casi no cambia |
+| `camino` (el camino cuesta solo 1 madera) | 16,7 | 49 % | 7,7 | ahora el cuello de botella pasa a ser la madera |
+| `cualquiera` (pedido de 3 tarjetas cualesquiera) | 18,3 | 57 % | 7,4 | da una salida a quien está trabado |
+| `mano` (el tope sube 1 por jugador desde el quinto) | = base con 4 | = base con 4 | = base | con 8 jugadores: 11,4 → 8,8 rondas y los descartes bajan de 7 a 3 por jugador |
+| `camino+cualquiera+colinas` | 15,9 | 46 % | 7,8 | con 2 jugadores: 30,5 → 23,2 rondas y ninguna partida trabada (antes 1 de 60) |
+
+**La partida de 2 que no terminó (semilla 1590):** cada jugador cobraba 4 de los 5 recursos, uno sin colinas (ladrillo) y el otro sin bosque (madera); los dos habían puesto sus 3 caballeros y nunca más pudieron construir un camino, así que ninguno pudo ampliarse. Es el **bloqueo mutuo de un mundo sin intercambio**; la variante con el pedido de «3 cualesquiera» da una salida (puntos sin depender de un recurso) y es la que lo evita.
+
+**Lectura:** el camino de solo madera y el pedido de cualesquiera son las dos palancas que más ayudan; más colinas casi no cambia nada. El tope de la mano por jugadores solo importa con mesas grandes.
