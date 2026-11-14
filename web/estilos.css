@@ -573,24 +573,24 @@ img, canvas { -webkit-user-drag: none; }
 .cajaConfig .error { margin: 0; }
 
 /* ---------- Fundación (versión 2): pantalla horizontal con el mapa a pantalla completa y todo flotando encima ---------- */
-#fu.pantalla { position: relative; max-width: none; padding: 0; overflow: hidden; font-size: clamp(11px, 1.9vmin, 17px); }
+#fu.pantalla { position: relative; max-width: none; padding: 0; overflow: hidden; font-size: clamp(11px, 1.9vmin, 17px); --barra: max(3.4vmin, 18px); --medio: calc(var(--barra) + (100% - var(--barra)) / 2); }
 #fuMapa { position: absolute; left: 0; top: 0; width: 100%; height: 100%; image-rendering: pixelated; cursor: pointer; touch-action: manipulation; }
 .iconoFu { position: absolute; left: 0; top: 0; }
 #fu [hidden] { display: none !important; }
-#fuTiempo { position: absolute; top: 0; left: 0; right: 0; height: 3.4vmin; min-height: 18px; background: #05020c; border-bottom: .3vmin solid var(--borde); z-index: 8; }
+#fuTiempo { position: absolute; top: 0; left: 0; right: 0; height: var(--barra); background: #05020c; border-bottom: .3vmin solid var(--borde); z-index: 8; }
 #fuTiempo i { display: block; height: 100%; background: #8bd0ff; transition: width .4s linear; }
 #fuTiempo.quieta { background: #3a3550; }
 #fuTiempo.poco i { background: #ff8b8b; }
 #fuTiempo span { position: absolute; left: 1vmin; top: 0; height: 100%; display: flex; align-items: center; font-weight: 800; color: #fff; text-shadow: 0 .2vmin 0 #000; }
-#fuCab { position: absolute; top: calc(3.4vmin + 6px); right: 1vmin; left: auto; width: auto; z-index: 4; padding: 0; background: none; border: 0; display: flex; gap: 8px; align-items: center; }
+#fuCab { position: absolute; top: calc(var(--barra) + 6px); right: 1vmin; left: auto; width: auto; z-index: 4; padding: 0; background: none; border: 0; display: flex; gap: 8px; align-items: center; }
 #fuCab .tileBtn { width: 5.4vmin; height: 5.4vmin; min-width: 30px; min-height: 30px; }
 @media (max-height: 520px) { #fuJugadores { width: 27vmin; } .fuJP { font-size: 1em; } #fuMisiones { width: 24vmin; } }
 #fuCab .tileBtn { padding: 0; }
 #fuCab .tileBtn canvas, #fuCab .tileBtn svg { width: 100% !important; height: auto !important; max-height: 100%; }
 @media (max-height: 520px) { #fuCab .salaLinea { display: none; } #fuCab .tileBtn { width: 26px; height: 26px; min-width: 26px; min-height: 26px; } }
 #fuCab .salaLinea { font-size: 1.3vmin; font-size: max(11px, 1.7vmin); }
-#fuPiezas { position: absolute; top: calc(3.4vmin + 6px); left: 1vmin; z-index: 4; display: flex; gap: 1.2vmin; padding: .6vmin 1vmin; background: var(--panel, #1d1236); border: .3vmin solid var(--borde); }
-#fuMisiones { position: absolute; left: 1vmin; top: 50%; transform: translateY(-50%); z-index: 4; width: 25vmin; max-height: 80%; overflow: hidden; }
+#fuPiezas { position: absolute; top: calc(var(--barra) + 6px); left: 1vmin; z-index: 4; display: flex; gap: 1.2vmin; padding: .6vmin 1vmin; background: var(--panel, #1d1236); border: .3vmin solid var(--borde); }
+#fuMisiones { position: absolute; left: 1vmin; top: var(--medio); transform: translateY(-50%); z-index: 4; width: 25vmin; max-height: 80%; overflow: hidden; }
 #fuMisiones.clic { cursor: pointer; }
 .fuMis { padding: .6vmin .9vmin; border-left: .7vmin solid #8bd0ff; background: rgba(42,26,77,.94); margin-bottom: .5vmin; }
 .fuMis.ped { border-left-color: var(--oro); }
@@ -598,7 +598,7 @@ img, canvas { -webkit-user-drag: none; }
 .fuMis.lista { box-shadow: inset 0 0 0 .3vmin var(--oro); }
 .fuMis small { display: block; color: var(--suave); font-weight: 600; }
 .fuMisT b { color: #fff3c4; }
-#fuJugadores { position: absolute; right: 1vmin; top: 50%; transform: translateY(-50%); z-index: 4; display: flex; flex-direction: column; gap: .7vmin; width: 22vmin; max-height: 86%; }
+#fuJugadores { position: absolute; right: 1vmin; top: var(--medio); transform: translateY(-50%); z-index: 4; display: flex; flex-direction: column; gap: .7vmin; width: 22vmin; max-height: 86%; }
 .fuJ { padding: .6vmin 1vmin; background: rgba(29,18,54,.95); border: .3vmin solid var(--borde); border-left-width: 1vmin; }
 .fuJ.turno { border-color: var(--oro); box-shadow: 0 0 0 .3vmin var(--oro); }
 .fuJ.off { opacity: .55; border-style: dashed; }
@@ -632,15 +632,15 @@ img, canvas { -webkit-user-drag: none; }
 .fuCuenta { align-self: flex-end; color: var(--suave); font-size: .85em; margin-left: .4vmin; }
 .fuCuenta.sobra { color: #ff8b8b; }
 #fuBotones { position: absolute; right: 1vmin; bottom: 1vmin; z-index: 6; display: flex; flex-direction: column; gap: .7vmin; align-items: stretch; }
-#fuAviso { position: absolute; top: calc(3.4vmin + 8px); left: 50%; transform: translateX(-50%); z-index: 6; display: flex; flex-direction: column; align-items: center; gap: 1vmin; pointer-events: none; }
+#fuAviso { position: absolute; top: calc(var(--barra) + 8px); left: 50%; transform: translateX(-50%); z-index: 6; display: flex; flex-direction: column; align-items: center; gap: 1vmin; pointer-events: none; }
 .fuBanner { background: var(--panel, #1d1236); border: .3vmin solid var(--oro); padding: .9vmin 2vmin; font-size: 1.25em; text-align: center; }
-#fuDados { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); z-index: 5; width: 80%; display: flex; justify-content: center; pointer-events: none; }
+#fuDados { position: absolute; left: 50%; top: var(--medio); transform: translate(-50%, -50%); z-index: 5; width: 80%; display: flex; justify-content: center; pointer-events: none; }
 #fuDados canvas { display: block; image-rendering: pixelated; }
 #fuSale { position: absolute; left: 50%; top: 72%; transform: translateX(-50%); z-index: 5; font-size: 2.4em; font-weight: 800; color: #fff3c4; text-shadow: 0 .3vmin 0 #000; pointer-events: none; }
-#fuGanancias { position: absolute; left: 50%; top: 42%; transform: translate(-50%, -50%); z-index: 5; display: flex; flex-direction: column; align-items: center; gap: 1.6vmin; background: rgba(5,2,12,.72); padding: 2vmin 3vmin; pointer-events: none; }
+#fuGanancias { position: absolute; left: 50%; top: calc(var(--medio) - 8%); transform: translate(-50%, -50%); z-index: 5; display: flex; flex-direction: column; align-items: center; gap: 1.6vmin; background: rgba(5,2,12,.72); padding: 2vmin 3vmin; pointer-events: none; }
 #fuVelo { position: absolute; inset: 0; z-index: 5; }
 .fuFondo { position: absolute; inset: 0; background: rgba(5,2,12,.82); }
-.fuCentro { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2.2vmin; padding-bottom: 12vmin; pointer-events: none; }
+.fuCentro { position: absolute; inset: var(--barra) 0 0 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2.2vmin; padding-bottom: 12vmin; pointer-events: none; }
 .fuCentro > * { pointer-events: auto; }
 .fuTitulo { font-size: 1.9em; font-weight: 800; color: #fff3c4; text-align: center; }
 .fuSub { color: var(--suave); font-size: 1.05em; text-align: center; }

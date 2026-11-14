@@ -22,7 +22,7 @@ const fuEl = (t, c, x) => { const n = document.createElement(t); if (c) n.classN
 function abrirFU() {
   if (!FU.escena) {
     // los dos dados de número, en 3D como los del diez mil (misma caída)
-    FU.escena = new D3.Escena($('fuDadosLienzo'), $('fuDados'), { maxAlto: 260, forzarFila: true, espaciado: 1.7, sinMesa: true, dprMax: 1.5, sombra: false });
+    FU.escena = new D3.Escena($('fuDadosLienzo'), $('fuDados'), { maxAlto: 260, forzarFila: true, espaciado: 1.7, sinMesa: true, velocidad: 1.15, dprMax: 1.5, escalaMax: 170 });   // (sin mesa, con la sombra de cada dado, y una caída más pausada que la del diez mil)
     FU.escena.configurar(['normal', 'normal']);
     FU.escena.alAterrizar = () => { if (!document.hidden) Sonido.play('ficha'); };
     FU.escena.alTerminar = () => { if (FU.tirada) aterrizoFU(FU.tirada.key); };
@@ -82,9 +82,9 @@ function dibujarMundo(e, geo) {
   return c;
 }
 // El bandido: una cruz roja sobre la ficha y su figura al lado. `alfa` lo hace tenue (el lugar de donde sale).
-function dibujarBandidoFU(g, b, alfa) {
+function dibujarBandidoFU(g, b, alfa, conCruz) {
   const A = FU_ARTE; g.globalAlpha = alfa;
-  for (let i = -5; i <= 5; i++) { A.fr(g, Math.round(b.x + i), Math.round(b.y + i), 1, 1, [1, 0.42, 0.36]); A.fr(g, Math.round(b.x - i), Math.round(b.y + i), 1, 1, [1, 0.42, 0.36]); }
+  if (conCruz) for (let i = -5; i <= 5; i++) { A.fr(g, Math.round(b.x + i), Math.round(b.y + i), 1, 1, [1, 0.42, 0.36]); A.fr(g, Math.round(b.x - i), Math.round(b.y + i), 1, 1, [1, 0.42, 0.36]); }
   g.drawImage(A.bandido(), Math.round(b.x + 6), Math.round(b.y - 8)); g.globalAlpha = 1;
 }
 const fuTitila = () => (Math.floor(performance.now() / 360) % 2 ? [1, 1, 1] : [0.97, 0.78, 0.25]);   // (lo que marca algo titila entre dorado y blanco)
@@ -230,19 +230,20 @@ function iniciarTiradaFU(e, key) {
   const esc = FU.escena, vals = [t.num.a, t.num.b];
   setTimeout(() => {
     if (!FU.tirada || FU.tirada.key !== key) return;
-    $('fuDados').hidden = false; esc.maxAlto = Math.round(Math.min($('fu').clientHeight * 0.45, 320)); esc.ajustar(); esc.mostrar([1, 1]); esc.tirar([0, 1], vals, e.ronda * 31 + t.num.suma);
+    $('fuDados').hidden = false; esc.maxAlto = Math.round(Math.min($('fu').clientHeight * 0.6, 430)); esc.ajustar(); esc.mostrar([1, 1]); esc.tirar([0, 1], vals, e.ronda * 31 + t.num.suma);
+    requestAnimationFrame(() => { const r = $('fuDados').getBoundingClientRect(), s0 = $('fu').getBoundingClientRect(); $('fuSale').style.top = Math.round(r.bottom - s0.top + 8) + 'px'; });   // («Sale N» va justo debajo de la mesa)
   }, 250);
-  setTimeout(() => aterrizoFU(key), 4200);   // (por si la animación no avisa)
+  setTimeout(() => aterrizoFU(key), 5200);   // (por si la animación no avisa)
 }
 function aterrizoFU(key) {
   if (!FU.tirada || FU.tirada.key !== key || FU.fase >= 1) return;
   FU.fase = 1; repintarFU();
-  setTimeout(() => { if (!FU.tirada || FU.tirada.key !== key) return; FU.fase = 2; FU.band = { t0: performance.now() }; repintarFU(); animarBandidoFU(); }, 900);
-  setTimeout(() => { if (!FU.tirada || FU.tirada.key !== key) return; FU.fase = 3; repintarFU(); }, 2300);
+  setTimeout(() => { if (!FU.tirada || FU.tirada.key !== key) return; FU.fase = 2; FU.band = { t0: performance.now() }; repintarFU(); animarBandidoFU(); }, 2300);   // (los dados se quedan quietos un buen rato, con el «Sale N»)
+  setTimeout(() => { if (!FU.tirada || FU.tirada.key !== key) return; FU.fase = 3; repintarFU(); }, 3900);
 }
 function animarBandidoFU() {
   cancelAnimationFrame(FU.rafBand);
-  const paso = () => { if (!FU.band || $('fu').hidden) return; dibujarCamFU(); if (performance.now() - FU.band.t0 < 1400) FU.rafBand = requestAnimationFrame(paso); };
+  const paso = () => { if (!FU.band || $('fu').hidden) return; dibujarCamFU(); if (performance.now() - FU.band.t0 < 1500) FU.rafBand = requestAnimationFrame(paso); };
   FU.rafBand = requestAnimationFrame(paso);
 }
 
@@ -255,7 +256,7 @@ function repintarFU() {
   const geo = geometria(e.mapa), t = e.turno, esc = escenaFU(e); FU.esc = esc;
   pintarRecursosFU(e, esc); pintarPiezasFU(e); pintarMisionesFU(e); pintarJugadoresFU(e); pintarManoFU(e, esc); pintarBotonesFU(e, esc); pintarAvisoFU(e, esc); pintarVeloFU(e, esc); pintarDadosFU(e, esc); pintarGananciasFU(e, esc); relojFU(e);
   // el mapa ocupa lo que queda entre las columnas, la barra de arriba y la mano de abajo (centrado en la pantalla)
-  const base = Math.min(W, H), lado = Math.round(base * 0.27) + 10, top = Math.round(base * 0.034) + 4, bottom = H - Math.round(base * 0.125) - 10;   // (las márgenes son fijas: el mapa no da saltos cuando aparece o desaparece algo)
+  const base = Math.min(W, H), lado = Math.round(base * 0.27) + 10, top = $('fuTiempo').offsetHeight + 4, bottom = H - Math.round(base * 0.125) - 10;   // (las márgenes son fijas: el mapa no da saltos cuando aparece o desaparece algo)
   const left = lado, right = W - lado, aw = Math.max(200, right - left), ah = Math.max(120, bottom - top);
   const cands = candidatosFU(e, geo); FU.candidatos = cands;
   const colocando = cands.length > 0;
@@ -336,13 +337,13 @@ function superponerFU(g, e, geo, colocando, z) {
   const nuevo = geo.hx(e.mapa.hexes[e.tab.bandido]);
   if (tirada && t.num.suma === 7 && FU.fase <= 2) {
     const antes = geo.hx(e.mapa.hexes[t.bandidoAntes]);
-    if (FU.fase < 2) dibujarBandidoFU(g, antes, 1);
-    else {
-      const k = Math.min(1, (performance.now() - (FU.band ? FU.band.t0 : 0)) / 1200), s = k < 0.5 ? 2 * k * k : 1 - Math.pow(-2 * k + 2, 2) / 2;
-      dibujarBandidoFU(g, antes, 0.3); dibujarBandidoFU(g, { x: antes.x + (nuevo.x - antes.x) * s, y: antes.y + (nuevo.y - antes.y) * s }, 1);
-      g.drawImage(A.aroHex(fuTitila(), 2.4), Math.round(nuevo.x - A.WD / 2), Math.round(nuevo.y - A.HT / 2)); FU.parpadea = true;
+    if (FU.fase < 2) dibujarBandidoFU(g, antes, 1, true);
+    else {   // el bandido se mueve solo (sin la cruz); cuando llega, aparece la cruz en la casilla nueva
+      const k = Math.min(1, (performance.now() - (FU.band ? FU.band.t0 : 0)) / 1400), s = k < 0.5 ? 2 * k * k : 1 - Math.pow(-2 * k + 2, 2) / 2;
+      dibujarBandidoFU(g, { x: antes.x + (nuevo.x - antes.x) * s, y: antes.y + (nuevo.y - antes.y) * s }, 1, k >= 1);
+      if (k >= 1) { g.drawImage(A.aroHex(fuTitila(), 2.4), Math.round(nuevo.x - A.WD / 2), Math.round(nuevo.y - A.HT / 2)); FU.parpadea = true; }
     }
-  } else dibujarBandidoFU(g, nuevo, 1);
+  } else dibujarBandidoFU(g, nuevo, 1, true);
   if (!colocando && FU.foco && performance.now() < FU.foco.hasta) fuMarcaFU(g, puntoLugarFU(e, geo, FU.foco.tipo, FU.foco.lugar), fuColor(FU.foco.asiento), FU.foco.t0);
   if (colocando) {
     fuOscurecer(g, 0.5);
@@ -386,9 +387,9 @@ function pintarPiezasFU(e) {
   const caja = $('fuPiezas'), yo = e.jugadores.find(j => j.asiento === e.yo);
   caja.hidden = !yo || !yo.quedan;
   if (caja.hidden) return;
-  conLlave(caja, yo.quedan, c => {
-    const tot = { camino: 15, pueblo: 5, ciudad: 4, caballero: 3 };
-    [['camino', 'Camino'], ['pueblo', 'Pueblo'], ['ciudad', 'Ciudad'], ['caballero', 'Caballero']].forEach(([k, n]) => c.append(fuEl('span', '', n + ' ' + yo.quedan[k] + '/' + tot[k])));
+  const tiene = { camino: yo.caminos, pueblo: yo.pueblos, ciudad: yo.ciudades, caballero: yo.caballeros };   // (cuántos tienes puestos, no cuántos te quedan)
+  conLlave(caja, tiene, c => {
+    [['camino', 'Caminos'], ['pueblo', 'Pueblos'], ['ciudad', 'Ciudades'], ['caballero', 'Caballeros']].forEach(([k, n]) => { const s = fuEl('span', '', n + ' '); s.append(fuEl('b', '', String(tiene[k]))); c.append(s); });
   });
 }
 

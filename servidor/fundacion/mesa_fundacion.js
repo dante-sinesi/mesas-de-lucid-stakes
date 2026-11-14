@@ -13,7 +13,7 @@ const Bots = require('../bots');
 const { TIEMPO_VALIDO, escalarTiempos } = require('../tiempo');
 
 const FASE = { ESPERA: 'espera', INICIAL: 'inicial', TURNO: 'turno', FIN: 'fin' };
-const TIEMPOS = { tirada: 7000, turno: 45000, inicial: 30000, fin: 1600, ausente: 2500, ausencia: 180000, reemplazo: 30000 };
+const TIEMPOS = { tirada: 8500, turno: 45000, inicial: 30000, fin: 1600, ausente: 2500, ausencia: 180000, reemplazo: 30000 };
 const CLAVES_TIEMPO = ['turno', 'inicial'];   // los plazos que cambian con el tiempo de la sala
 const MAX_APODO = 16;
 const MAX_ASIENTOS = 8;

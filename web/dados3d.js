@@ -194,7 +194,7 @@ const D3 = (() => {
     // `lienzo`: el canvas; `contenedor`: de quien toma el ancho; opciones: { maxAlto }
     constructor(lienzo, contenedor, opciones = {}) {
       this.lienzo = lienzo; this.contenedor = contenedor; this.ctx = lienzo.getContext('2d');
-      this.maxAlto = opciones.maxAlto || 9999; this.forzarFila = !!opciones.forzarFila; this.espaciado = opciones.espaciado; this.forzarGrilla = !!opciones.forzarGrilla; this.sinMesa = !!opciones.sinMesa; this.velocidad = opciones.velocidad; this.sombra = opciones.sombra !== false; this.dprMax = opciones.dprMax;   // (opciones de Fundación: en fila o en dos filas de 3, sin la mesa de fieltro)
+      this.maxAlto = opciones.maxAlto || 9999; this.forzarFila = !!opciones.forzarFila; this.espaciado = opciones.espaciado; this.forzarGrilla = !!opciones.forzarGrilla; this.sinMesa = !!opciones.sinMesa; this.velocidad = opciones.velocidad; this.sombra = opciones.sombra !== false; this.dprMax = opciones.dprMax; this.escalaMax = opciones.escalaMax;   // (opciones de Fundación: en fila o en dos filas de 3, sin la mesa de fieltro)
       this.mesaCaras = carasDe(voxelesMesa(), TABLE_VOX, [-TABLE_X / 2, 0, -TABLE_Z / 2]);
       this.modelos = {};
       this.dados = [];          // por lugar: { tipo, valor, pos, R, squash, apartado, seleccionado, brillo, anim }
@@ -265,7 +265,7 @@ const D3 = (() => {
       const dpr = Math.min(window.devicePixelRatio || 1, this.dprMax || 2), ancho = Math.max(this.contenedor.clientWidth || (window.innerWidth - 24), 200);
       this.modo = this.forzarGrilla ? 'grilla' : ((this.forzarFila || ancho >= 560) ? 'fila' : 'grilla');
       const nD = Math.max(this.dados.length, 1), vw = this.modo === 'fila' ? (this.forzarFila ? Math.max((nD - 1) * (this.espaciado || 0.86) + 1.5, 2.2) : 9.75) : 5.6, vh = this.modo === 'fila' ? (this.forzarFila ? 2.7 : 3.22) : 4.4;
-      this.sc = Math.min(ancho / vw, 118, this.maxAlto / vh);
+      this.sc = Math.min(ancho / vw, this.escalaMax || 118, this.maxAlto / vh);
       this.W = Math.round(this.sc * vw); this.H = Math.round(this.sc * vh);
       this.lienzo.style.width = this.W + 'px'; this.lienzo.style.height = this.H + 'px';
       this.lienzo.width = Math.round(this.W * dpr); this.lienzo.height = Math.round(this.H * dpr);
