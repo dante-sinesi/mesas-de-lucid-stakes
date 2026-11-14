@@ -531,7 +531,6 @@ function pintarVeloFU(e, esc) {
   else if (esc === 'turno' && FU.panel) tipo = typeof FU.panel === 'string' ? FU.panel : 'entrega';
   velo.hidden = !tipo; if (!tipo) { velo.dataset.llave = ''; return; }
   conLlave(velo, [tipo, FU.panel, [...FU.selDesc], e.mano, t && t.exceso, t && t.posibles, t && t.entregables, e.grupo && e.grupo.misiones.map(m => [m.id, m.quedan, m.por])], c => {
-    c.append(fuEl('div', 'fuFondo'));
     const centro = fuEl('div', 'fuCentro'); c.append(centro);
     if (tipo === 'descarte') descarteVeloFU(e, centro);
     else if (tipo === 'construir') construirVeloFU(e, centro);
