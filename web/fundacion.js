@@ -123,9 +123,13 @@ function zonasFU(cands) {   // se agrupan en zonas para acercar la cámara a una
 const fuFitZ = (pts, aw, ah, pad, zs) => { const xs = pts.map(p => p.x), ys = pts.map(p => p.y), w = Math.max(...xs) - Math.min(...xs) + 2 * pad, h = Math.max(...ys) - Math.min(...ys) + 2 * pad; for (const z of zs) if (w * z <= aw && h * z <= ah) return z; return zs[zs.length - 1]; };
 const fuCentro = pts => ({ x: (Math.min(...pts.map(p => p.x)) + Math.max(...pts.map(p => p.x))) / 2, y: (Math.min(...pts.map(p => p.y)) + Math.max(...pts.map(p => p.y))) / 2 });
 
-function puntoLugarFU(e, geo, ed, id) {   // dónde está en el mapa un lugar de construcción
+function puntoLugarFU(e, geo, ed, id, asiento) {   // dónde está en el mapa un lugar de construcción
   const mapa = e.mapa;
-  if (ed === 'caballero') { const q = geo.hx(mapa.hexes[id]); return { x: q.x + 10, y: q.y + 2 }; }
+  if (ed === 'caballero') {   // el centro de la figura del caballero, donde de verdad está dibujada (no el punto donde se tocaba para ponerla)
+    const q = geo.hx(mapa.hexes[id]), lista = (e.tab.cab[id] || []), i = Math.max(0, lista.lastIndexOf(asiento === undefined ? lista[lista.length - 1] : asiento)), o = posCabFU(Math.max(1, lista.length), i);
+    const img = o[2] ? FU_ARTE.caballeroMini(fuColor(0)) : FU_ARTE.caballero(fuColor(0));
+    return { x: q.x + o[0] + img.width / 2, y: q.y + o[1] + img.height / 2 };
+  }
   if (ed === 'camino') { const ar = mapa.aristas[id], a = geo.v(mapa.vertices[ar.a]), b = geo.v(mapa.vertices[ar.b]); return { x: (a.x + b.x) / 2, y: (a.y + b.y) / 2 }; }
   return geo.v(mapa.vertices[id]);
 }
@@ -272,7 +276,7 @@ function repintarFU() {
     if (FU.MOV && cands.length > 6 && FU.zona === null && zc < 3) { z = zLleno; FU.zonas = zonas; }
     else { z = zc; foco = fuCentro(lista); FU.zonas = []; }
   } else if (FU.foco && performance.now() < FU.foco.hasta) {
-    const pt = puntoLugarFU(e, geo, FU.foco.tipo, FU.foco.lugar), zp = fuFitZ([pt], aw - 20, ah - 20, 40, FU.MOV ? [3, 2] : [4, 3]);
+    const pt = puntoLugarFU(e, geo, FU.foco.tipo, FU.foco.lugar, FU.foco.asiento), zp = fuFitZ([pt], aw - 20, ah - 20, 40, FU.MOV ? [3, 2] : [4, 3]);
     if (zp > zLleno) { z = zp; foco = pt; }
     FU.zonas = [];
   } else FU.zonas = [];
@@ -344,7 +348,7 @@ function superponerFU(g, e, geo, colocando, z) {
       if (k >= 1) { g.drawImage(A.aroHex(fuTitila(), 2.4), Math.round(nuevo.x - A.WD / 2), Math.round(nuevo.y - A.HT / 2)); FU.parpadea = true; }
     }
   } else dibujarBandidoFU(g, nuevo, 1, true);
-  if (!colocando && FU.foco && performance.now() < FU.foco.hasta) fuMarcaFU(g, puntoLugarFU(e, geo, FU.foco.tipo, FU.foco.lugar), fuColor(FU.foco.asiento), FU.foco.t0);
+  if (!colocando && FU.foco && performance.now() < FU.foco.hasta) fuMarcaFU(g, puntoLugarFU(e, geo, FU.foco.tipo, FU.foco.lugar, FU.foco.asiento), fuColor(FU.foco.asiento), FU.foco.t0);
   if (colocando) {
     fuOscurecer(g, 0.5);
     if (FU.zonasMostrar && FU.zonasMostrar.length) { FU.candidatos.forEach(c => fuPunto(g, c, 1.6, false)); FU.zonasMostrar.forEach(zn => fuAroZona(g, zn)); }

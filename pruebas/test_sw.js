@@ -18,7 +18,7 @@ const check = (ok, msg) => { if (!ok) { fallos++; console.log('FALLA', msg); } }
   const entorno = {
     self: { addEventListener: (n, f) => { eventos[n] = f; }, skipWaiting: async () => { entorno.saltado = true; }, clients: { claim: async () => { entorno.reclamado = true; } } },
     location: { origin: 'https://juego.test' },
-    caches: { open: async () => cache, keys: async () => ['bj-viejo', 'bj-133'], delete: async k => { entorno.borrada = k; return true; }, match: async req => guardado[typeof req === 'string' ? req : req.url] || null },
+    caches: { open: async () => cache, keys: async () => ['bj-viejo', 'bj-134'], delete: async k => { entorno.borrada = k; return true; }, match: async req => guardado[typeof req === 'string' ? req : req.url] || null },
     fetch: async req => { if (redCaida) throw new Error('sin red'); return { ok: true, clone() { return this; }, de: 'red:' + req.url }; },
     URL, Promise, console,
   };
