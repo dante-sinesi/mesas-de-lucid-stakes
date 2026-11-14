@@ -4,7 +4,7 @@
 // Todo lo decide el servidor (servidor/fundacion/mesa_fundacion.js); aquí solo se dibuja lo que manda y se envían acciones. Diseño: docs/fundacion_v2_pantallas.md.
 // Usa: comun.js (accion, nuevoBoton, ponerNombre, compartirImagen), voxel.js (V), dados3d.js (D3), mesas.js (Mesas) y fu_arte.js (FU_ARTE).
 
-const FU = { e: null, escena: null, sel: null, zona: null, panel: null, selDesc: new Set(), estKey: '', turnoKey: '', fase: 3, tirada: null, finKey: '', cam: null, candidatos: [], zonas: [], zonasMostrar: [], ultimoMapa: null, evVisto: -1, aviso: null, band: null };
+const FU = { e: null, escena: null, sel: null, zona: null, panel: null, selDesc: new Set(), estKey: '', turnoKey: '', fase: 3, roll: 0, tirada: null, finKey: '', cam: null, candidatos: [], zonas: [], zonasMostrar: [], ultimoMapa: null, evVisto: -1, aviso: null, band: null };
 const FU_TIPO_RECURSO = { bosque: 0, colinas: 1, pastos: 2, campos: 3, montana: 4 };
 const FU_NOMBRE_REC = ['madera', 'ladrillo', 'lana', 'trigo', 'mineral'];
 const FU_NOMBRE_ED = { camino: 'Camino', pueblo: 'Pueblo', ciudad: 'Ciudad', caballero: 'Caballero' };
@@ -25,7 +25,7 @@ function abrirFU() {
     FU.escena = new D3.Escena($('fuDadosLienzo'), $('fuDados'), { maxAlto: 260, forzarFila: true, espaciado: 1.7, sinMesa: true, velocidad: 1.15, dprMax: 1.5, escalaMax: 120, sinValores: true, sombraFiel: true });   // (sin mesa, con la sombra de cada dado, y una caída más pausada que la del diez mil)
     FU.escena.configurar(['normal', 'normal']);
     FU.escena.alAterrizar = () => { if (!document.hidden) Sonido.play('ficha'); };
-    FU.escena.alTerminar = () => { if (FU.tirada) aterrizoFU(FU.tirada.key); };
+    FU.escena.alTerminar = () => { if (FU.tirada) aterrizoFU(FU.tirada.key, FU.roll); };
     $('fAyuda').appendChild(V.interrogante()); $('fAyuda').onclick = abrirAyudaFU;
     $('fInvitar').appendChild(V.invitar()); $('fInvitar').onclick = abrirInvitar;
     $('fSalir').appendChild(V.puerta()); $('fSalir').onclick = confirmarSalir;
@@ -35,7 +35,7 @@ function abrirFU() {
     window.addEventListener('resize', () => { clearTimeout(FU.tRes); FU.tRes = setTimeout(() => { if (!$('fu').hidden && FU.e) repintarFU(); }, 120); });
   }
   pintarSonidoFU();
-  Object.assign(FU, { e: null, sel: null, zona: null, panel: null, selDesc: new Set(), estKey: '', turnoKey: '', fase: 3, tirada: null, finKey: '', evVisto: -1, aviso: null, band: null });
+  Object.assign(FU, { e: null, sel: null, zona: null, panel: null, selDesc: new Set(), estKey: '', turnoKey: '', fase: 3, roll: 0, tirada: null, finKey: '', evVisto: -1, aviso: null, band: null });
   try { if (screen.orientation && screen.orientation.lock) screen.orientation.lock('landscape').catch(() => {}); } catch (err) { /* no todos los navegadores dejan fijar la orientación */ }
   $('fuFinal').hidden = true;
 }
@@ -161,6 +161,19 @@ function cartaFU(k, cls) {
   const c = fuEl('div', 'fuCarta' + (cls ? ' ' + cls : '')); c.style.background = fuRgb(FU_ARTE.EST[FU_NOMBRE_REC[k]].cuerpo);
   const ic = iconoRecFU(k, 15); ic.style.width = '78%'; ic.style.height = 'auto'; c.append(ic); return c;
 }
+// Lo que ganó cada jugador con todas las tiradas del turno (puede haber varias o ninguna), por asiento.
+function ganadoFU(t) {
+  const por = {};
+  ((t && t.tiradas) || []).forEach(r => r.gana.forEach(x => { por[x.asiento] = (por[x.asiento] || [0, 0, 0, 0, 0]).map((n, i) => n + x.mano[i]); }));
+  return Object.keys(por).map(Number).sort((a, b) => a - b).map(a => ({ asiento: a, mano: por[a] }));
+}
+// La clave de un turno (para saber cuándo empieza otro): quién juega, la ronda y las tiradas que salieron.
+const claveTurnoFU = (e, t) => [t.de, e.ronda, (t.tiradas || []).map(r => r.num.a + ',' + r.num.b).join('.')].join('-');
+// Los jugadores de primero a último según el orden de la ronda (antes de empezar, por asiento).
+function jugadoresEnOrdenFU(e) {
+  const orden = e.orden || [], pos = a => { const i = orden.indexOf(a); return i < 0 ? 1000 + a : i; };
+  return e.jugadores.slice().sort((x, y) => pos(x.asiento) - pos(y.asiento));
+}
 const expandirFU = mano => { const a = []; mano.forEach((n, r) => { for (let i = 0; i < n; i++) a.push(r); }); return a; };
 const dorsoFU = cls => fuEl('div', 'fuCarta fuDorso' + (cls ? ' ' + cls : ''));
 const fuNombreDe = (e, asiento) => { const j = e.jugadores.find(x => x.asiento === asiento); return j ? j.apodo : '—'; };
@@ -204,7 +217,7 @@ function escenaFU(e) {
 function pintarFU(e) {
   FU.e = e;
   const t = e.turno;
-  const turnoKey = e.fase === 'turno' && t ? [t.de, e.ronda, t.num.a, t.num.b].join('-') : 'x';
+  const turnoKey = e.fase === 'turno' && t ? claveTurnoFU(e, t) : 'x';
   if (turnoKey !== FU.turnoKey) { FU.turnoKey = turnoKey; FU.panel = null; FU.selDesc = new Set(); iniciarTiradaFU(e, turnoKey); }
   const estKey = [e.fase, e.turnoDe, t && t.sub, t && t.edificio, e.inicial && e.inicial.idx, e.inicial && e.inicial.sub, e.yo].join('|');
   if (estKey !== FU.estKey) { FU.estKey = estKey; FU.sel = null; FU.zona = null; FU.panel = null; FU.selDesc = new Set(); }
@@ -240,25 +253,38 @@ function animarMarcaFU() {
 function avisoFU(txt) { FU.aviso = { txt, hasta: performance.now() + 2200 }; if (FU.e) pintarAvisoFU(FU.e, escenaFU(FU.e)); setTimeout(() => { if (FU.e) pintarAvisoFU(FU.e, escenaFU(FU.e)); }, 2300); }
 
 // ---------- la tirada: los dados, las ganancias y el bandido ----------
-// Fases: 0 los dados ruedan · 1 aterrizaron («Sale N») · 2 las tarjetas salen de los edificios (o el bandido se mueve) · 3 las ganancias de todos.
+// Un turno puede tener varias tiradas seguidas (o ninguna). Cada una pasa por las fases: 0 los dados ruedan · 1 aterrizaron («Sale N») ·
+// 2 las tarjetas salen de los edificios (solo si es la única tirada) o el bandido se mueve (si salió 7). Tras la última, la fase 3 muestra las ganancias de todos.
 
 function iniciarTiradaFU(e, key) {
-  const t = e.turno;
-  if (!t || t.sub !== 'tirada') { FU.tirada = null; FU.fase = 3; FU.band = null; return; }
-  if (sinMovimiento()) { FU.tirada = { key }; FU.fase = 3; return; }
-  FU.tirada = { key }; FU.fase = 0;
-  const esc = FU.escena, vals = [t.num.a, t.num.b];
-  setTimeout(() => {
-    if (!FU.tirada || FU.tirada.key !== key) return;
-    $('fuDados').hidden = false; $('fuFranja').hidden = false; esc.maxAlto = Math.round($('fu').clientHeight * 0.30); esc.ajustar(); esc.mostrar([1, 1]); esc.tirar([0, 1], vals, e.ronda * 31 + t.num.suma);
-  }, 250);
-  setTimeout(() => aterrizoFU(key), 5200);   // (por si la animación no avisa)
+  const t = e.turno, tiradas = (t && t.tiradas) || [];
+  if (!t || t.sub !== 'tirada' || !tiradas.length) { FU.tirada = null; FU.fase = 3; FU.roll = 0; FU.band = null; return; }
+  FU.tirada = { key };
+  if (sinMovimiento()) { FU.fase = 3; FU.roll = tiradas.length - 1; return; }
+  rodarFU(key, 0);
 }
-function aterrizoFU(key) {
-  if (!FU.tirada || FU.tirada.key !== key || FU.fase >= 1) return;
+function rodarFU(key, i) {
+  const e = FU.e; if (!e || !FU.tirada || FU.tirada.key !== key) return;
+  const r = e.turno.tiradas[i], esc = FU.escena;
+  FU.roll = i; FU.fase = 0; repintarFU();
+  setTimeout(() => {
+    if (!FU.tirada || FU.tirada.key !== key || FU.roll !== i) return;
+    $('fuDados').hidden = false; $('fuFranja').hidden = false; esc.maxAlto = Math.round($('fu').clientHeight * 0.30); esc.ajustar(); esc.mostrar([1, 1]); esc.tirar([0, 1], [r.num.a, r.num.b], e.ronda * 31 + r.num.suma + i * 7);
+  }, 250);
+  setTimeout(() => aterrizoFU(key, i), 5200);   // (por si la animación no avisa)
+}
+function aterrizoFU(key, i) {
+  const e = FU.e; if (!e || !FU.tirada || FU.tirada.key !== key || FU.roll !== i || FU.fase >= 1) return;
+  const tiradas = e.turno.tiradas, r = tiradas[i], unica = tiradas.length === 1, ultima = i === tiradas.length - 1;
   FU.fase = 1; repintarFU();
-  setTimeout(() => { if (!FU.tirada || FU.tirada.key !== key) return; FU.fase = 2; FU.band = { t0: performance.now() }; repintarFU(); animarBandidoFU(); }, 2300);   // (los dados se quedan quietos un buen rato, con el «Sale N»)
-  setTimeout(() => { if (!FU.tirada || FU.tirada.key !== key) return; FU.fase = 3; repintarFU(); }, 3900);
+  const sigue = () => { if (!FU.tirada || FU.tirada.key !== key || FU.roll !== i) return; if (ultima) { FU.fase = 3; repintarFU(); } else rodarFU(key, i + 1); };
+  setTimeout(() => {
+    if (!FU.tirada || FU.tirada.key !== key || FU.roll !== i) return;
+    if (r.num.suma === 7 || unica) {   // el bandido se mueve; o, con una sola tirada, las tarjetas salen de los edificios
+      FU.fase = 2; FU.band = { t0: performance.now() }; repintarFU(); animarBandidoFU();
+      setTimeout(sigue, r.num.suma === 7 ? 1500 : 1600);
+    } else sigue();
+  }, unica ? 2300 : 1300);   // (los dados se quedan quietos un buen rato, con el «Sale N»)
 }
 function animarBandidoFU() {
   cancelAnimationFrame(FU.rafBand);
@@ -341,21 +367,21 @@ function dibujarCamFU() {
 // Lo que se dibuja sobre el mapa según la escena: los hexágonos que producen, las tarjetas que salen de los edificios, el bandido y los lugares donde poner una pieza.
 function superponerFU(g, e, geo, colocando, z) {
   const t = e.turno, A = FU_ARTE; FU.parpadea = false;
-  const tirada = e.fase === 'turno' && t && t.sub === 'tirada' && FU.tirada;
-  if (tirada && FU.fase >= 1 && t.num.suma !== 7) {
+  const tirada = e.fase === 'turno' && t && t.sub === 'tirada' && FU.tirada && (t.tiradas || []).length > 0, r = tirada ? t.tiradas[Math.min(FU.roll, t.tiradas.length - 1)] : null;
+  if (tirada && FU.fase >= 1 && FU.fase <= 2 && r.num.suma !== 7) {
     FU.parpadea = true; const marca = fuTitila();
-    t.hexes.forEach(i => { const h = e.mapa.hexes[i], p = geo.hx(h); g.drawImage(A.aroHex(marca, 2.4), Math.round(p.x - A.WD / 2), Math.round(p.y - A.HT / 2)); });
+    r.hexes.forEach(i => { const h = e.mapa.hexes[i], p = geo.hx(h); g.drawImage(A.aroHex(marca, 2.4), Math.round(p.x - A.WD / 2), Math.round(p.y - A.HT / 2)); });
   }
-  if (tirada && FU.fase === 2 && t.num.suma !== 7) {   // cada tarjeta que gana el propio jugador sale de su pueblo o ciudad
-    t.detalle.filter(d => d.asiento === e.yo).forEach(d => {
+  if (tirada && FU.fase === 2 && r.num.suma !== 7) {   // cada tarjeta que gana el propio jugador sale de su pueblo o ciudad
+    r.detalle.filter(d => d.asiento === e.yo).forEach(d => {
       const p = geo.v(e.mapa.vertices[d.vertice]);
       for (let i = 0; i < d.n; i++) g.drawImage(A.dado2d(FU_NOMBRE_REC[d.recurso]), Math.round(p.x - 8 + (i - (d.n - 1) / 2) * 17), Math.round(p.y - 28));
     });
   }
   // el bandido: quieto en su casilla, o desplazándose de la anterior a la nueva cuando acaba de salir un 7
-  const nuevo = geo.hx(e.mapa.hexes[e.tab.bandido]);
-  if (tirada && t.num.suma === 7 && FU.fase <= 2) {
-    const antes = geo.hx(e.mapa.hexes[t.bandidoAntes]);
+  const nuevo = geo.hx(e.mapa.hexes[tirada && FU.fase < 3 ? (r.num.suma === 7 && FU.fase < 2 ? r.bandidoAntes : r.bandido) : e.tab.bandido]);
+  if (tirada && r.num.suma === 7 && FU.fase <= 2) {
+    const antes = geo.hx(e.mapa.hexes[r.bandidoAntes]);
     if (FU.fase < 2) dibujarBandidoFU(g, antes, 1, true);
     else {   // el bandido se mueve solo (sin la cruz); cuando llega, aparece la cruz en la casilla nueva
       const k = Math.min(1, (performance.now() - (FU.band ? FU.band.t0 : 0)) / 1400), s = k < 0.5 ? 2 * k * k : 1 - Math.pow(-2 * k + 2, 2) / 2;
@@ -443,7 +469,7 @@ function pintarJugadoresFU(e) {
   const caja = $('fuJugadores'), n = e.jugadores.length;
   conLlave(caja, [e.turnoDe, e.yo, e.mano, e.jugadores.map(j => [j.asiento, j.apodo, j.puntos, j.bot, j.conectado, j.expulsado, j.tarjetas])], c => {
     c.className = 'fuJug' + (n > 5 ? ' muchos' : '');
-    e.jugadores.forEach(j => {
+    jugadoresEnOrdenFU(e).forEach(j => {
       const d = fuEl('div', 'fuJ' + (j.asiento === e.turnoDe ? ' turno' : '') + (j.asiento === e.yo ? ' soy' : '') + (j.conectado || j.bot ? '' : ' off'));
       d.style.borderLeftColor = fuRgb(fuColor(j.asiento));
       const cab = fuEl('div', 'fuJNom'); const nom = fuEl('span', 'fuJN'); ponerNombre(nom, (j.asiento === e.yo ? '★ ' : '') + j.apodo, j.bot || j.expulsado);
@@ -462,8 +488,8 @@ function pintarManoFU(e, esc) {
   caja.hidden = !ver; if (!ver) return;
   const t = e.turno, mio = t && t.de === e.yo;
   // las ganancias de esta tirada llegan a la mano recién cuando se muestran
-  const gan = t && t.sub === 'tirada' ? (t.gana.find(x => x.asiento === e.yo) || { mano: [0, 0, 0, 0, 0] }).mano : [0, 0, 0, 0, 0];
-  const ocultar = t && t.sub === 'tirada' && FU.fase < 3;
+  const gan = t && t.sub === 'tirada' ? (ganadoFU(t).find(x => x.asiento === e.yo) || { mano: [0, 0, 0, 0, 0] }).mano : [0, 0, 0, 0, 0];
+  const ocultar = t && t.sub === 'tirada' && (t.tiradas || []).length > 0 && FU.fase < 3;
   conLlave(caja, [e.mano, ocultar, gan, FU.panel ? 1 : 0], c => {
     const base = e.mano.map((n, r) => n - (ocultar ? gan[r] : 0));
     expandirFU(base).forEach(r => c.append(cartaFU(r)));
@@ -479,7 +505,7 @@ function pintarBotonesFU(e, esc) {
   const llave = [esc, FU.sel, FU.zona, FU.panel ? 1 : 0, t && t.edificio, t && t.posibles, e.turnoDe, FU.zonasMostrar.length];
   conLlave(caja, llave, c => {
     const add = (...bs) => bs.forEach(b => b && c.append(b));
-    if (esc === 'turno' && !FU.panel) add(botonFU('Construir', () => { Sonido.play('clic'); FU.panel = 'construir'; repintarFU(); }), botonFU('Terminar turno', () => hacerFU('pasar'), 'oro'));
+    if (esc === 'turno' && !FU.panel) add(botonFU('Construir', () => { Sonido.play('clic'); FU.panel = 'construir'; repintarFU(); }), botonFU('Pasar', () => hacerFU('pasar'), 'oro'));
     else if (esc === 'colocar') add(botonFU('Atrás', () => { if (FU.zona !== null) { FU.zona = null; FU.sel = null; repintarFU(); } else hacerFU('atras'); }), FU.sel !== null ? botonFU('Confirmar', () => confirmarLugarFU(), 'oro') : null);
     else if (esc === 'inicial') add(FU.zona !== null ? botonFU('Atrás', () => { FU.zona = null; FU.sel = null; repintarFU(); }) : null, FU.sel !== null ? botonFU('Poner aquí', () => confirmarLugarFU(), 'oro') : null);
     else if ((esc === 'turnoAjeno' || esc === 'colocarAjeno' || esc === 'descarteAjeno') && e.turnoDe !== null) add(botonFU('Esperando a ' + fuNombreDe(e, e.turnoDe), () => {}, 'off'));
@@ -490,8 +516,8 @@ function pintarAvisoFU(e, esc) {
   const caja = $('fuAviso'), t = e.turno; let txt = null, dorsos = 0;
   const ahoraP = performance.now();
   if (FU.aviso && ahoraP < FU.aviso.hasta) txt = FU.aviso.txt;
-  else if (esc === 'tirada' && t && FU.fase >= 2 && t.num.suma === 7) txt = 'Salió 7, el bandido se mueve';
-  else if (esc === 'tirada' && t && FU.fase >= 2 && !t.gana.length) txt = 'Salió ' + t.num.suma + ': nadie cobra';
+  else if (esc === 'tirada' && t && (t.tiradas || []).length && FU.fase === 2 && t.tiradas[FU.roll].num.suma === 7) txt = 'Salió 7, el bandido se mueve';
+  else if (esc === 'tirada' && t && (t.tiradas || []).length && FU.fase === 3 && !ganadoFU(t).length) txt = t.tiradas.length === 1 ? 'Salió ' + t.tiradas[0].num.suma + ': nadie cobra' : 'Nadie cobró';
   else if (esc === 'inicial') txt = 'Fundación · ronda ' + (Math.floor(e.inicial.idx / e.jugadores.length) + 1) + ' de 2: elige tu ' + (e.inicial.sub === 'pueblo' ? 'pueblo' : 'camino');
   else if (esc === 'inicialAjeno') txt = fuNombreDe(e, e.inicial.de) + ' pone su ' + (e.inicial.sub === 'pueblo' ? 'pueblo' : 'camino');
   else if (esc === 'colocar') txt = 'Elige dónde poner ' + ({ camino: 'el camino', pueblo: 'el pueblo', ciudad: 'la ciudad', caballero: 'el caballero' }[t.edificio] || 'la pieza');
@@ -603,23 +629,26 @@ function entregaVeloFU(e, centro) {
 
 // Los dados en el centro de la pantalla, con «Sale N».
 function pintarDadosFU(e, esc) {
-  const caja = $('fuDados'), t = e.turno;
-  const ver = esc === 'tirada' && !!FU.tirada && FU.fase <= 1 && !sinMovimiento();
+  const caja = $('fuDados'), t = e.turno, tiradas = (t && t.tiradas) || [];
+  const ver = esc === 'tirada' && !!FU.tirada && tiradas.length > 0 && FU.fase <= 1 && !sinMovimiento();
   caja.hidden = !ver; $('fuFranja').hidden = !ver; $('fuSale').hidden = !(ver && FU.fase === 1);
-  if (ver) { const s = $('fuSale'); s.textContent = ''; s.append(fuEl('div', 'fuSaleN', 'Sale ' + t.num.suma), fuEl('div', 'fuSaleD', t.num.a + ' + ' + t.num.b)); }
+  if (ver && FU.fase === 1) {
+    const r = tiradas[Math.min(FU.roll, tiradas.length - 1)], s = $('fuSale'); s.textContent = '';
+    s.append(fuEl('div', 'fuSaleN', 'Sale ' + r.num.suma), fuEl('div', 'fuSaleD', r.num.a + ' + ' + r.num.b + (tiradas.length > 1 ? ' · tirada ' + (FU.roll + 1) + ' de ' + tiradas.length : '')));
+  }
 }
-// Las ganancias de la tirada de todos, al frente.
+// Las ganancias de las tiradas del turno, de todos, al frente.
 function pintarGananciasFU(e, esc) {
-  const caja = $('fuGanancias'), t = e.turno;
-  const ver = esc === 'tirada' && FU.tirada && FU.fase === 3 && t.num.suma !== 7 && t.gana.length > 0;
+  const caja = $('fuGanancias'), t = e.turno, gan = t ? ganadoFU(t) : [];
+  const ver = esc === 'tirada' && FU.tirada && FU.fase === 3 && gan.length > 0;
   caja.hidden = !ver; if (!ver) { caja.dataset.llave = ''; return; }
-  conLlave(caja, [t.gana, e.ronda], c => {
-    c.append(fuEl('div', 'fuTitulo', 'Ganancias de la tirada'));
+  conLlave(caja, [gan, e.ronda], c => {
+    c.append(fuEl('div', 'fuTitulo', t.tiradas.length > 1 ? 'Ganancias de las ' + t.tiradas.length + ' tiradas' : 'Ganancias de la tirada'));
     const fila = fuEl('div', 'fuFila fuGan');
-    t.gana.forEach(x => {
+    gan.forEach(x => {
       const g = fuEl('div', 'fuGrupo'), cab = fuEl('div', 'fuFila'), av = fuEl('i', 'fuAv'); av.style.background = fuRgb(fuColor(x.asiento));
       cab.append(av, fuEl('span', '', x.asiento === e.yo ? 'Tú' : fuNombreDe(e, x.asiento)));
-      const cs = fuEl('div', 'fuFila'); expandirFU(x.mano).forEach(r => cs.append(cartaFU(r)));
+      const cs = fuEl('div', 'fuFila'); expandirFU(x.mano).forEach(r2 => cs.append(cartaFU(r2)));
       g.append(cab, cs); fila.append(g);
     });
     c.append(fila);

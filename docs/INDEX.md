@@ -45,6 +45,7 @@ Archivo generado por `indexar_docs.py`. No editar a mano: se regenera.
 - [[RU-014]] [Final de partida como en los otros juegos](requisitos/usuario/RU-014.md) — El final muestra título, subtítulo, una fila por jugador (puesto, nombre, detalle y puntos) y los botones «Nueva partida», «Compartir» (imagen PNG) y «Salir».
 - [[RU-015]] [Entrada y sala de espera comunes](requisitos/usuario/RU-015.md) — La sala de espera, la entrada y el crear sala son los comunes de la sala; de Fundación solo cambian las reglas (tiempo por turno y meta).
 - [[RU-016]] [Interfaz con poco texto](requisitos/usuario/RU-016.md) — Las pantallas de juego usan poco texto, sin desplazamiento (scroll), con arte de píxeles planos y sin textos de ayuda ni de depuración en el HUD.
+- [[RU-017]] [Jugadores ordenados por orden de ronda](requisitos/usuario/RU-017.md) — La lista de jugadores del lateral se ordena de primero a último según el orden de juego de la ronda.
 
 ## Funcional
 
@@ -71,6 +72,7 @@ Archivo generado por `indexar_docs.py`. No editar a mano: se regenera.
 - [[ADR-004]] [Reloj único por turno; el tiempo agotado pasa el turno](decisiones/ADR-004.md) — Cada turno tiene un solo reloj (45 s Normal, 90 s Extendido); al agotarse, el turno se pasa solo.
 - [[ADR-005]] [Camino de solo madera y pedido de 3 tarjetas cualesquiera](decisiones/ADR-005.md) — Dos palancas de economía medidas con bots que se adoptan para reducir los turnos sin construir y evitar bloqueos mutuos.
 - [[ADR-006]] [Meta de 8 puntos por omisión](decisiones/ADR-006.md) — La meta por omisión de Fundación pasa de 10 a 8 puntos, porque el tramo final de 8 a 10 puntos se arrastra.
+- [[ADR-007]] [Ritmo de Fundación: 5 tiradas por ronda, una acción por turno y meta 20](decisiones/ADR-007.md) — Las tiradas pasan a ser 5 por ronda repartidas entre los turnos, una sola acción por turno y meta 20, para que cada jugador juegue entre 20 y 30 turnos.
 
 ## Otro
 
@@ -155,5 +157,6 @@ Archivo generado por `indexar_docs.py`. No editar a mano: se regenera.
 | RU-014 | — | — |
 | RU-015 | — | — |
 | RU-016 | — | — |
+| RU-017 | — | — |
 
-**Requisitos sin test:** RF-001, RF-002, RF-003, RF-004, RF-005, RF-006, RN-001, RN-002, RN-003, RN-004, RN-005, RN-006, RN-007, RN-008, RN-009, RN-010, RN-011, RN-012, RN-013, RN-014, RN-015, RN-016, RN-017, RN-018, RN-019, RN-020, RN-021, RN-022, RNF-001, RNF-002, RNF-003, RNF-004, RNF-005, RU-001, RU-002, RU-003, RU-004, RU-005, RU-006, RU-007, RU-008, RU-009, RU-010, RU-011, RU-012, RU-013, RU-014, RU-015, RU-016
+**Requisitos sin test:** RF-001, RF-002, RF-003, RF-004, RF-005, RF-006, RN-001, RN-002, RN-003, RN-004, RN-005, RN-006, RN-007, RN-008, RN-009, RN-010, RN-011, RN-012, RN-013, RN-014, RN-015, RN-016, RN-017, RN-018, RN-019, RN-020, RN-021, RN-022, RNF-001, RNF-002, RNF-003, RNF-004, RNF-005, RU-001, RU-002, RU-003, RU-004, RU-005, RU-006, RU-007, RU-008, RU-009, RU-010, RU-011, RU-012, RU-013, RU-014, RU-015, RU-016, RU-017

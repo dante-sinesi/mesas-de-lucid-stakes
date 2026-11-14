@@ -13,7 +13,7 @@ const Bots = require('../bots');
 const { TIEMPO_VALIDO, escalarTiempos } = require('../tiempo');
 
 const FASE = { ESPERA: 'espera', INICIAL: 'inicial', TURNO: 'turno', FIN: 'fin' };
-const TIEMPOS = { tirada: 8500, turno: 45000, inicial: 30000, bot: 14000, botIni: 6000, fin: 1600, ausente: 2500, ausencia: 180000, reemplazo: 30000 };
+const TIEMPOS = { tirada: 8500, tiradaCada: 3800, tiradaFin: 2700, turno: 45000, inicial: 30000, bot: 14000, botIni: 6000, fin: 1600, ausente: 2500, ausencia: 180000, reemplazo: 30000 };
 const CLAVES_TIEMPO = ['turno', 'inicial'];   // los plazos que cambian con el tiempo de la sala
 const MAX_APODO = 16;
 const MAX_ASIENTOS = 8;
@@ -23,7 +23,7 @@ class MesaFundacion {
   constructor(op = {}) {
     this.juego = 'fundacion';
     this.modo = op.modo === 'solo' ? 'solo' : 'multi';
-    this.meta = R.METAS.includes(Number(op.meta)) ? Number(op.meta) : 8;
+    this.meta = R.METAS.includes(Number(op.meta)) ? Number(op.meta) : 20;
     this.maxAsientos = this.modo === 'multi' ? (op.asientos || MAX_ASIENTOS) : 1;
     this.clave = op.clave || null;
     this.azar = op.azar || Math.random;
@@ -283,18 +283,25 @@ class MesaFundacion {
   // ---------- el turno ----------
 
   _evento(asiento, tipo, lugar) { this.eventos.push({ id: ++this.contadorEventos, asiento, tipo, lugar }); if (this.eventos.length > 8) this.eventos.shift(); }
-  // La tirada y la cobranza: dos dados de número; con 7 el bandido salta; con otro número cobran todos los que tienen un edificio junto a ese número.
-  _iniciarTurno(asiento) {
-    const nums = R.tirarNumeros(this.azar), antes = this.tab.bandido;
-    let detalle = []; const gana = [];
-    if (nums.suma === 7) R.moverBandido(this.mapa, this.tab, this.azar);
+  // Una tirada: dos dados de número; con 7 el bandido salta y no cobra nadie; con otro número cobran todos los que tienen un edificio junto a ese número.
+  _tirada() {
+    const num = R.tirarNumeros(this.azar), antes = this.tab.bandido; let detalle = []; const gana = [];
+    if (num.suma === 7) R.moverBandido(this.mapa, this.tab, this.azar);
     else {
-      const pr = R.produccion(this.mapa, this.tab, nums.suma, MAX_ASIENTOS); detalle = pr.detalle;
+      const pr = R.produccion(this.mapa, this.tab, num.suma, MAX_ASIENTOS); detalle = pr.detalle;
       for (const j of this.jugadores) { const g = pr.gana[j.asiento]; if (R.totalMano(g)) { j.mano = R.sumarMano(j.mano, g); gana.push({ asiento: j.asiento, mano: g }); } }
     }
-    this.t = { asiento, sub: 'tirada', num: nums, gana, detalle, hexes: nums.suma === 7 ? [] : R.hexesDe(this.mapa, nums.suma), bandidoAntes: antes, bandido: this.tab.bandido, edificio: null, lugar: null, terminado: false, motivo: null, exceso: 0 };
+    return { num, gana, detalle, hexes: num.suma === 7 ? [] : R.hexesDe(this.mapa, num.suma), bandidoAntes: antes, bandido: this.tab.bandido };
+  }
+  _duracionTirada(veces) { return veces <= 1 ? this.tiempos.tirada : veces * this.tiempos.tiradaCada + this.tiempos.tiradaFin; }
+  // Al empezar el turno hay las tiradas que le tocan en la ronda (puede no haber ninguna); cobran todos con cada una.
+  _iniciarTurno(asiento) {
+    const veces = R.tiradasDelTurno(this.turnoIdx, this.orden.length), tiradas = [];
+    for (let k = 0; k < veces; k++) tiradas.push(this._tirada());
+    this.t = { asiento, sub: 'tirada', tiradas, edificio: null, lugar: null, terminado: false, motivo: null, exceso: 0, acciones: 0 };
     this.finTurnoEn = null; this.limite = null; this.botEn = null;
-    this.tiradaHasta = this.ahora() + this.tiempos.tirada;
+    if (!veces) { this.tiradaHasta = null; this._despuesDeTirada(); return; }   // (un turno sin tirada empieza directo en el descarte o en el turno)
+    this.tiradaHasta = this.ahora() + this._duracionTirada(veces);
   }
   // Pasada la tirada: si el jugador tiene más de 6 tarjetas, primero descarta; después construye y entrega. Desde acá corre el reloj del turno.
   _despuesDeTirada() {
@@ -321,6 +328,7 @@ class MesaFundacion {
     t.lugar = lugar; t.ultimo = t.edificio; t.edificio = null; t.sub = 'turno';   // (dónde se construyó: los demás lo ven resaltado)
     this.carreras = R.carreras(this.tab, MAX_ASIENTOS, this.carreras);
     this._revisarMisiones(j);
+    this._acciono();
     return { ok: true };
   }
   _entregar(j, id) {
@@ -328,8 +336,11 @@ class MesaFundacion {
     if (!m || m.por !== null || !M.PEDIDOS[id]) return { ok: false, error: 'Ese pedido ya no está' };
     const q = M.entrega(id, j.mano); if (!q) return { ok: false, error: 'No tienes las tarjetas para ese pedido' };
     j.mano = j.mano.map((n, r) => n - q[r]); M.tomar(this.grupo, id, j.asiento); j.pvExtra += M.PV; this._evento(j.asiento, 'pedido', id);
+    this._acciono();
     return { ok: true };
   }
+  // Una acción hecha (construir o entregar): si ya se hicieron las que caben en un turno, el turno termina solo.
+  _acciono() { const t = this.t; t.acciones++; if (t.acciones >= R.CFG.accionesPorTurno) this._finTurno('accion'); }
   // Las misiones de condición que el jugador acaba de cumplir: se las lleva (y se reponen al terminar su turno).
   _revisarMisiones(j) {
     for (const id of M.cumplidas(this.grupo, this.mapa, this.tab, j.asiento)) { M.tomar(this.grupo, id, j.asiento); j.pvExtra += M.PV; this._evento(j.asiento, 'mision', id); }
@@ -435,21 +446,21 @@ class MesaFundacion {
   // ---------- guardar y recuperar la sala ----------
 
   guardar() {
-    return { juego: 'fundacion', v: 2, modo: this.modo, meta: this.meta, tiempoModo: this.tiempoModo, maxAsientos: this.maxAsientos, clave: this.clave, fase: this.fase, version: this.version,
+    return { juego: 'fundacion', v: 3, modo: this.modo, meta: this.meta, tiempoModo: this.tiempoModo, maxAsientos: this.maxAsientos, clave: this.clave, fase: this.fase, version: this.version,
       jugadores: this.jugadores, semilla: this.semilla, nMapa: this.nMapa, tab: this.tab, carreras: this.carreras, orden: this.orden, inicial: this.inicial, turnoIdx: this.turnoIdx, ronda: this.ronda,
       t: this.t, grupo: this.grupo, finDeVuelta: this.finDeVuelta, llegoMeta: this.llegoMeta, eventos: this.eventos, contadorEventos: this.contadorEventos, fin: this.fin };
   }
   static desde(datos, op = {}) {
     const m = new MesaFundacion(Object.assign({}, op, { modo: datos.modo, meta: datos.meta, tiempoModo: datos.tiempoModo, asientos: datos.maxAsientos, clave: datos.clave, bots: 0 }));
     m.jugadores = (datos.jugadores || []).map(j => Object.assign({ mano: R.manoVacia(), pvExtra: 0 }, j)); m.fase = datos.fase; m.version = datos.version || 0;
-    if (datos.v !== 2 && datos.fase !== FASE.ESPERA) { m.fase = FASE.ESPERA; return m; }   // (una partida de la versión 1 no sirve en la 2: la sala vuelve a la espera)
+    if (datos.v !== 3 && datos.fase !== FASE.ESPERA) { m.fase = FASE.ESPERA; return m; }   // (una partida de la versión 1 no sirve en la 2: la sala vuelve a la espera)
     Object.assign(m, { semilla: datos.semilla || 0, nMapa: datos.nMapa || 0, carreras: datos.carreras || { camino: null, ejercito: null }, orden: datos.orden || [], inicial: datos.inicial || null, turnoIdx: datos.turnoIdx || 0, ronda: datos.ronda || 1,
       t: datos.t || null, grupo: datos.grupo || null, finDeVuelta: !!datos.finDeVuelta, llegoMeta: datos.llegoMeta === undefined ? null : datos.llegoMeta, eventos: datos.eventos || [], contadorEventos: datos.contadorEventos || 0, fin: datos.fin || null });
     if (m.fase === FASE.INICIAL || m.fase === FASE.TURNO) {
       m.mapa = R.crearMapa(m.semilla, m.nMapa); m.tab = datos.tab;
       if (m.fase === FASE.INICIAL) m._fijarLimite('inicial');
       else if (m.t && m.t.terminado) m.finTurnoEn = m.ahora() + m.tiempos.fin;
-      else if (m.t && m.t.sub === 'tirada') m.tiradaHasta = m.ahora() + m.tiempos.tirada;
+      else if (m.t && m.t.sub === 'tirada') m.tiradaHasta = m.ahora() + m._duracionTirada((m.t.tiradas || []).length);
       else m._fijarLimite('turno');
     }
     return m;
@@ -474,7 +485,7 @@ class MesaFundacion {
     let turno = null;
     if (this.fase === FASE.TURNO && this.t) {
       const t = this.t;
-      turno = { de: t.asiento, sub: t.sub, num: t.num, gana: t.gana, detalle: t.detalle, hexes: t.hexes, bandidoAntes: t.bandidoAntes, bandido: t.bandido, edificio: t.edificio, exceso: t.exceso, terminado: t.terminado, motivo: t.motivo, lugar: t.lugar === undefined ? null : t.lugar, ultimo: t.ultimo || null, grupo: t.grupo || null };
+      turno = { de: t.asiento, sub: t.sub, tiradas: t.tiradas, edificio: t.edificio, exceso: t.exceso, terminado: t.terminado, motivo: t.motivo, lugar: t.lugar === undefined ? null : t.lugar, ultimo: t.ultimo || null, grupo: t.grupo || null };
       if (activo && (t.sub === 'turno' || t.sub === 'colocar')) {
         turno.posibles = R.posibles(this.mapa, this.tab, yo.asiento, yo.mano);
         turno.motivos = {}; R.EDIFICIOS.filter(e => !R.lugares(this.mapa, this.tab, yo.asiento, e).length).forEach(e => { turno.motivos[e] = R.motivoSinLugar(this.mapa, this.tab, yo.asiento, e); });

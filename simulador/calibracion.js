@@ -7,10 +7,14 @@ const { MesaFundacion, FASE } = require(path.join(__dirname, '..', 'servidor', '
 const R = require(path.join(__dirname, '..', 'servidor', 'fundacion', 'reglas.js'));
 const M = require(path.join(__dirname, '..', 'servidor', 'fundacion', 'misiones.js'));
 
-const PARTIDAS = Number(process.argv[2]) || 40, META = Number(process.argv[3]) || 10, MINERAL = Number(process.argv[4]) || 3, PEDIDO_MIN = process.argv[5] === undefined ? R.CFG.pedidoMin : Number(process.argv[5]);
+const PARTIDAS = Number(process.argv[2]) || 40, META = Number(process.argv[3]) || 20, MINERAL = Number(process.argv[4]) || 3, PEDIDO_MIN = process.argv[5] === undefined ? R.CFG.pedidoMin : Number(process.argv[5]);
 const CANTIDADES = (process.argv[6] || '1,2,4,6,8').split(',').map(Number);
 R.COSTOS.ciudad = [0, 0, 0, 2, MINERAL]; R.CFG.pedidoMin = PEDIDO_MIN;
 // Las variantes a medir (se suman con +): colinas (más ladrillo y bosque en la isla) y mano (el tope de la mano sube con la mesa). El camino de solo madera y el pedido de 3 tarjetas cualesquiera ya son la regla.
+const PASO = Number(process.env.PASO_MS) || 3000;   // cuánto avanza el reloj de mentira por cada paso (más chico: tiempo más exacto, más lento)
+// Para medir otras reglas: TIRADAS_POR_RONDA=k (0 = una por turno) y ACCIONES=a (0 = todas las que alcancen); por omisión valen las de la regla (5 y 1).
+if (process.env.TIRADAS_POR_RONDA !== undefined) R.CFG.tiradasPorRonda = Number(process.env.TIRADAS_POR_RONDA);
+if (process.env.ACCIONES !== undefined) R.CFG.accionesPorTurno = Number(process.env.ACCIONES) || 999;
 const VARIANTES = (process.argv[7] || 'base').split('+');
 if (VARIANTES.includes('colinas')) { R.TIPOS_19.colinas = 4; R.TIPOS_19.campos = 3; R.TIPOS_37.colinas = 8; R.TIPOS_37.campos = 7; }
 if (VARIANTES.includes('mano')) R.CFG.manoPorJugadorExtra = 1;
@@ -23,19 +27,21 @@ function jugar(jugadores, semilla) {
   const despues = m._despuesDeTirada.bind(m), fin = m._finTurno.bind(m), desc = m._descartar.bind(m), ent = m._entregar.bind(m), rev = m._revisarMisiones.bind(m), col = m._colocar.bind(m);
   m._despuesDeTirada = () => { m.jugadores.forEach(j => { st.maxMano = Math.max(st.maxMano, R.totalMano(j.mano)); }); despues(); };
   m._descartar = (j, q) => { const r = desc(j, q); if (r.ok) { st.descartes++; st.descartadas += R.totalMano(q); } return r; };
-  m._entregar = (j, id) => { const r = ent(j, id); if (r.ok) { st.entregas++; st.construyo[j.asiento] = true; } return r; };
+  m._entregar = (j, id) => { const r = ent(j, id); if (r.ok) { st.entregas++; if (!(m.t && m.t.terminado)) st.construyo[j.asiento] = true; } return r; };
   m._revisarMisiones = j => { const antes = j.pvExtra; rev(j); st.misiones += (j.pvExtra - antes); };
-  m._colocar = (j, l) => { const r = col(j, l); if (r.ok) st.construyo[j.asiento] = true; return r; };
+  m._colocar = (j, l) => { const r = col(j, l); if (r.ok && !(m.t && m.t.terminado)) st.construyo[j.asiento] = true; return r; };
   m._finTurno = mot => {
     const as = m.t.asiento, jx = m.porAsiento(as);
+    if (mot === 'accion') st.construyo[as] = true;   // (el turno terminó solo porque hizo su acción)
     if (!st.construyo[as] && jx) {   // un turno sin hacer nada: por qué
       const mano = jx.mano, caros = R.EDIFICIOS.filter(e => R.alcanza(R.COSTOS[e], mano));
       if (R.totalMano(mano) === 0) st.razon.manoVacia++; else if (caros.length) st.razon.sinLugar++; else { st.razon.faltaRecurso++; R.COSTOS.pueblo.forEach((n, r) => { if (mano[r] < n) st.falta[r]++; }); }
     }
     const rr = m.ronda; if (as === m.orden[m.orden.length - 1]) { const mx = Math.max.apply(null, m.jugadores.map(x => m._puntosDe(x.asiento))); st.curva[rr] = mx; }
     st.turnos++; if (st.construyo[as]) st.racha[as] = 0; else { st.vacios++; st.racha[as]++; st.rachaMax = Math.max(st.rachaMax, st.racha[as]); } st.construyo[as] = false; fin(mot); };
-  m._empezar();
-  for (let i = 0; i < 60000 && m.fase !== FASE.FIN; i++) { reloj.t += 3000; m.avanzar(); }
+  m._empezar(); const t0 = reloj.t;
+  for (let i = 0; i < 90000 && m.fase !== FASE.FIN; i++) { reloj.t += PASO; m.avanzar(); }
+  st.ms = reloj.t - t0;
   return { m, st };
 }
 
@@ -43,11 +49,11 @@ const media = a => a.length ? a.reduce((x, y) => x + y, 0) / a.length : 0;
 const pct = (a, q) => a.length ? a.slice().sort((x, y) => x - y)[Math.min(a.length - 1, Math.floor(a.length * q))] : 0;
 console.log('Fundación v2 [' + VARIANTES.join('+') + ']: ' + PARTIDAS + ' partidas por cantidad, meta ' + META + ', ciudad ' + MINERAL + ' mineral + 2 trigo, pedidos de al menos ' + PEDIDO_MIN + ' turnos\n');
 for (const jug of CANTIDADES) {
-  const rondas = [], curvas = [], razon = { sinLugar: 0, faltaRecurso: 0, manoVacia: 0 }, faltan = [0, 0, 0, 0, 0], r = { fin: 0, ciudades: 0, pueblos: 0, caminos: 0, caballeros: 0, vacios: 0, turnos: 0, descartes: 0, descartadas: 0, entregas: 0, misiones: 0, maxMano: [], rachaMax: [], trabadas: 0 };
+  const rondas = [], minutos = [], porJugador = [], turnosLista = [], vaciosLista = [], curvas = [], razon = { sinLugar: 0, faltaRecurso: 0, manoVacia: 0 }, faltan = [0, 0, 0, 0, 0], r = { fin: 0, ciudades: 0, pueblos: 0, caminos: 0, caballeros: 0, vacios: 0, turnos: 0, descartes: 0, descartadas: 0, entregas: 0, misiones: 0, maxMano: [], rachaMax: [], trabadas: 0 };
   for (let k = 0; k < PARTIDAS; k++) {
     const { m, st } = jugar(jug, 777 * jug + k);
     if (m.fase !== FASE.FIN) { r.trabadas++; continue; }
-    r.fin++; rondas.push(m.ronda); curvas.push(st.curva); for (const k in razon) razon[k] += st.razon[k]; st.falta.forEach((n, i) => { faltan[i] += n; });
+    r.fin++; rondas.push(m.ronda); minutos.push(st.ms / 60000); m.fin.ranking.forEach(x => porJugador.push(x.turnos)); turnosLista.push(st.turnos); vaciosLista.push(st.vacios / Math.max(1, st.turnos)); curvas.push(st.curva); for (const k in razon) razon[k] += st.razon[k]; st.falta.forEach((n, i) => { faltan[i] += n; });
     m.fin.ranking.forEach(x => { r.ciudades += x.ciudades; r.pueblos += x.pueblos; r.caminos += x.caminos; r.caballeros += x.caballeros; });
     r.vacios += st.vacios; r.turnos += st.turnos; r.descartes += st.descartes; r.descartadas += st.descartadas; r.entregas += st.entregas; r.misiones += st.misiones; r.maxMano.push(st.maxMano); r.rachaMax.push(st.rachaMax);
   }
@@ -55,6 +61,8 @@ for (const jug of CANTIDADES) {
   console.log(jug + ' jugador' + (jug > 1 ? 'es' : '') + ': terminan ' + r.fin + '/' + PARTIDAS + ' · rondas ' + media(rondas).toFixed(1) + ' (mediana ' + pct(rondas, 0.5) + ', p90 ' + pct(rondas, 0.9) + ') · turnos de la partida ' + (r.turnos / Math.max(1, r.fin)).toFixed(0));
   console.log('   por jugador: ' + (r.pueblos / n).toFixed(1) + ' pueblos, ' + (r.ciudades / n).toFixed(2) + ' ciudades, ' + (r.caminos / n).toFixed(1) + ' caminos, ' + (r.caballeros / n).toFixed(1) + ' caballeros · pedidos entregados ' + (r.entregas / n).toFixed(1) + ' · puntos de misiones y pedidos ' + (r.misiones / n).toFixed(1));
   console.log('   turnos sin hacer nada ' + Math.round(r.vacios / Math.max(1, r.turnos) * 100) + ' % · racha máxima de turnos vacíos: mediana ' + pct(r.rachaMax, 0.5) + ', p90 ' + pct(r.rachaMax, 0.9) + ' · descartes por jugador ' + (r.descartes / n).toFixed(1) + ' (' + (r.descartadas / Math.max(1, r.descartes)).toFixed(1) + ' tarjetas cada uno) · mano máxima al empezar un turno: mediana ' + pct(r.maxMano, 0.5) + ', p90 ' + pct(r.maxMano, 0.9));
+  console.log('   TIEMPO con bots (reloj de la mesa, con la tirada de ' + (8.5) + ' s y lo que tarda un bot): media ' + media(minutos).toFixed(1) + ' min (mediana ' + pct(minutos, 0.5).toFixed(1) + ', p90 ' + pct(minutos, 0.9).toFixed(1) + ') · TURNOS que juega cada jugador: media ' + media(porJugador).toFixed(1) + ' (mediana ' + pct(porJugador, 0.5) + ', p10 ' + pct(porJugador, 0.1) + ', p90 ' + pct(porJugador, 0.9) + ') · TURNOS por partida: media ' + media(turnosLista).toFixed(0) + ' (mediana ' + pct(turnosLista, 0.5) + ', p90 ' + pct(turnosLista, 0.9) + ') · turnos sin hacer nada: media ' + (media(vaciosLista) * 100).toFixed(0) + ' % (p90 ' + (pct(vaciosLista, 0.9) * 100).toFixed(0) + ' %)');
+  console.log('   RESUMEN jugadores=' + jug + ' turnosPorJugador=' + media(porJugador).toFixed(1) + ' (p10 ' + pct(porJugador, 0.1) + ' p90 ' + pct(porJugador, 0.9) + ') sinHacerNada=' + (media(vaciosLista) * 100).toFixed(0) + '% terminan=' + r.fin + '/' + PARTIDAS);
   const tot = Math.max(1, razon.sinLugar + razon.faltaRecurso + razon.manoVacia), pc = x => Math.round(x / tot * 100) + ' %';
   console.log('   por qué se queda sin hacer nada: falta algún recurso ' + pc(razon.faltaRecurso) + ' · tiene lo que cuesta pero no hay lugar ' + pc(razon.sinLugar) + ' · mano vacía ' + pc(razon.manoVacia) + ' · el recurso que más falta para un pueblo: ' + ['madera', 'ladrillo', 'lana', 'trigo', 'mineral'].map((n, i) => n + ' ' + faltan[i]).join(', '));
   const rs = [3, 6, 9, 12, 15, 18, 21, 24].filter(x => curvas.some(c => c[x] !== undefined));
