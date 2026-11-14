@@ -88,19 +88,9 @@ function dibujarBandidoFU(g, b, alfa, conCruz) {
   g.drawImage(A.bandido(), Math.round(b.x + 6), Math.round(b.y - 8)); g.globalAlpha = 1;
 }
 const fuTitila = () => (Math.floor(performance.now() / 360) % 2 ? [1, 1, 1] : [0.97, 0.78, 0.25]);   // (lo que marca algo titila entre dorado y blanco)
-const fuOscurecer = (g, a) => { g.fillStyle = 'rgba(8,6,20,' + a + ')'; g.fillRect(-9999, -9999, 99999, 99999); };
 function fuPunto(g, p, R, sel) {
   for (let j = -7; j <= 7; j++) for (let k = -7; k <= 7; k++) { const d = Math.hypot(k, j); if (d <= R + 1.2 && d > R) FU_ARTE.fr(g, Math.round(p.x) + k, Math.round(p.y) + j, 1, 1, sel ? [1, 1, 1] : [0.2, 0.12, 0.05]); else if (d <= R) FU_ARTE.fr(g, Math.round(p.x) + k, Math.round(p.y) + j, 1, 1, [0.97, 0.78, 0.22]); }
 }
-function fuAroZona(g, zn) {
-  const R = Math.round(zn.r);
-  for (let a = 0; a < 360; a += 3) { if ((a / 3) % 2) continue; FU_ARTE.fr(g, Math.round(zn.x + Math.cos(a * Math.PI / 180) * R) - 1, Math.round(zn.y + Math.sin(a * Math.PI / 180) * R) - 1, 2, 2, zn.col || [0.97, 0.78, 0.22]); }
-  if (zn.sinNum) return;
-  const l = V.celdas('x' + zn.n), w = l.ancho + 4;
-  FU_ARTE.fr(g, Math.round(zn.x - w / 2), Math.round(zn.y - 6), w, 12, [0.11, 0.07, 0.21]); FU_ARTE.fr(g, Math.round(zn.x - w / 2), Math.round(zn.y - 6), w, 1, [0.97, 0.78, 0.22]); FU_ARTE.fr(g, Math.round(zn.x - w / 2), Math.round(zn.y + 5), w, 1, [0.97, 0.78, 0.22]);
-  l.celdas.forEach(p => FU_ARTE.fr(g, Math.round(zn.x - l.ancho / 2) + p[0], Math.round(zn.y - 5.5) + p[1] + 1, 1, 1, [0.97, 0.78, 0.22]));
-}
-
 // ---------- los lugares: puntos tocables según lo que se pone ----------
 
 function candidatosFU(e, geo) {
@@ -391,8 +381,7 @@ function superponerFU(g, e, geo, colocando, z) {
   } else dibujarBandidoFU(g, nuevo, 1, true);
   if (!colocando && FU.foco && performance.now() < FU.foco.hasta) fuMarcaFU(g, puntoLugarFU(e, geo, FU.foco.tipo, FU.foco.lugar, FU.foco.asiento), fuColor(FU.foco.asiento), FU.foco.t0);
   if (colocando) {
-    fuOscurecer(g, 0.5);
-    if (FU.zonasMostrar && FU.zonasMostrar.length) { FU.candidatos.forEach(c => fuPunto(g, c, 1.6, false)); FU.zonasMostrar.forEach(zn => fuAroZona(g, zn)); }
+    if (FU.zonasMostrar && FU.zonasMostrar.length) { FU.candidatos.forEach(c => fuPunto(g, c, 1.6, false)); }   // (sin aros ni fondo oscuro: el mapa se ve entero y, al tocarlo, la cámara se acerca a la zona más cercana)
     else {
       FU.candidatos.forEach(c => fuPunto(g, c, c.id === FU.sel ? 5.2 : 3.4, c.id === FU.sel));
       const s = FU.candidatos.find(c => c.id === FU.sel);
@@ -414,7 +403,7 @@ function tocarMapaFU(ev) {
   const r = $('fuMapa').getBoundingClientRect(), sx = ev.clientX - r.left, sy = ev.clientY - r.top, z = FU.cam.z;
   const wx = sx / z + FU.cam.ox, wy = sy / z + FU.cam.oy;
   if (FU.zonasMostrar && FU.zonasMostrar.length) {
-    let mejor = -1, dm = Infinity; FU.zonasMostrar.forEach((zn, i) => { const d = Math.hypot(zn.x - wx, zn.y - wy); if (d <= zn.r * 1.25 && d < dm) { dm = d; mejor = i; } });
+    let mejor = -1, dm = Infinity; FU.zonasMostrar.forEach((zn, i) => { const d = Math.hypot(zn.x - wx, zn.y - wy); if (d <= zn.r * 2.4 && d < dm) { dm = d; mejor = i; } });
     if (mejor >= 0) { Sonido.play('clic'); FU.zona = FU.zonas.indexOf(FU.zonasMostrar[mejor]); if (FU.zona < 0) FU.zona = mejor; repintarFU(); }
     return;
   }
