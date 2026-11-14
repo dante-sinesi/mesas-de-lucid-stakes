@@ -243,7 +243,7 @@ class MesaFundacion {
     j.automaticos++; j.fallos++;
     if (j.fallos >= SEGUIDOS_PARA_BOT) { j.expulsado = true; j.reemplazado = true; }
     if (this.fase === FASE.INICIAL) { this._jugadaBot(j); return; }
-    if (this.t && this.t.sub === 'descarte') this._descartar(j, R.descarteAzar(j.mano, this.azar));
+    if (this.t && this.t.sub === 'descarte') this._descartar(j, R.descarteAzar(j.mano, this.azar, this._manoMax()));
     this._finTurno('tiempo');
   }
   _manual(j) { j.fallos = 0; j.expulsado = false; }
@@ -299,12 +299,12 @@ class MesaFundacion {
   // Pasada la tirada: si el jugador tiene más de 6 tarjetas, primero descarta; después construye y entrega. Desde acá corre el reloj del turno.
   _despuesDeTirada() {
     const t = this.t, j = this.porAsiento(t.asiento); this.tiradaHasta = null;
-    t.exceso = j ? R.exceso(j.mano) : 0;
+    t.exceso = j ? R.exceso(j.mano, this._manoMax()) : 0;
     t.sub = t.exceso > 0 ? 'descarte' : 'turno';
     this._fijarLimite('turno');
   }
   _descartar(j, quitar) {
-    if (!R.descarteValido(j.mano, quitar)) return { ok: false, error: 'Descarta justo las tarjetas que sobran' };
+    if (!R.descarteValido(j.mano, quitar, this._manoMax())) return { ok: false, error: 'Descarta justo las tarjetas que sobran' };
     j.mano = j.mano.map((n, r) => n - quitar[r]); this.t.sub = 'turno'; this.t.exceso = 0;
     return { ok: true };
   }
@@ -334,6 +334,7 @@ class MesaFundacion {
   _revisarMisiones(j) {
     for (const id of M.cumplidas(this.grupo, this.mapa, this.tab, j.asiento)) { M.tomar(this.grupo, id, j.asiento); j.pvExtra += M.PV; this._evento(j.asiento, 'mision', id); }
   }
+  _manoMax() { return R.manoMax(this.jugadores.length); }   // (el tope de la mano de esta mesa)
   _puntosDe(asiento) { const j = this.porAsiento(asiento); return R.puntos(this.tab, asiento, this.carreras, j ? j.pvExtra : 0); }
   _finTurno(motivo) {
     const t = this.t, j = this.porAsiento(t.asiento);
@@ -377,7 +378,7 @@ class MesaFundacion {
       return;
     }
     const t = this.t; if (!t || t.sub === 'tirada') return;   // (la tirada espera sola)
-    if (t.sub === 'descarte') { this._descartar(j, Bot.descartar(this.mapa, this.tab, as, j.mano, R.exceso(j.mano))); return; }
+    if (t.sub === 'descarte') { this._descartar(j, Bot.descartar(this.mapa, this.tab, as, j.mano, R.exceso(j.mano, this._manoMax()))); return; }
     if (t.sub === 'colocar') { t.sub = 'turno'; t.edificio = null; }
     const d = Bot.decidir(this.mapa, this.tab, as, j.mano, this.grupo, this.azar);
     if (d.tipo === 'entregar') this._entregar(j, d.id);
@@ -484,7 +485,7 @@ class MesaFundacion {
       juego: 'fundacion', sinTiempo: !!this.sinTiempo, pausa: this.pausa !== null, tiempos: { turno: this.tiempos.turno, inicial: this.tiempos.inicial, tirada: this.tiempos.tirada }, version: this.version, ahora: this.ahora(),
       modo: this.modo, fase: this.fase, limite: this.limite, limiteDur: this.limiteDur || null, meta: this.meta, ronda: this.ronda, finDeVuelta: this.finDeVuelta, llegoMeta: this.llegoMeta, maxAsientos: this.maxAsientos, tiempoModo: this.tiempoModo,
       turnoDe: this.fase === FASE.TURNO && this.t ? this.t.asiento : (this.fase === FASE.INICIAL && this.inicial ? this._actor().asiento : null),
-      yo: yo ? yo.asiento : null, mano: yo ? yo.mano.slice() : null, manoMax: R.MANO_MAX, reemplazado: !!(yo && yo.reemplazado), anfitrion: this.anfitrion() ? this.anfitrion().asiento : null,
+      yo: yo ? yo.asiento : null, mano: yo ? yo.mano.slice() : null, manoMax: this._manoMax(), reemplazado: !!(yo && yo.reemplazado), anfitrion: this.anfitrion() ? this.anfitrion().asiento : null,
       jugadores: this.jugadores.map(j => { const c = this.tab ? R.piezas(this.tab, j.asiento) : { pueblo: 0, ciudad: 0, camino: 0, caballero: 0 }; return { asiento: j.asiento, apodo: j.apodo, conectado: j.conectado, bot: !!j.bot, expulsado: !!j.expulsado, puntos: this.tab ? this._puntosDe(j.asiento) : 0, misiones: j.pvExtra || 0, tarjetas: R.totalMano(j.mano || R.manoVacia()), pueblos: c.pueblo, ciudades: c.ciudad, caminos: c.camino, caballeros: c.caballero, quedan: this.tab ? R.quedan(this.tab, j.asiento) : null, turnos: j.turnos }; }),
       inicial: this.fase === FASE.INICIAL && this.inicial ? { de: this._actor().asiento, sub: this.inicial.sub, idx: this.inicial.idx, total: this.inicial.plan.length, ultimoPueblo: this.inicial.ultimoPueblo } : null,
       turno, grupo: this._grupoPublico(), carreras: this.carreras, eventos: this.eventos.slice(), contadorEventos: this.contadorEventos, fin: this.fin, orden: this.orden,

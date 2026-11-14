@@ -40,14 +40,21 @@ const PEDIDOS = {
   mineral3: { clase: 'B', costo: [0, 0, 0, 0, 3] },   // 3 mineral
   surtido: { clase: 'B', costo: [1, 1, 1, 1, 1] },    // una de cada
   iguales3: { clase: 'B', iguales: 3 },               // 3 tarjetas iguales
+  cualquiera3: { clase: 'B', cualquiera: 3 },         // 3 tarjetas cualesquiera (todavía fuera del grupo: se calibra con bots)
 };
 const DEFS = Object.assign({}, MISIONES, PEDIDOS);
-const IDS = { A: Object.keys(MISIONES), B: Object.keys(PEDIDOS) };
+const IDS = { A: Object.keys(MISIONES), B: Object.keys(PEDIDOS).filter(id => id !== 'cualquiera3') };   // (lo que entra al grupo)
 
 // Las tarjetas que se entregarían por un pedido con esta mano (una cuenta por recurso), o null si no se puede. Las elige el juego: el jugador no elige.
 function entrega(id, mano) {
   const d = PEDIDOS[id]; if (!d) return null;
   if (d.costo) return R.alcanza(d.costo, mano) ? d.costo.slice() : null;
+  if (d.cualquiera) {   // las del recurso que más hay, de a una (con empate, el primero)
+    if (R.totalMano(mano) < d.cualquiera) return null;
+    const m = mano.slice(), q = R.manoVacia();
+    for (let k = 0; k < d.cualquiera; k++) { let r = 0; m.forEach((n, i) => { if (n > m[r]) r = i; }); m[r]--; q[r]++; }
+    return q;
+  }
   let r = -1; mano.forEach((n, i) => { if (n >= d.iguales && (r < 0 || n > mano[r])) r = i; });
   if (r < 0) return null;
   const q = R.manoVacia(); q[r] = d.iguales; return q;

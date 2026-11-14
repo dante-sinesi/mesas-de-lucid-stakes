@@ -46,6 +46,18 @@ check(R.descarteValido([2, 0, 0, 0, 0], [0, 0, 0, 0, 0]), 'con 6 o menos, el des
 { const mano = [4, 3, 0, 0, 2], q = R.descarteAzar(mano, R.rng(3)); check(R.descarteValido(mano, q), 'el descarte al azar quita justo lo que sobra'); }
 { const m = R.crearMapa(5, 3), r = R.recursosDeVertice(m, m.hexes[3].vertices[0]); check(r.da.length >= 1 && r.da.every(x => x.num > 0) && r.da.length + r.faltan.length >= 3 && r.faltan.every(f => !r.da.some(d => d.recurso === f)), 'un vértice dice qué recursos da y cuáles le faltan'); }
 
+{ // el tope de la mano puede crecer con la cantidad de jugadores (por omisión no crece: es una palanca de calibración)
+  check(R.manoMax(2) === 6 && R.manoMax(4) === 6 && R.manoMax(8) === 6, 'por omisión la mano máxima es 6 con cualquier cantidad de jugadores');
+  const ant = R.CFG.manoPorJugadorExtra; R.CFG.manoPorJugadorExtra = 1;
+  check(R.manoMax(4) === 6 && R.manoMax(6) === 8 && R.manoMax(8) === 10 && R.manoMax(2) === 6, 'con la palanca en 1, cada jugador desde el quinto suma 1 al tope');
+  R.CFG.manoPorJugadorExtra = ant;
+  check(R.exceso([3, 3, 3, 0, 1], 8) === 2 && R.descarteValido([3, 3, 3, 0, 1], [1, 1, 0, 0, 0], 8) && !R.descarteValido([3, 3, 3, 0, 1], [1, 1, 1, 0, 1], 8), 'el descarte se calcula contra el tope que se le pasa');
+  const q = R.descarteAzar([3, 3, 3, 0, 1], R.rng(2), 8); check(R.totalMano(q) === 2, 'con tope 8 y 10 tarjetas se descartan 2');
+}
+{ // el contorno de la isla: las cuentas de tipos se pueden cambiar para probar mapas con más colinas
+  check(R.TIPOS_19 && R.TIPOS_19.colinas === 3 && R.TIPOS_37 && R.TIPOS_37.colinas === 7, 'la isla de 19 tiene 3 colinas y la de 37 tiene 7');
+}
+
 // ---------- los lugares válidos ----------
 const mapa = R.crearMapa(11, 4);
 let tab = R.nuevoTablero(mapa);
