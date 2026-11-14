@@ -122,7 +122,7 @@ async function jugarSolo(juego, modo) {
 function apodoSolo() { if (!$('apodo').value.trim()) $('apodo').value = guardado('bj_apodo') || 'Jugador ' + (10 + Math.floor(Math.random() * 90)); }
 async function crearSolo(juego, modo) {
   apodoSolo();
-  const r = await api('/api/crear', juego === 'fundacion' ? { juego, modoFU: 'solo', metaFU: 10, tiempo: 'libre' } : (juego === 'trecejack' ? { juego, modoTJ: 'solo', mazosTJ: 5, especiales: true, tiempo: 'libre' } : { juego, modoDM: modo || 'carrera', metaDM: 10000, tiempo: 'libre' }));
+  const r = await api('/api/crear', juego === 'fundacion' ? { juego, modoFU: 'solo', metaFU: 8, tiempo: 'libre' } : (juego === 'trecejack' ? { juego, modoTJ: 'solo', mazosTJ: 5, especiales: true, tiempo: 'libre' } : { juego, modoDM: modo || 'carrera', metaDM: 10000, tiempo: 'libre' }));
   if (!r.ok) return avisoSolo(r.error || 'No se pudo crear la partida');
   const e = await entrar(r.sala, '');
   if (!e.ok) avisoSolo(e.error);
@@ -140,7 +140,7 @@ function avisoSolo(msg) { irEntrada(); $('errorInicio').textContent = msg || '';
 // ---------- crear sala ----------
 
 // Las reglas con las que nace una sala nueva (después se cambian en la sala de espera).
-const reglasBase = juego => (juego === 'fundacion' ? { juego, modoFU: 'multi', metaFU: 10, tiempo: 'normal', asientos: 8 } : juego === 'trecejack'
+const reglasBase = juego => (juego === 'fundacion' ? { juego, modoFU: 'multi', metaFU: 8, tiempo: 'normal', asientos: 8 } : juego === 'trecejack'
   ? { juego, modoTJ: 'multi', mazosTJ: 5, especiales: true, tiempo: 'normal', asientos: 6 }
   : { juego, modoDM: 'multi', metaDM: 10000, tomarDados: false, hostil: true, cupo: false, tiempo: 'normal', asientos: 6 });
 const Crear = { juego: 'trecejack', publica: false };
