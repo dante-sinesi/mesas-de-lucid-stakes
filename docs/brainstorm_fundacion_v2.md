@@ -113,16 +113,22 @@ H8. **Construir:** muestra siempre las cuatro opciones con su costo, y las que n
 H9. **Misiones y pedidos:** pantalla con las misiones de condición (con el avance, p. ej. 3 de 5 caminos; no se entregan) y los pedidos (con costo y lo que falta).
 H10. **Colocación inicial:** se marcan los lugares posibles; al elegir uno se ven los recursos que daría y cuáles faltan («Te falta»).
 H11. **Bandido (7):** se resaltan las casillas posibles y el botón dice «Elige una casilla».
+H13. **Tarjetas sin texto:** cada tarjeta de la mano es una sola y se identifica por su color y un dibujo (tronco, ladrillo, nube, espiga, roca); con 3 maderas se ven 3 tarjetas de madera. Vale para la mano, el descarte, los costos y las entregas. Los dibujos son provisorios.
+H14. **Visor de jugadores (derecha):** el propio muestra las tarjetas en miniatura, de color y sin texto; los demás muestran solo cuántas tienen, como dorsos.
+H15. **Dados:** la tirada usa la misma escena 3D y la misma caída que el diez mil, en el centro de la pantalla, grandes, con «Sale x». En el segundo cuadro solo se ve la carta que se lleva el propio jugador, encima de su pueblo o ciudad. En el tercero se ven las cartas que se llevó cada uno.
+H16. **Bandido:** no lo mueve el jugador, se mueve solo. Se ve su desplazamiento de la casilla anterior (tenue) a la nueva (marcada), con el mensaje «Salió 7, el bandido se mueve». Sin botón ni medidor.
+H17. **Entrega de pedidos:** el jugador no elige tarjetas. Las que se entregan se muestran marcadas y no se pueden cambiar; solo hay «Atrás» y «Entregar». Una opción que no se puede cumplir aparece apagada y, al tocarla, no abre la ventana y avisa (p. ej. «Necesitas 3 tarjetas iguales»), para que el jugador no pierda tiempo de su turno. Lo mismo vale para las opciones apagadas de Construir.
+H18. **Final de partida:** igual a la del diez mil y el 13jack (título, subtítulo, una fila por jugador con puesto, nombre, detalle y puntos; «Nueva partida», «Compartir» y «Salir»), con la misma función `compartirImagen` de `comun.js`. Ojo: esa función hoy exporta PNG.
+H19. **Sala de espera:** no se rediseña; es común a todos los juegos de la sala.
 H12. **Turno de otro jugador:** se ve su nombre en el medidor, su ficha resaltada y el botón «Esperando a Ana»; lo que hace se avisa arriba («Ana descarta 2 tarjetas»). La mano propia sigue visible.
 
 ### Escenas bosquejadas
 
-Turno, Dados 1 a 3, Descarte (obligatorio, listo, opcional), Construir, Nada que construir, Colocar, Pedidos, Colocación inicial, Bandido, Turno ajeno y Ajeno descarta.
+Turno, Dados 1 a 3, Descarte (obligatorio, listo, opcional), Construir, Nada que construir, Colocar, Pedidos, Pedido no disponible, Entrega fija, Entrega de 3 iguales, Colocación inicial, Bandido, Turno ajeno, Ajeno descarta, Victoria, Otro se desconecta y Reconectando. **Aprobadas por Dante** (primera ronda de diseño de las vistas).
 
 ### Pendiente del HUD
 
 - Revisar el celular: los textos de «Construir» y «Pedidos» se leen chicos, y las ganancias de la tirada ocupan mucho.
-- Escenas que faltan: entrega de un pedido paso a paso, victoria y fin de partida, lobby y espera, y la reconexión.
 - Hay que confirmar la animación real de las cartas (los bosquejos son cuadros fijos).
 - Después de este paso, el rediseño sigue el método de `senior-diseno`: estilo, evolución de la elegida y recién entonces la implementación, con la autorización explícita de Dante.
 
