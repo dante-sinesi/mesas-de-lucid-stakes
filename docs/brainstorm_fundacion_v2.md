@@ -1,6 +1,6 @@
 # Fundación v2: brainstorming
 
-Estado: **brainstorming, nada programado.** Regla de trabajo acordada: no se escribe código hasta que Dante lo autorice de forma explícita. Todo lo que él va diciendo se anota aquí, tal cual; después este documento se traduce a documentación (requisitos, flujo, diseño) y recién ahí empieza el código.
+Estado: **brainstorming cerrado y traducido a la documentación (14 de noviembre de 2026), nada programado.** La documentación vigente es `catan_dados.md` (reglas), `catan_flujo.md` (flujo), `fundacion_v2_pantallas.md`, `fundacion_v2_requisitos.md` y `fundacion_v2_plan.md`; este documento queda como registro de cómo se decidió. Regla de trabajo acordada: no se escribe código hasta que Dante lo autorice de forma explícita. Todo lo que él va diciendo se anota aquí, tal cual; después este documento se traduce a documentación (requisitos, flujo, diseño) y recién ahí empieza el código.
 
 Convención: lo que dijo Dante va en **Ideas de Dante** y **Decisiones**; lo que agrego yo (consecuencias, dudas, propuestas) va aparte y marcado como mío, para que se pueda aceptar, corregir o descartar.
 
@@ -53,7 +53,8 @@ Fundación funciona, pero la experiencia no convence. Lo que se midió y se vivi
 19. **La ayuda al azar con el 7 se descarta.**
 21. **En solitario se gana por meta de puntos** (sin reloj).
 22. **Qué decide el jugador:** se da por suficiente por ahora (qué construir y dónde, qué descartar, qué misión o pedido perseguir). Se pasa al rediseño completo del HUD.
-23. **Duración de la partida:** el turno tiene solo dos partes: la tirada con la ganancia de recursos (compartida, cobran todos) y el turno propio de quien juega. Dante propone manejar el ritmo **como en los otros juegos de la sala** (reloj por turno). Falta confirmar con Dante cuál de esos mecanismos exactamente y qué tiempo.
+24. **Reloj (cerrado):** un solo reloj por turno; se arranca con Normal 45 s, Extendido 90 s y Sin límite, y se regula después. **Al agotarse, el turno se pasa solo.** La duración de la partida y la meta de puntos se calibran con partidas simuladas y no se pueden cerrar hasta tener el juego y los bots.
+23. **Duración de la partida (reemplazada por la 24):** el turno tiene solo dos partes: la tirada con la ganancia de recursos (compartida, cobran todos) y el turno propio de quien juega. Dante propone manejar el ritmo **como en los otros juegos de la sala** (reloj por turno). Falta confirmar con Dante cuál de esos mecanismos exactamente y qué tiempo.
 20. **La meta de puntos (hoy 8, 10 o 12) se recalibra con partidas simuladas** una vez que las tarjetas y las misiones estén definidas: con más fuentes de puntos probablemente baje la cantidad de turnos y haya que subir la meta. No se fija ahora.
 
 ## Consecuencias que veo (mías, por confirmar)

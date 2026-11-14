@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Fundación HUD v2: escenas</title>
+<style>
+:root{--fondo:#120a22;--panel:#1d1236;--borde:#3a2766;--oro:#f2c94c;--claro:#efe6ff}
+*{box-sizing:border-box;margin:0}
+html,body{height:100%;background:var(--fondo);color:var(--claro);font:600 13px 'Segoe UI',system-ui,sans-serif;overflow:hidden}
+#barra{display:flex;flex-wrap:wrap;gap:6px;align-items:center;padding:8px 10px;background:var(--panel);border-bottom:2px solid var(--borde)}
+#barra button{background:#2a1a4d;color:var(--claro);border:2px solid var(--borde);padding:5px 10px;font:700 13px 'Segoe UI';cursor:pointer}
+#barra button.on{background:var(--oro);color:#1a1030;border-color:#000}
+#barra .sep{width:14px}
+#zona{position:absolute;top:var(--alto,90px);left:0;right:0;bottom:0;display:flex;align-items:center;justify-content:center;overflow:hidden}
+#marco{border:3px solid var(--borde);background:#000;transform-origin:center center}
+iframe{display:block;border:0;width:100%;height:100%}
+</style></head><body>
+<div id="barra"></div>
+<div id="zona"><div id="marco"><iframe id="f" title="Escena"></iframe></div></div>
+<script>
+var L=[['turno','Turno'],['dados1','Dados 1'],['dados2','Dados 2'],['dados3','Dados 3'],['descarte','Descarte'],['descarte_sel','Descarte listo'],['descarte_op','Descarte opcional'],['construir','Construir'],['construir_nada','Nada que construir'],['colocar','Colocar'],['pedidos','Pedidos'],['pedidos_aviso','Pedido no disponible'],['entrega','Entrega fija'],['entrega_sel','Entrega 3 iguales'],['inicial','Colocación inicial'],['bandido','Bandido (7)'],['ajeno','Turno ajeno'],['ajeno_descarta','Ajeno descarta'],['victoria','Victoria'],['reconexion','Otro se desconecta'],['reconectando','Reconectando']];
+var E='turno',D='m';
+try{var q=location.hash.replace('#','').split(',');if(q[0])E=q[0];if(q[1])D=q[1]}catch(x){}
+var barra=document.getElementById('barra');
+barra.innerHTML=[['m','Celular horizontal'],['d','Escritorio']].map(function(x){return '<button data-d="'+x[0]+'">'+x[1]+'</button>'}).join('')+'<span class="sep"></span>'+L.map(function(x){return '<button data-e="'+x[0]+'">'+x[1]+'</button>'}).join('');
+function pintar(){
+  document.querySelectorAll('#barra button').forEach(function(b){b.classList.toggle('on',b.dataset.e==E||b.dataset.d==D)});
+  var z=document.getElementById('zona'),m=document.getElementById('marco');
+  z.style.setProperty('--alto',barra.offsetHeight+'px');
+  var aw=innerWidth-20,ah=innerHeight-barra.offsetHeight-20;
+  if(D=='m'){m.style.width='812px';m.style.height='375px';var k=Math.min(aw/812,ah/375);m.style.transform='scale('+k+')'}
+  else{var w=Math.min(aw,ah*16/9);m.style.width=w+'px';m.style.height=(w*9/16)+'px';m.style.transform='none'}
+  var f=document.getElementById('f'),src='hud_escenas.html?limpio&e='+E+'&v='+D;
+  if(f.getAttribute('src')!==src)f.setAttribute('src',src);
+  try{history.replaceState(null,'','#'+E+','+D)}catch(x){}
+}
+barra.onclick=function(ev){var b=ev.target.closest('button');if(!b)return;if(b.dataset.e)E=b.dataset.e;if(b.dataset.d)D=b.dataset.d;pintar()};
+document.addEventListener('keydown',function(ev){var i=L.findIndex(function(x){return x[0]==E});if(ev.key=='ArrowRight')E=L[Math.min(i+1,L.length-1)][0];else if(ev.key=='ArrowLeft')E=L[Math.max(i-1,0)][0];else return;pintar()});
+addEventListener('resize',pintar);pintar();
+</script></body></html>
