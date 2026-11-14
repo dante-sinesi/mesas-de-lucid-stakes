@@ -583,6 +583,7 @@ img, canvas { -webkit-user-drag: none; }
 #fuTiempo span { position: absolute; left: 1vmin; top: 0; height: 100%; display: flex; align-items: center; font-weight: 800; color: #fff; text-shadow: 0 .2vmin 0 #000; }
 #fuCab { position: absolute; top: calc(3.4vmin + 6px); right: 1vmin; left: auto; width: auto; z-index: 4; padding: 0; background: none; border: 0; display: flex; gap: 8px; align-items: center; }
 #fuCab .tileBtn { width: 5.4vmin; height: 5.4vmin; min-width: 30px; min-height: 30px; }
+@media (max-height: 520px) { #fuJugadores { width: 27vmin; } .fuJP { font-size: 1em; } #fuMisiones { width: 24vmin; } }
 #fuCab .tileBtn { padding: 0; }
 #fuCab .tileBtn canvas, #fuCab .tileBtn svg { width: 100% !important; height: auto !important; max-height: 100%; }
 @media (max-height: 520px) { #fuCab .salaLinea { display: none; } #fuCab .tileBtn { width: 26px; height: 26px; min-width: 26px; min-height: 26px; } }
@@ -632,12 +633,12 @@ img, canvas { -webkit-user-drag: none; }
 #fuGanancias { position: absolute; left: 50%; top: 42%; transform: translate(-50%, -50%); z-index: 5; display: flex; flex-direction: column; align-items: center; gap: 1.6vmin; background: rgba(5,2,12,.72); padding: 2vmin 3vmin; pointer-events: none; }
 #fuVelo { position: absolute; inset: 0; z-index: 5; }
 .fuFondo { position: absolute; inset: 0; background: rgba(5,2,12,.82); }
-.fuCentro { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2vmin; padding-bottom: 12vmin; pointer-events: none; }
+.fuCentro { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2.2vmin; padding-bottom: 12vmin; pointer-events: none; }
 .fuCentro > * { pointer-events: auto; }
 .fuTitulo { font-size: 1.9em; font-weight: 800; color: #fff3c4; text-align: center; }
 .fuSub { color: var(--suave); font-size: 1.05em; text-align: center; }
 .fuFila { display: flex; gap: .8vmin; align-items: center; justify-content: center; }
-.fuGrandes { gap: 1.4vmin; margin-top: 1vmin; flex-wrap: wrap; }
+.fuGrandes { gap: 1.4vmin; margin-top: 3.2vmin; flex-wrap: wrap; }
 .fuGan { gap: 4vmin; align-items: flex-start; }
 .fuGrupo { display: flex; flex-direction: column; align-items: center; gap: .8vmin; }
 .fuAv { display: block; width: 3.6vmin; height: 3.6vmin; border: .3vmin solid #000; }
