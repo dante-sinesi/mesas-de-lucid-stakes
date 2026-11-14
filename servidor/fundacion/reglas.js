@@ -7,7 +7,7 @@
 // La mano de un jugador es una lista de 5 cuentas, una por recurso: [madera, ladrillo, lana, trigo, mineral]. Cada unidad es una tarjeta.
 
 const RECURSOS = ['madera', 'ladrillo', 'lana', 'trigo', 'mineral'];
-const COSTOS = { camino: [1, 1, 0, 0, 0], pueblo: [1, 1, 1, 1, 0], ciudad: [0, 0, 0, 2, 3], caballero: [0, 0, 1, 1, 1] };   // por recurso: madera, ladrillo, lana, trigo, mineral (la ciudad pide 3 de mineral: por confirmar con un bot, plan B 2 + 2)
+const COSTOS = { camino: [1, 0, 0, 0, 0], pueblo: [1, 1, 1, 1, 0], ciudad: [0, 0, 0, 2, 3], caballero: [0, 0, 1, 1, 1] };   // por recurso: madera, ladrillo, lana, trigo, mineral (la ciudad pide 3 de mineral: por confirmar con un bot, plan B 2 + 2)
 const EDIFICIOS = ['camino', 'pueblo', 'ciudad', 'caballero'];
 const PIEZAS = { camino: 15, pueblo: 5, ciudad: 4, caballero: 3 };
 const MANO_MAX = 6;            // tarjetas que puedes tener al empezar tu turno (si tienes más, descartas hasta 6)

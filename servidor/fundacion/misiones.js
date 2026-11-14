@@ -40,10 +40,10 @@ const PEDIDOS = {
   mineral3: { clase: 'B', costo: [0, 0, 0, 0, 3] },   // 3 mineral
   surtido: { clase: 'B', costo: [1, 1, 1, 1, 1] },    // una de cada
   iguales3: { clase: 'B', iguales: 3 },               // 3 tarjetas iguales
-  cualquiera3: { clase: 'B', cualquiera: 3 },         // 3 tarjetas cualesquiera (todavía fuera del grupo: se calibra con bots)
+  cualquiera3: { clase: 'B', cualquiera: 3 },         // 3 tarjetas cualesquiera (una salida para quien está trabado)
 };
 const DEFS = Object.assign({}, MISIONES, PEDIDOS);
-const IDS = { A: Object.keys(MISIONES), B: Object.keys(PEDIDOS).filter(id => id !== 'cualquiera3') };   // (lo que entra al grupo)
+const IDS = { A: Object.keys(MISIONES), B: Object.keys(PEDIDOS) };   // (lo que entra al grupo)
 
 // Las tarjetas que se entregarían por un pedido con esta mano (una cuenta por recurso), o null si no se puede. Las elige el juego: el jugador no elige.
 function entrega(id, mano) {
@@ -60,7 +60,7 @@ function entrega(id, mano) {
   const q = R.manoVacia(); q[r] = d.iguales; return q;
 }
 // Las tarjetas que muestra un pedido (lo que pide), con el 'iguales' como cantidad de tarjetas parecidas.
-const describe = id => { const d = DEFS[id]; return d ? { id, clase: d.clase, costo: d.costo ? d.costo.slice() : null, iguales: d.iguales || 0 } : null; };
+const describe = id => { const d = DEFS[id]; return d ? { id, clase: d.clase, costo: d.costo ? d.costo.slice() : null, iguales: d.iguales || 0, cualquiera: d.cualquiera || 0 } : null; };
 
 // ---------- el grupo ----------
 

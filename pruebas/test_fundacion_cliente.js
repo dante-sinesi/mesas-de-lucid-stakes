@@ -34,8 +34,8 @@ check(C.escenaFU(e('espera', null)) === 'nada', 'fuera de la partida no hay esce
 // ---------- lo que se entrega por un pedido (lo decide el servidor; el cliente solo lo muestra y debe coincidir) ----------
 const pedidos = Object.keys(M.PEDIDOS).filter(id => M.PEDIDOS[id].clase === 'B');
 const manos = [[2, 2, 0, 0, 0], [0, 0, 2, 2, 0], [3, 1, 0, 0, 0], [0, 0, 0, 0, 3], [1, 1, 1, 1, 1], [4, 0, 1, 0, 0], [0, 1, 0, 0, 0], [3, 3, 3, 0, 0]];
-pedidos.filter(id => id !== 'cualquiera3').forEach(id => manos.forEach(mano => {
-  const srv = M.entrega(id, mano), d = M.describe(id), cli = C.entregaFU({ costo: d.costo, iguales: d.iguales }, mano);
+pedidos.forEach(id => manos.forEach(mano => {
+  const srv = M.entrega(id, mano), d = M.describe(id), cli = C.entregaFU({ costo: d.costo, iguales: d.iguales, cualquiera: d.cualquiera }, mano);
   check(JSON.stringify(srv) === JSON.stringify(cli), 'el cliente y el servidor entregan lo mismo para «' + id + '» con la mano ' + mano.join(','));
 }));
 check(C.expandirFU([2, 0, 1, 0, 0]).join() === '0,0,2', 'una tarjeta por unidad, en el orden de los recursos');

@@ -51,9 +51,10 @@ const mapa = R.crearMapa(11, 4);
   check(M.entrega('red5', [9, 9, 9, 9, 9]) === null, 'una misión de condición no se entrega');
 }
 
-// ---------- el pedido de «3 tarjetas cualesquiera» (existe, pero todavía no está en el catálogo: se calibra) ----------
+// ---------- el pedido de «3 tarjetas cualesquiera» ----------
 {
-  check(M.PEDIDOS.cualquiera3 && !M.IDS.B.includes('cualquiera3'), '«3 cualesquiera» existe como pedido pero no entra al grupo por omisión');
+  check(M.PEDIDOS.cualquiera3 && M.IDS.B.includes('cualquiera3') && M.IDS.B.length === 6, '«3 cualesquiera» es uno de los 6 pedidos que entran al grupo');
+  check(M.describe('cualquiera3').cualquiera === 3 && M.describe('cualquiera3').costo === null, 'el pedido se describe para el cliente');
   check(JSON.stringify(M.entrega('cualquiera3', [4, 1, 0, 0, 0])) === '[3,0,0,0,0]', 'entrega las 3 del recurso que más hay');
   check(JSON.stringify(M.entrega('cualquiera3', [2, 2, 0, 0, 0])) === '[2,1,0,0,0]', 'con empate saca de a una, alternando, empezando por el primero');
   check(JSON.stringify(M.entrega('cualquiera3', [1, 1, 1, 0, 0])) === '[1,1,1,0,0]' && M.entrega('cualquiera3', [1, 1, 0, 0, 0]) === null, 'con menos de 3 tarjetas no se puede');

@@ -34,7 +34,7 @@ check(JSON.stringify(R.crearMapa(3, 4).hexes.map(h => [h.tipo, h.num])) !== JSON
 
 // ---------- las tarjetas, los costos y el descarte ----------
 const C = R.COSTOS;
-check(R.alcanza(C.camino, [1, 1, 0, 0, 0]) && !R.alcanza(C.camino, [0, 1, 0, 0, 0]), 'un camino pide madera y ladrillo');
+check(R.alcanza(C.camino, [1, 0, 0, 0, 0]) && !R.alcanza(C.camino, [0, 5, 5, 5, 5]), 'un camino pide solo 1 de madera');
 check(R.alcanza(C.pueblo, [1, 1, 1, 1, 0]) && !R.alcanza(C.pueblo, [1, 1, 1, 0, 5]), 'un pueblo pide madera, ladrillo, lana y trigo');
 check(R.alcanza(C.ciudad, [0, 0, 0, 2, 3]) && !R.alcanza(C.ciudad, [0, 0, 0, 2, 2]) && !R.alcanza(C.ciudad, [0, 0, 0, 1, 3]), 'una ciudad pide 3 de mineral y 2 de trigo');
 check(R.alcanza(C.caballero, [0, 0, 1, 1, 1]) && !R.alcanza(C.caballero, [5, 5, 0, 1, 1]), 'un caballero pide lana, trigo y mineral');
