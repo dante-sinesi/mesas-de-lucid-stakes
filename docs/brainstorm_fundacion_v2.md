@@ -98,16 +98,37 @@ Por decidir (mío):
 
 ## Diseño de la pantalla (HUD)
 
-Lo único dicho hasta ahora: está tosco y hay que rediseñarlo, y las tarjetas de recurso aparecen por abajo. Por contestar:
+Bosquejos en `prototipos/hud_v2/` (no se versiona): `index.html` muestra todas las escenas con botones arriba y un selector **Celular horizontal / Escritorio**; `hud_escenas.html` es la página de las escenas y `hud_abc.html` la primera ronda (A, B y C).
 
-- ¿Qué es lo que se siente más tosco: el panel lateral, la ventana de producción, las tarjetas de los jugadores, los textos, los botones, todo?
-- ¿En celular y en escritorio por igual?
-- Se suma lo nuevo para mostrar: la mano de tarjetas abajo (con sus cantidades y el tope de 6), las misiones a la vista, la producción de cada tirada para todos y **el contador de piezas que quedan** de cada tipo (caballeros, ciudades, pueblos y caminos).
-- Cuando se defina el flujo del turno, el rediseño sigue el método de `senior-diseno`: briefing, tres alternativas que difieren en estructura (bosquejos HTML de escritorio y celular), feedback de Dante y evolución de la elegida. Reglas de siempre del proyecto: poco texto en pantalla, nada de scroll, arte en píxeles planos sin espacios, ayuda y textos de depuración fuera del HUD.
+### Decisiones del HUD (de Dante)
+
+H1. **Estructura «Mesa de Risk»** (la referencia de Dante) en escritorio y en celular: el mapa ocupa toda la pantalla y todo lo demás flota encima. **Los jugadores van a la derecha y las misiones a la izquierda, ambos centrados verticalmente en todas las escenas.** Arriba a la izquierda, el contador de piezas (caballeros, ciudades, pueblos y caminos). Abajo en el centro, la mano; abajo a la derecha, los botones.
+H2. **Fundación es el primer juego horizontal también en celular**: se justifica por su mayor complejidad respecto de los demás juegos de la sala.
+H3. **Medidor de tiempo de turno** en una barra fina arriba de toda la pantalla, sobre cualquier fondo oscurecido. Dice «Tu turno · 0:21» (o «Turno de Ana»), se vacía y se pone roja cuando queda poco. Está en todas las escenas de turno (propio y ajeno); **no** en la tirada de dados, que es automática y compartida.
+H4. **Las cartas de la mano son privadas.** En las fichas de los demás jugadores no se lee el número de tarjetas: se ven como dorsos. **Excepción:** las ganancias de una tirada se muestran de frente a todos, porque se deducen del tablero.
+H5. **Dados:** los mismos dados 3D de siempre, en el medio de la pantalla, con el «Sale x» y nada más.
+H6. **Ganancias de la tirada:** las cartas salen de los pueblos y ciudades que tocan el número, se muestran al frente agrupadas por jugador y se acomodan solas en la mano.
+H7. **Descarte:** fondo oscurecido y cartas grandes en el medio, fáciles de tocar. Título «Descarta N tarjetas» y «Máximo 6». Si es obligatorio, el botón dice «Faltan N» y pasa a «Descartar» al elegir las necesarias; si es opcional, dice «Pasar» (y «Descartar» si se elige alguna).
+H8. **Construir:** muestra siempre las cuatro opciones con su costo, y las que no se pueden quedan apagadas con lo que falta. Si no se puede ninguna, avisa y el botón dice «Pasar». La mano queda visible debajo. Al elegir, se marcan en el mapa los lugares válidos.
+H9. **Misiones y pedidos:** pantalla con las misiones de condición (con el avance, p. ej. 3 de 5 caminos; no se entregan) y los pedidos (con costo y lo que falta).
+H10. **Colocación inicial:** se marcan los lugares posibles; al elegir uno se ven los recursos que daría y cuáles faltan («Te falta»).
+H11. **Bandido (7):** se resaltan las casillas posibles y el botón dice «Elige una casilla».
+H12. **Turno de otro jugador:** se ve su nombre en el medidor, su ficha resaltada y el botón «Esperando a Ana»; lo que hace se avisa arriba («Ana descarta 2 tarjetas»). La mano propia sigue visible.
+
+### Escenas bosquejadas
+
+Turno, Dados 1 a 3, Descarte (obligatorio, listo, opcional), Construir, Nada que construir, Colocar, Pedidos, Colocación inicial, Bandido, Turno ajeno y Ajeno descarta.
+
+### Pendiente del HUD
+
+- Revisar el celular: los textos de «Construir» y «Pedidos» se leen chicos, y las ganancias de la tirada ocupan mucho.
+- Escenas que faltan: entrega de un pedido paso a paso, victoria y fin de partida, lobby y espera, y la reconexión.
+- Hay que confirmar la animación real de las cartas (los bosquejos son cuadros fijos).
+- Después de este paso, el rediseño sigue el método de `senior-diseno`: estilo, evolución de la elegida y recién entonces la implementación, con la autorización explícita de Dante.
 
 ## Para después de las decisiones
 
 1. Cerrar la duración y, con simulaciones, la meta de puntos (reglas del resto, cerradas por ahora).
 2. Traducir este documento a documentación: requisitos, flujo del turno y pantallas (`docs/catan_dados.md` y `docs/catan_flujo.md` se reescriben).
-3. Diseñar las vistas con bosquejos A, B y C.
+3. Diseñar las vistas con bosquejos (hecho en una primera ronda; ver «Diseño de la pantalla»).
 4. Recién ahí, con la autorización explícita de Dante, el código: reglas, mesa, bots, cliente y simuladores; y la calibración con partidas de bots.
