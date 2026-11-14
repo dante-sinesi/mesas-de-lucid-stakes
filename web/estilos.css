@@ -669,3 +669,17 @@ img, canvas { -webkit-user-drag: none; }
 @media (orientation: portrait) and (max-width: 700px) { #fuGira { display: flex; } }
 
 .cfGrid > :only-child { grid-column: 1 / -1; }
+
+/* celular en horizontal: misiones y jugadores en una o dos líneas, para que quepan las seis misiones y el mapa quede más libre */
+@media (max-height: 520px) {
+  #fuMisiones { width: 38vmin; max-height: calc(100% - var(--barra) - 12vmin); }
+  .fuMis { padding: .25vmin .7vmin; margin-bottom: .25vmin; }
+  .fuMisT, .fuMis small { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .fuMisT { font-size: max(9px, 2.6vmin); line-height: 1.15; }
+  .fuMis small { font-size: max(8px, 2.2vmin); line-height: 1.1; }
+  #fuJugadores { width: 30vmin; gap: .4vmin; }
+  .fuJ { padding: .3vmin .8vmin; }
+  .fuJNom { font-size: max(9px, 2.6vmin); }
+  .fuJMano { min-height: 2vmin; margin-top: .2vmin; }
+  .fuMini { width: 1.4vmin; height: 2vmin; min-width: 5px; min-height: 8px; }
+}
