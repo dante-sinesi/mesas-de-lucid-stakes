@@ -46,6 +46,7 @@ Archivo generado por `indexar_docs.py`. No editar a mano: se regenera.
 - [[RU-015]] [Entrada y sala de espera comunes](requisitos/usuario/RU-015.md) — La sala de espera, la entrada y el crear sala son los comunes de la sala; de Fundación solo cambian las reglas (tiempo por turno y meta).
 - [[RU-016]] [Interfaz con poco texto](requisitos/usuario/RU-016.md) — Las pantallas de juego usan poco texto, sin desplazamiento (scroll), con arte de píxeles planos y sin textos de ayuda ni de depuración en el HUD.
 - [[RU-017]] [Jugadores ordenados por orden de ronda](requisitos/usuario/RU-017.md) — La lista de jugadores del lateral se ordena de primero a último según el orden de juego de la ronda.
+- [[RU-018]] [Zoom del mapa con gestos y rueda](requisitos/usuario/RU-018.md) — El mapa se acerca con dos dedos o la rueda, se mueve arrastrando, y en el celular el zoom a la zona llega tras el primer toque.
 
 ## Funcional
 
@@ -158,5 +159,6 @@ Archivo generado por `indexar_docs.py`. No editar a mano: se regenera.
 | RU-015 | — | — |
 | RU-016 | — | — |
 | RU-017 | — | — |
+| RU-018 | — | — |
 
-**Requisitos sin test:** RF-001, RF-002, RF-003, RF-004, RF-005, RF-006, RN-001, RN-002, RN-003, RN-004, RN-005, RN-006, RN-007, RN-008, RN-009, RN-010, RN-011, RN-012, RN-013, RN-014, RN-015, RN-016, RN-017, RN-018, RN-019, RN-020, RN-021, RN-022, RNF-001, RNF-002, RNF-003, RNF-004, RNF-005, RU-001, RU-002, RU-003, RU-004, RU-005, RU-006, RU-007, RU-008, RU-009, RU-010, RU-011, RU-012, RU-013, RU-014, RU-015, RU-016, RU-017
+**Requisitos sin test:** RF-001, RF-002, RF-003, RF-004, RF-005, RF-006, RN-001, RN-002, RN-003, RN-004, RN-005, RN-006, RN-007, RN-008, RN-009, RN-010, RN-011, RN-012, RN-013, RN-014, RN-015, RN-016, RN-017, RN-018, RN-019, RN-020, RN-021, RN-022, RNF-001, RNF-002, RNF-003, RNF-004, RNF-005, RU-001, RU-002, RU-003, RU-004, RU-005, RU-006, RU-007, RU-008, RU-009, RU-010, RU-011, RU-012, RU-013, RU-014, RU-015, RU-016, RU-017, RU-018

@@ -574,7 +574,7 @@ img, canvas { -webkit-user-drag: none; }
 
 /* ---------- Fundación (versión 2): pantalla horizontal con el mapa a pantalla completa y todo flotando encima ---------- */
 #fu.pantalla { position: relative; max-width: none; padding: 0; overflow: hidden; font-size: clamp(11px, 1.9vmin, 17px); --barra: max(3.4vmin, 18px); --medio: calc(var(--barra) + (100% - var(--barra)) / 2); }
-#fuMapa { position: absolute; left: 0; top: 0; width: 100%; height: 100%; image-rendering: pixelated; cursor: pointer; touch-action: manipulation; }
+#fuMapa { position: absolute; left: 0; top: 0; width: 100%; height: 100%; image-rendering: pixelated; cursor: pointer; touch-action: none; }
 .iconoFu { position: absolute; left: 0; top: 0; }
 #fu [hidden] { display: none !important; }
 #fuTiempo { position: absolute; top: 0; left: 0; right: 0; height: var(--barra); background: #05020c; border-bottom: .3vmin solid var(--borde); z-index: 8; }

@@ -4,7 +4,7 @@
 // Todo lo decide el servidor (servidor/fundacion/mesa_fundacion.js); aquí solo se dibuja lo que manda y se envían acciones. Diseño: docs/fundacion_v2_pantallas.md.
 // Usa: comun.js (accion, nuevoBoton, ponerNombre, compartirImagen), voxel.js (V), dados3d.js (D3), mesas.js (Mesas) y fu_arte.js (FU_ARTE).
 
-const FU = { e: null, escena: null, sel: null, zona: null, panel: null, selDesc: new Set(), estKey: '', turnoKey: '', fase: 3, roll: 0, tirada: null, finKey: '', cam: null, candidatos: [], zonas: [], zonasMostrar: [], ultimoMapa: null, evVisto: -1, aviso: null, band: null };
+const FU = { e: null, escena: null, sel: null, zona: null, panel: null, selDesc: new Set(), estKey: '', turnoKey: '', fase: 3, roll: 0, tirada: null, finKey: '', cam: null, man: null, gest: false, candidatos: [], zonas: [], zonasMostrar: [], ultimoMapa: null, evVisto: -1, aviso: null, band: null };
 const FU_TIPO_RECURSO = { bosque: 0, colinas: 1, pastos: 2, campos: 3, montana: 4 };
 const FU_NOMBRE_REC = ['madera', 'ladrillo', 'lana', 'trigo', 'mineral'];
 const FU_NOMBRE_ED = { camino: 'Camino', pueblo: 'Pueblo', ciudad: 'Ciudad', caballero: 'Caballero' };
@@ -31,11 +31,11 @@ function abrirFU() {
     $('fSalir').appendChild(V.puerta()); $('fSalir').onclick = confirmarSalir;
     $('fSonido').onclick = () => { Sonido.setActivo(!Sonido.activo); pintarSonidoFU(); Sonido.play('clic'); };
     FU.tParp = setInterval(() => { if (FU.parpadea && !$('fu').hidden && !FU.anim) dibujarCamFU(); }, 180);   // (las marcas doradas y blancas titilan)
-    $('fuMapa').addEventListener('pointerdown', tocarMapaFU);
+    gestosMapaFU();
     window.addEventListener('resize', () => { clearTimeout(FU.tRes); FU.tRes = setTimeout(() => { if (!$('fu').hidden && FU.e) repintarFU(); }, 120); });
   }
   pintarSonidoFU();
-  Object.assign(FU, { e: null, sel: null, zona: null, panel: null, selDesc: new Set(), estKey: '', turnoKey: '', fase: 3, roll: 0, tirada: null, finKey: '', evVisto: -1, aviso: null, band: null });
+  Object.assign(FU, { e: null, sel: null, zona: null, panel: null, selDesc: new Set(), estKey: '', turnoKey: '', fase: 3, roll: 0, tirada: null, finKey: '', evVisto: -1, aviso: null, band: null, man: null, gest: false });
   try { if (screen.orientation && screen.orientation.lock) screen.orientation.lock('landscape').catch(() => {}); } catch (err) { /* no todos los navegadores dejan fijar la orientación */ }
   $('fuFinal').hidden = true;
 }
@@ -210,7 +210,7 @@ function pintarFU(e) {
   const turnoKey = e.fase === 'turno' && t ? claveTurnoFU(e, t) : 'x';
   if (turnoKey !== FU.turnoKey) { FU.turnoKey = turnoKey; FU.panel = null; FU.selDesc = new Set(); iniciarTiradaFU(e, turnoKey); }
   const estKey = [e.fase, e.turnoDe, t && t.sub, t && t.edificio, e.inicial && e.inicial.idx, e.inicial && e.inicial.sub, e.yo].join('|');
-  if (estKey !== FU.estKey) { FU.estKey = estKey; FU.sel = null; FU.zona = null; FU.panel = null; FU.selDesc = new Set(); }
+  if (estKey !== FU.estKey) { FU.estKey = estKey; FU.man = null; FU.sel = null; FU.zona = null; FU.panel = null; FU.selDesc = new Set(); }
   avisosFU(e);
   repintarFU();
   if (e.fase === 'fin' && e.fin) finalFU(e);
@@ -229,7 +229,8 @@ function avisosFU(e) {
     else if (v.tipo === 'pedido') txt = quien + (v.asiento === e.yo ? ' entregaste un pedido' : ' entregó un pedido');
     else if (v.tipo === 'mision') txt = quien + (v.asiento === e.yo ? ' cumpliste una misión' : ' cumplió una misión');
     if (txt) FU.aviso = { txt, hasta: performance.now() + 2600 };
-    if (art[v.tipo] && v.lugar !== null && v.lugar !== undefined) {   // lo que construyó cualquiera se muestra: la cámara se acerca y una marca lo señala un momento
+    if (art[v.tipo] && v.lugar !== null && v.lugar !== undefined) {
+      FU.man = null;   // lo que construyó cualquiera se muestra: la cámara se acerca y una marca lo señala un momento
       FU.foco = { tipo: v.tipo, lugar: v.lugar, asiento: v.asiento, t0: performance.now(), hasta: performance.now() + 2600 };
       clearTimeout(FU.tFoco); FU.tFoco = setTimeout(() => { FU.foco = null; if (FU.e) repintarFU(); }, 2700); animarMarcaFU();
     }
@@ -302,20 +303,21 @@ function repintarFU() {
   if (colocando) {
     const zs = FU.MOV ? [4, 3, 2] : [5, 4, 3, 2];
     let lista = cands;
-    if (FU.MOV && cands.length > 6) { zonas = zonasFU(cands); if (FU.zona !== null && zonas[FU.zona]) lista = zonas[FU.zona].lista; }
+    if (FU.MOV) { zonas = zonasFU(cands); if (FU.zona !== null && zonas[FU.zona]) lista = zonas[FU.zona].lista; }
     const zc = fuFitZ(lista, aw - 16, ah - 16, 16, zs);
-    if (FU.MOV && cands.length > 6 && FU.zona === null && zc < 3) { z = zLleno; FU.zonas = zonas; }
+    if (FU.MOV && FU.zona === null) { z = zLleno; FU.zonas = zonas; }   // (en el celular se ve todo el mapa y el zoom llega con el primer toque, que elige la zona)
     else { z = zc; foco = fuCentro(lista); FU.zonas = []; }
   } else if (FU.foco && performance.now() < FU.foco.hasta) {
     const pt = puntoLugarFU(e, geo, FU.foco.tipo, FU.foco.lugar, FU.foco.asiento), zp = fuFitZ([pt], aw - 20, ah - 20, 40, FU.MOV ? [3, 2] : [4, 3]);
     if (zp > zLleno) { z = zp; foco = pt; }
     FU.zonas = [];
   } else FU.zonas = [];
+  if (FU.man && !(FU.foco && performance.now() < FU.foco.hasta)) { z = FU.man.z; foco = { x: FU.man.fx, y: FU.man.fy }; zonas = []; FU.zonas = []; }   // (si el jugador acercó, alejó o movió el mapa con los dedos o la rueda, manda eso)
   const cx = left + aw / 2, cy = top + ah / 2;
   const kMundo = e.version + '|' + e.mapa.semilla; if (FU.kMundo !== kMundo || !FU.mundo) { FU.kMundo = kMundo; FU.mundo = dibujarMundo(e, geo); }
   FU.pl = { e, geo, colocando, W, H };   // (lo que hace falta para redibujar el mapa en cada cuadro de la transición)
   irCamaraFU({ z, fx: foco.x, fy: foco.y, cx, cy, W, H });
-  FU.zonasMostrar = FU.MOV && colocando && FU.zona === null && zonas.length && z === zLleno ? zonas : [];
+  FU.zonasMostrar = FU.MOV && colocando && FU.zona === null && !FU.man && zonas.length ? zonas : [];
 }
 
 // ---------- la cámara: el zoom y el movimiento por el mapa son una transición suave ----------
@@ -345,7 +347,7 @@ function dibujarCamFU() {
   c.style.width = W + 'px'; c.style.height = H + 'px';
   const g = c.getContext('2d'); g.setTransform(1, 0, 0, 1, 0, 0); g.imageSmoothingEnabled = false;
   g.fillStyle = 'rgb(15,54,79)'; g.fillRect(0, 0, c.width, c.height);
-  const quieto = !FU.anim, z = quieto ? Math.max(1, Math.round(v.z * dpr)) / dpr : v.z, S = z * dpr;
+  const quieto = !FU.anim && !FU.gest, z = quieto ? Math.max(1, Math.round(v.z * dpr)) / dpr : v.z, S = z * dpr;
   let ox = v.fx - v.cx / z, oy = v.fy - v.cy / z; if (quieto) { ox = Math.round(ox * S) / S; oy = Math.round(oy * S) / S; }   // (en reposo cae justo en píxeles enteros: nítido)
   g.setTransform(S, 0, 0, S, -ox * S, -oy * S);
   g.drawImage(FU.mundo, 0, 0);
@@ -398,13 +400,66 @@ function superponerFU(g, e, geo, colocando, z) {
 
 // ---------- tocar el mapa ----------
 
+// Acercar y alejar con la rueda (escritorio) o con dos dedos, y mover el mapa arrastrando. Un toque corto sigue eligiendo (zona o lugar).
+function gestosMapaFU() {
+  const c = $('fuMapa'), pts = new Map(); let toque = null, fin = 0;
+  const pos = ev => { const r = c.getBoundingClientRect(); return { x: ev.clientX - r.left, y: ev.clientY - r.top }; };
+  const zoomEn = (s, factor) => {   // acerca (factor > 1) o aleja alrededor del punto s de la pantalla, sin que ese punto del mapa se mueva
+    const k = FU.cam, v = FU.vista, pl = FU.pl; if (!k || !v || !pl) return;
+    const wx = s.x / k.z + k.ox, wy = s.y / k.z + k.oy, z2 = Math.max(1, Math.min(10, k.z * factor));
+    FU.man = { z: z2, fx: Math.max(0, Math.min(pl.geo.WW, wx - s.x / z2 + v.cx / z2)), fy: Math.max(0, Math.min(pl.geo.WH, wy - s.y / z2 + v.cy / z2)) };
+    FU.gest = true; FU.anim = null; FU.vista = Object.assign({}, v, { z: z2, fx: FU.man.fx, fy: FU.man.fy }); dibujarCamFU();
+  };
+  const mover = (dx, dy) => {
+    const k = FU.cam, v = FU.vista, pl = FU.pl; if (!k || !v || !pl) return;
+    FU.man = { z: k.z, fx: Math.max(0, Math.min(pl.geo.WW, v.fx - dx / k.z)), fy: Math.max(0, Math.min(pl.geo.WH, v.fy - dy / k.z)) };
+    FU.gest = true; FU.anim = null; FU.vista = Object.assign({}, v, { fx: FU.man.fx, fy: FU.man.fy }); dibujarCamFU();
+  };
+  const soltar = () => {   // al terminar el gesto el zoom vuelve a caer en píxeles enteros
+    FU.gest = false; clearTimeout(fin);
+    if (FU.man) { const dpr = Math.min(window.devicePixelRatio || 1, 3); FU.man.z = Math.max(1, Math.round(FU.man.z * dpr)) / dpr; if (FU.vista) FU.vista.z = FU.man.z; if (FU.e) repintarFU(); }
+  };
+  c.addEventListener('pointerdown', ev => {
+    try { c.setPointerCapture(ev.pointerId); } catch (err) { /* sin captura el gesto igual funciona */ }
+    pts.set(ev.pointerId, pos(ev));
+    toque = pts.size === 1 ? { ev, x: ev.clientX, y: ev.clientY, mov: false } : null;
+  });
+  c.addEventListener('pointermove', ev => {
+    const antes = pts.get(ev.pointerId); if (!antes) return;
+    const ahora = pos(ev);
+    if (pts.size >= 2) {
+      const otro = [...pts.entries()].find(([id]) => id !== ev.pointerId)[1];
+      const d0 = Math.hypot(antes.x - otro.x, antes.y - otro.y), d1 = Math.hypot(ahora.x - otro.x, ahora.y - otro.y);
+      pts.set(ev.pointerId, ahora);
+      if (d0 > 4 && d1 > 4) zoomEn({ x: (ahora.x + otro.x) / 2, y: (ahora.y + otro.y) / 2 }, d1 / d0);
+      return;
+    }
+    if (toque && !toque.mov && Math.hypot(ev.clientX - toque.x, ev.clientY - toque.y) < 8) return;   // (un toque corto no es un arrastre)
+    if (toque) toque.mov = true;
+    pts.set(ev.pointerId, ahora); mover(ahora.x - antes.x, ahora.y - antes.y);
+  });
+  const levantar = ev => {
+    if (!pts.has(ev.pointerId)) return;
+    pts.delete(ev.pointerId);
+    if (toque && !toque.mov && ev.type === 'pointerup') tocarMapaFU(toque.ev);   // (era un toque, no un gesto)
+    toque = null;
+    if (!pts.size) soltar();
+  };
+  c.addEventListener('pointerup', levantar); c.addEventListener('pointercancel', levantar);
+  c.addEventListener('wheel', ev => {
+    ev.preventDefault(); if (!FU.e || !FU.cam) return;
+    zoomEn(pos(ev), Math.exp(-ev.deltaY * 0.0018));
+    clearTimeout(fin); fin = setTimeout(soltar, 160);
+  }, { passive: false });
+}
+
 function tocarMapaFU(ev) {
   const e = FU.e; if (!e || !FU.cam || !FU.candidatos) return;
   const r = $('fuMapa').getBoundingClientRect(), sx = ev.clientX - r.left, sy = ev.clientY - r.top, z = FU.cam.z;
   const wx = sx / z + FU.cam.ox, wy = sy / z + FU.cam.oy;
   if (FU.zonasMostrar && FU.zonasMostrar.length) {
     let mejor = -1, dm = Infinity; FU.zonasMostrar.forEach((zn, i) => { const d = Math.hypot(zn.x - wx, zn.y - wy); if (d <= zn.r * 2.4 && d < dm) { dm = d; mejor = i; } });
-    if (mejor >= 0) { Sonido.play('clic'); FU.zona = FU.zonas.indexOf(FU.zonasMostrar[mejor]); if (FU.zona < 0) FU.zona = mejor; repintarFU(); }
+    if (mejor >= 0) { Sonido.play('clic'); FU.man = null; FU.zona = FU.zonas.indexOf(FU.zonasMostrar[mejor]); if (FU.zona < 0) FU.zona = mejor; repintarFU(); }
     return;
   }
   let mejor = null, dm = Infinity;
