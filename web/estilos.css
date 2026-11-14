@@ -578,10 +578,10 @@ img, canvas { -webkit-user-drag: none; }
 .iconoFu { position: absolute; left: 0; top: 0; }
 #fu [hidden] { display: none !important; }
 #fuTiempo { position: absolute; top: 0; left: 0; right: 0; height: var(--barra); background: #05020c; border-bottom: .3vmin solid var(--borde); z-index: 8; }
-#fuTiempo i { display: block; height: 100%; background: #8bd0ff; transition: width .4s linear; }
+#fuTiempo i { display: block; height: 100%; background: #2b6cb0; transition: width .4s linear; }
 #fuTiempo.quieta { background: #3a3550; }
-#fuTiempo.poco i { background: #ff8b8b; }
-#fuTiempo span { position: absolute; left: 1vmin; top: 0; height: 100%; display: flex; align-items: center; font-weight: 800; color: #fff; text-shadow: 0 .2vmin 0 #000; }
+#fuTiempo.poco i { background: #b03a3a; }
+#fuTiempo span { position: absolute; left: 1vmin; top: 0; height: 100%; display: flex; align-items: center; font-weight: 800; color: #fff; text-shadow: -.15vmin -.15vmin 0 #000, .15vmin -.15vmin 0 #000, -.15vmin .15vmin 0 #000, .15vmin .15vmin 0 #000, 0 .25vmin 0 #000; }
 #fuCab { position: absolute; top: calc(var(--barra) + 6px); right: 1vmin; left: auto; width: auto; z-index: 4; padding: 0; background: none; border: 0; display: flex; gap: 8px; align-items: center; }
 #fuCab .tileBtn { width: 5.4vmin; height: 5.4vmin; min-width: 30px; min-height: 30px; }
 @media (max-height: 520px) { #fuJugadores { width: 27vmin; } .fuJP { font-size: 1em; } #fuMisiones { width: 24vmin; } }
@@ -589,6 +589,11 @@ img, canvas { -webkit-user-drag: none; }
 #fuCab .tileBtn canvas, #fuCab .tileBtn svg { width: 100% !important; height: auto !important; max-height: 100%; }
 @media (max-height: 520px) { #fuCab .salaLinea { display: none; } #fuCab .tileBtn { width: 26px; height: 26px; min-width: 26px; min-height: 26px; } }
 #fuCab .salaLinea { font-size: 1.3vmin; font-size: max(11px, 1.7vmin); }
+.fuMisIc { display: inline-block !important; vertical-align: middle; margin-right: .6vmin; }
+.fuOp > canvas { margin-bottom: .2vmin; }
+.fuPieza { display: inline-flex; align-items: center; gap: .6vmin; }
+.fuPiezaN b { color: #fff3c4; font-size: 1.15em; }
+.fuPiezaN.tope b { color: var(--oro); }
 #fuPiezas { position: absolute; top: calc(var(--barra) + 6px); left: 1vmin; z-index: 4; display: flex; gap: 1.2vmin; padding: .6vmin 1vmin; background: var(--panel, #1d1236); border: .3vmin solid var(--borde); }
 #fuMisiones { position: absolute; left: 1vmin; top: var(--medio); transform: translateY(-50%); z-index: 4; width: 25vmin; max-height: 80%; overflow: hidden; }
 #fuMisiones.clic { cursor: pointer; }

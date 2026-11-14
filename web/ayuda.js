@@ -156,7 +156,7 @@ const Ayuda = (() => {
       }, pie: 'Solo tú ves cuáles son. No hay intercambio.' },
     { titulo: 'CONSTRUIR', hacer: () => {
         const w = el('div', 'ayApila'), C = COL_FU();
-        [[FU_ARTE.camino(C), [0, 1]], [FU_ARTE.casa(C), [0, 1, 2, 3]], [FU_ARTE.ciudad(C), [3, 3, 4, 4, 4]], [FU_ARTE.caballero(C), [2, 3, 4]]].forEach(([c, costo]) => { const f = el('div', 'ayFila ayDef'); f.append(pieza(c, c.width > 12 ? 3 : 4), tarjetas(costo)); w.appendChild(f); });
+        [[FU_ARTE.caminoIcono(C), [0, 1]], [FU_ARTE.casa(C), [0, 1, 2, 3]], [FU_ARTE.ciudad(C), [3, 3, 4, 4, 4]], [FU_ARTE.caballero(C), [2, 3, 4]]].forEach(([c, costo]) => { const f = el('div', 'ayFila ayDef'); f.append(pieza(c, c.width > 12 ? 3 : 4), tarjetas(costo)); w.appendChild(f); });
         return w;
       }, pie: 'Camino, pueblo, ciudad y caballero. Haz todo lo que te alcance.' },
     { titulo: 'MISIONES Y PEDIDOS', hacer: () => {
@@ -174,7 +174,7 @@ const Ayuda = (() => {
     { titulo: 'GANAR', hacer: () => {
         const w = el('div', 'ayApila ayPuntaje'), C = COL_FU();
         const lin = (c, t, z = 3) => { const f = el('div', 'ayFila ayDef ayPuntos2'); f.append(pieza(c, z), rot(t, ORO, 64, 3)); return f; };
-        w.append(lin(FU_ARTE.casa(C), '1'), lin(FU_ARTE.ciudad(C), '2'), lin(FU_ARTE.camino(C), 'MÁS LARGO 2', 3), lin(FU_ARTE.caballero(C), 'EJÉRCITO 2', 3), fila(rot('MISIÓN', [0.55, 0.8, 1.0], 100, 3), rot('1', ORO, 40, 3)));
+        w.append(lin(FU_ARTE.casa(C), '1'), lin(FU_ARTE.ciudad(C), '2'), lin(FU_ARTE.caminoIcono(C), 'MÁS LARGO 2', 3), lin(FU_ARTE.caballero(C), 'EJÉRCITO 2', 3), fila(rot('MISIÓN', [0.55, 0.8, 1.0], 100, 3), rot('1', ORO, 40, 3)));
         return w;
       }, pie: 'Gana quien llega primero a la meta (8, 10 o 12), con la vuelta completa.' },
   ];

@@ -145,6 +145,14 @@ function fuMarcaFU(g, p, col, t0) {
   [[d, 0], [-d, 0], [0, d], [0, -d]].forEach(([dx, dy]) => { A.fr(g, Math.round(p.x + dx) - 1, Math.round(p.y + dy) - 1, 3, 3, oscuro); A.fr(g, Math.round(p.x + dx), Math.round(p.y + dy) - 1, 1, 3, claro); A.fr(g, Math.round(p.x + dx) - 1, Math.round(p.y + dy), 3, 1, claro); });
 }
 
+// El icono de una pieza (camino, pueblo, ciudad o caballero) del color de un jugador, para el contador, las tarjetas de construir y las misiones.
+const FU_ICONO_MISION = { red5: 'camino', ciudades2: 'ciudad', pueblos4: 'pueblo', caballeros3: 'caballero' };
+function piezaFU(tipo, asiento, z) {
+  const A = FU_ARTE, col = fuColor(asiento), img = tipo === 'camino' ? A.caminoIcono(col) : (tipo === 'pueblo' ? A.casa(col) : (tipo === 'ciudad' ? A.ciudad(col) : A.caballero(col)));
+  const c = A.cvs(img.width, img.height); c.getContext('2d').drawImage(img, 0, 0);
+  c.style.cssText = 'width:' + img.width * z + 'px;height:' + img.height * z + 'px;image-rendering:pixelated;display:block'; return c;
+}
+
 // ---------- las tarjetas ----------
 
 function iconoRecFU(k, px) { const cc = FU_ARTE.cvs(15, 15); cc.getContext('2d').drawImage(FU_ARTE.dado2d(FU_NOMBRE_REC[k]), 0, 0); cc.style.cssText = 'width:' + px + 'px;height:' + px + 'px;image-rendering:pixelated;display:block'; return cc; }
@@ -392,8 +400,13 @@ function pintarPiezasFU(e) {
   caja.hidden = !yo || !yo.quedan;
   if (caja.hidden) return;
   const tiene = { camino: yo.caminos, pueblo: yo.pueblos, ciudad: yo.ciudades, caballero: yo.caballeros };   // (cuántos tienes puestos, no cuántos te quedan)
-  conLlave(caja, tiene, c => {
-    [['camino', 'Caminos'], ['pueblo', 'Pueblos'], ['ciudad', 'Ciudades'], ['caballero', 'Caballeros']].forEach(([k, n]) => { const s = fuEl('span', '', n + ' '); s.append(fuEl('b', '', String(tiene[k]))); c.append(s); });
+  conLlave(caja, [tiene, e.yo], c => {
+    const max = { camino: 15, pueblo: 5, ciudad: 4, caballero: 3 };
+    [['camino', 'Caminos'], ['pueblo', 'Pueblos'], ['ciudad', 'Ciudades'], ['caballero', 'Caballeros']].forEach(([k, nombre]) => {
+      const s = fuEl('span', 'fuPieza'); s.title = nombre;
+      const t = fuEl('span', 'fuPiezaN' + (tiene[k] >= max[k] ? ' tope' : '')); t.append(fuEl('b', '', String(tiene[k])), document.createTextNode('/' + max[k]));
+      s.append(piezaFU(k, e.yo, 2), t); c.append(s);
+    });
   });
 }
 
@@ -405,7 +418,7 @@ function pintarMisionesFU(e) {
   conLlave(caja, [g.misiones.map(m => [m.id, m.quedan, m.por]), e.turno && e.turno.entregables, e.turno && e.turno.sub], c => {
     g.misiones.forEach(m => {
       const d = fuEl('div', 'fuMis' + (m.clase === 'B' ? ' ped' : '') + (m.por !== null ? ' tomada' : '') + (e.turno && e.turno.entregables && e.turno.entregables.includes(m.id) ? ' lista' : ''));
-      const t = fuEl('div', 'fuMisT'); t.append(fuEl('b', '', FU_MISION[m.id] || m.id), document.createTextNode(' +1 PV')); d.append(t);
+      const t = fuEl('div', 'fuMisT'); if (FU_ICONO_MISION[m.id]) { const ic = piezaFU(FU_ICONO_MISION[m.id], e.yo === null ? 0 : e.yo, 1.5); ic.classList.add('fuMisIc'); t.append(ic); } t.append(fuEl('b', '', FU_MISION[m.id] || m.id), document.createTextNode(' +1 PV')); d.append(t);
       d.append(fuEl('small', '', m.por !== null ? 'Se la llevó ' + fuNombreDe(e, m.por) : (m.clase === 'B' ? 'Pedido · ' + (m.quedan === 1 ? 'vence en 1 turno' : 'vence en ' + m.quedan + ' turnos') : 'Sin vencimiento')));
       c.append(d);
     });
@@ -544,7 +557,7 @@ function construirVeloFU(e, centro) {
     const motivo = !faltan.length && !ok ? ((t.motivos && t.motivos[ed]) || 'No hay dónde ponerlo') : '';
     if (ok) ninguna = false;
     const c = fuEl('div', 'fuOp ' + (ok ? 'si' : 'no'));
-    c.append(fuEl('div', 'fuNm', FU_NOMBRE_ED[ed]), costoFU(costo, mano), fuEl('div', ok ? 'fuOk' : 'fuFalta', ok ? 'Puedes construir' : (faltan.length ? 'Te falta ' + faltan.join(' y ') : motivo)));
+    c.append(piezaFU(ed, e.yo, 3), fuEl('div', 'fuNm', FU_NOMBRE_ED[ed]), costoFU(costo, mano), fuEl('div', ok ? 'fuOk' : 'fuFalta', ok ? 'Puedes construir' : (faltan.length ? 'Te falta ' + faltan.join(' y ') : motivo)));
     c.onclick = () => { Sonido.play('clic'); if (ok) hacerFU('construir', { edificio: ed }); else avisoFU(faltan.length ? 'Te falta ' + faltan.join(' y ') : motivo); };
     ops.append(c);
   });
@@ -556,6 +569,7 @@ function pedidosVeloFU(e, centro) {
   e.grupo.misiones.forEach(m => {
     const B = m.clase === 'B', ok = B && t.entregables.includes(m.id) && m.por === null;
     const c = fuEl('div', 'fuOp ' + (ok ? 'si' : (B ? 'no' : 'info')));
+    if (FU_ICONO_MISION[m.id]) c.append(piezaFU(FU_ICONO_MISION[m.id], e.yo, 3));
     c.append(fuEl('div', 'fuNm', FU_MISION[m.id] || m.id));
     if (B) c.append(m.costo ? costoFU(m.costo, mano) : costoIgualesFU(mano));
     const falt = []; if (B && m.costo) m.costo.forEach((n, r) => { if (mano[r] < n) falt.push((n - mano[r]) + ' ' + FU_NOMBRE_REC[r]); });

@@ -133,6 +133,9 @@ const FU_ARTE = (() => {
   const ciudad = c => memo('ciudad' + c, () => conBorde(deFilas(ciudadF(), palCasa(c))));
   const camino = c => memo('camino' + c, () => deFilas(['eeeeeeeeeeeeee', 'kkkkkkkkkkkkkk', 'kkkkkkkkkkkkkk', 'eeeeeeeeeeeeee'], { e: [c[0] * 0.55, c[1] * 0.55, c[2] * 0.55], k: c }));
   const CAB = ['....r....', '...rr....', '..mmmmm..', '.mmmmmmM.', '.mmeeemM.', '.mmmmmmM.', '..MMMMM..', '.rrrrrrr.', '.rrryrrr.', '.rrrrrrr.', '..MM.MM..', '..nn.nn..'];
+  // El icono del camino: un tramo con borde oscuro, brillo arriba, sombra abajo y las rayas del medio (en el mapa se sigue dibujando la línea de siempre).
+  const CAMINO_ICONO = ['..oooooooooo..', '.occcccccccco.', 'occllllllllcco', 'ocwwcccwwcccco', 'occeeeeeeeecco', '.oeeeeeeeeeeo.', '..oooooooooo..'];
+  const caminoIcono = c => memo('caminoIc' + c, () => deFilas(CAMINO_ICONO, { o: [c[0] * 0.2, c[1] * 0.2, c[2] * 0.2], c, l: [Math.min(1, c[0] * 0.5 + 0.5), Math.min(1, c[1] * 0.5 + 0.5), Math.min(1, c[2] * 0.5 + 0.5)], e: [c[0] * 0.6, c[1] * 0.6, c[2] * 0.6], w: [1, 0.97, 0.85] }));
   const caballero = c => memo('cab' + c, () => conBorde(deFilas(CAB, palCasa(c))));
   const MINI = ['..r..', '.mmm.', '.mem.', '.rrr.', 'rrrrr', '.rrr.', '.n.n.'];   // el caballero chico: cuando hay 3 o más en un mismo hexágono
   const caballeroMini = c => memo('cabm' + c, () => conBorde(deFilas(MINI, palCasa(c))));
@@ -150,5 +153,5 @@ const FU_ARTE = (() => {
     return c;
   }
 
-  return { WD, HT, PASO, RECURSOS, SIMB, EST, tile, aroHex, casa, ciudad, camino, caballero, caballeroMini, bandido, dado2d, icono, CANDADO, deFilas, fr, cvs, ficha, PH };
+  return { WD, HT, PASO, RECURSOS, SIMB, EST, tile, aroHex, casa, ciudad, camino, caminoIcono, caballero, caballeroMini, bandido, dado2d, icono, CANDADO, deFilas, fr, cvs, ficha, PH };
 })();
