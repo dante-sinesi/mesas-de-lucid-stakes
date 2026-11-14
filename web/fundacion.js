@@ -414,12 +414,18 @@ function pintarMisionesFU(e) {
   const caja = $('fuMisiones'), g = e.grupo;
   caja.hidden = !g || !g.misiones.length;
   if (caja.hidden) return;
+  const car = e.carreras || { camino: null, ejercito: null };
   caja.classList.toggle('clic', e.fase === 'turno' && e.turno && e.turno.de === e.yo && e.turno.sub === 'turno');
-  conLlave(caja, [g.misiones.map(m => [m.id, m.quedan, m.por]), e.turno && e.turno.entregables, e.turno && e.turno.sub], c => {
+  conLlave(caja, [g.misiones.map(m => [m.id, m.quedan, m.por]), e.turno && e.turno.entregables, e.turno && e.turno.sub, car], c => {
+    [['camino', 'Camino más largo', 'camino'], ['ejercito', 'Ejército más grande', 'caballero']].forEach(([k, nombre, pieza]) => {   // (las dos carreras: el dueño se ve acá y no en la fila del jugador)
+      const d = fuEl('div', 'fuMis carrera' + (car[k] !== null ? ' tomada' : '')), t = fuEl('div', 'fuMisT');
+      const ic = piezaFU(pieza, car[k] === null ? (e.yo === null ? 0 : e.yo) : car[k], 1.5); ic.classList.add('fuMisIc'); t.append(ic, fuEl('b', '', nombre), document.createTextNode(' +2 PV'));
+      d.append(t, fuEl('small', '', car[k] === null ? 'Sin reclamar' : 'Reclamado por ' + (car[k] === e.yo ? 'ti' : fuNombreDe(e, car[k])))); c.append(d);
+    });
     g.misiones.forEach(m => {
       const d = fuEl('div', 'fuMis' + (m.clase === 'B' ? ' ped' : '') + (m.por !== null ? ' tomada' : '') + (e.turno && e.turno.entregables && e.turno.entregables.includes(m.id) ? ' lista' : ''));
       const t = fuEl('div', 'fuMisT'); if (FU_ICONO_MISION[m.id]) { const ic = piezaFU(FU_ICONO_MISION[m.id], e.yo === null ? 0 : e.yo, 1.5); ic.classList.add('fuMisIc'); t.append(ic); } t.append(fuEl('b', '', FU_MISION[m.id] || m.id), document.createTextNode(' +1 PV')); d.append(t);
-      d.append(fuEl('small', '', m.por !== null ? 'Se la llevó ' + fuNombreDe(e, m.por) : (m.clase === 'B' ? 'Pedido · ' + (m.quedan === 1 ? 'vence en 1 turno' : 'vence en ' + m.quedan + ' turnos') : 'Sin vencimiento')));
+      d.append(fuEl('small', '', m.por !== null ? 'Reclamado por ' + (m.por === e.yo ? 'ti' : fuNombreDe(e, m.por)) : (m.clase === 'B' ? 'Pedido · ' + (m.quedan === 1 ? 'vence en 1 turno' : 'vence en ' + m.quedan + ' turnos') : 'Sin vencimiento')));
       c.append(d);
     });
   });
@@ -428,17 +434,13 @@ function pintarMisionesFU(e) {
 
 function pintarJugadoresFU(e) {
   const caja = $('fuJugadores'), n = e.jugadores.length;
-  conLlave(caja, [e.turnoDe, e.yo, e.carreras, e.mano, e.jugadores.map(j => [j.asiento, j.apodo, j.puntos, j.bot, j.conectado, j.expulsado, j.tarjetas])], c => {
+  conLlave(caja, [e.turnoDe, e.yo, e.mano, e.jugadores.map(j => [j.asiento, j.apodo, j.puntos, j.bot, j.conectado, j.expulsado, j.tarjetas])], c => {
     c.className = 'fuJug' + (n > 5 ? ' muchos' : '');
     e.jugadores.forEach(j => {
       const d = fuEl('div', 'fuJ' + (j.asiento === e.turnoDe ? ' turno' : '') + (j.asiento === e.yo ? ' soy' : '') + (j.conectado || j.bot ? '' : ' off'));
       d.style.borderLeftColor = fuRgb(fuColor(j.asiento));
       const cab = fuEl('div', 'fuJNom'); const nom = fuEl('span', 'fuJN'); ponerNombre(nom, (j.asiento === e.yo ? '★ ' : '') + j.apodo, j.bot || j.expulsado);
       cab.append(nom, fuEl('b', 'fuJP', j.puntos + ' PV'));
-      const ins = fuEl('span', 'fuIns');
-      if (e.carreras && e.carreras.camino === j.asiento) { const ic = FU_ARTE.camino(fuColor(j.asiento)); ic.style.cssText = 'width:' + ic.width * 2 + 'px;height:' + ic.height * 2 + 'px;image-rendering:pixelated'; ins.append(ic); ins.title = 'Camino más largo'; }
-      if (e.carreras && e.carreras.ejercito === j.asiento) { const ic = FU_ARTE.caballero(fuColor(j.asiento)); ic.style.cssText = 'width:' + ic.width + 'px;height:' + ic.height + 'px;image-rendering:pixelated'; ins.append(ic); ins.title = 'Ejército más grande'; }
-      cab.append(ins);
       const mano = fuEl('div', 'fuJMano');
       if (j.asiento === e.yo && e.mano) expandirFU(e.mano).forEach(r => { const i = fuEl('i', 'fuMini'); i.style.background = fuRgb(FU_ARTE.EST[FU_NOMBRE_REC[r]].cuerpo); mano.append(i); });   // (mis tarjetas, de color y sin texto)
       else { for (let i = 0; i < Math.min(j.tarjetas, 14); i++) mano.append(fuEl('i', 'fuMini dorso')); if (j.tarjetas > 14) mano.append(fuEl('span', 'fuMas', '+' + (j.tarjetas - 14))); }   // (las de los demás: solo cuántas)
