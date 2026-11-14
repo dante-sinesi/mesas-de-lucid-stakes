@@ -49,8 +49,11 @@ Fundación funciona, pero la experiencia no convence. Lo que se midió y se vivi
 15. **El caballero sigue protegiendo del bandido.**
 16. **Contador de piezas en el HUD:** hay que mostrar cuántas piezas quedan del total de cada tipo (caballeros, ciudades, pueblos y caminos).
 17. **Misiones: conviven las dos clases y todas son compartidas.** A (condición, p. ej. «5 caminos conectados») y B (pedidos pagados con tarjetas). Un solo grupo a la vista para todos. **A:** se la lleva quien la cumple primero. **B:** se la lleva el primero que, en su turno, decide entregar las tarjetas.
-18. **Las misiones vencen por turnos, no por rondas, y también en multijugador.** Motivo: con rondas, en una mesa de 4 y un vencimiento de 3 rondas, cuando llega el cuarto jugador ya se reiniciaron todas. Cada misión lleva su propia cuenta de turnos desde que apareció (se cuenta cada turno de cualquier jugador), así las reposiciones quedan escalonadas. En solitario un turno es una ronda.
+18. **Vencimiento (corrige mi versión anterior).** **Las misiones de condición (A) no vencen:** se las lleva quien las cumple primero. **Los pedidos (B) sí vencen, por turnos, no por rondas:** cada pedido dura dos turnos para cada jugador (dos vueltas completas, 2 × jugadores turnos en total), con cuenta propia por pedido. Motivo de contar turnos: con rondas, en una mesa de 4 y 3 rondas, cuando llega el cuarto jugador ya se reiniciaron todos. **Reposición:** cuando alguien compra un pedido, se repone **al terminar el turno de quien lo compró**.
 19. **La ayuda al azar con el 7 se descarta.**
+21. **En solitario se gana por meta de puntos** (sin reloj).
+22. **Qué decide el jugador:** se da por suficiente por ahora (qué construir y dónde, qué descartar, qué misión o pedido perseguir). Se pasa al rediseño completo del HUD.
+23. **Duración de la partida:** el turno tiene solo dos partes: la tirada con la ganancia de recursos (compartida, cobran todos) y el turno propio de quien juega. Dante propone manejar el ritmo **como en los otros juegos de la sala** (reloj por turno). Falta confirmar con Dante cuál de esos mecanismos exactamente y qué tiempo.
 20. **La meta de puntos (hoy 8, 10 o 12) se recalibra con partidas simuladas** una vez que las tarjetas y las misiones estén definidas: con más fuentes de puntos probablemente baje la cantidad de turnos y haya que subir la meta. No se fija ahora.
 
 ## Consecuencias que veo (mías, por confirmar)
@@ -91,10 +94,7 @@ Por decidir (mío):
 
 ## Dudas abiertas (para Dante)
 
-1. **Vencimiento de misiones:** ¿te sirve el criterio «2 vueltas completas, con mínimo en solitario»? ¿O prefieres un número fijo de turnos?
-2. **Solo:** ¿se gana por meta de puntos, por reloj o por las dos cosas?
-3. **Qué decisiones le quedan al jugador** en su turno: qué construir y dónde, qué descartar, qué misión perseguir. ¿Alcanza?
-4. **Duración objetivo:** ¿cuánto tiene que durar una partida con 2, 4 y 8 jugadores? (Sirve de objetivo para calibrar la meta de puntos.)
+1. **Duración:** confirmar el mecanismo de ritmo por turno (como en los otros juegos) y el tiempo; la meta de puntos se calibra después con simulaciones.
 
 ## Diseño de la pantalla (HUD)
 
@@ -107,7 +107,7 @@ Lo único dicho hasta ahora: está tosco y hay que rediseñarlo, y las tarjetas 
 
 ## Para después de las decisiones
 
-1. Cerrar las reglas (vencimiento de misiones, solo, duración y meta de puntos, esta última con simulaciones).
+1. Cerrar la duración y, con simulaciones, la meta de puntos (reglas del resto, cerradas por ahora).
 2. Traducir este documento a documentación: requisitos, flujo del turno y pantallas (`docs/catan_dados.md` y `docs/catan_flujo.md` se reescriben).
 3. Diseñar las vistas con bosquejos A, B y C.
 4. Recién ahí, con la autorización explícita de Dante, el código: reglas, mesa, bots, cliente y simuladores; y la calibración con partidas de bots.
