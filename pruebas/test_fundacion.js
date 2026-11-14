@@ -159,6 +159,22 @@ function correr(m, reloj, token, pasos) {
   check(m.unirse('d').ok && m.jugador('d').expulsado === false && m.jugador('d').fallos === 0, 'al volver a entrar recupera su lugar');
 }
 
+// ---------- el reloj que se muestra: el de una persona y el de un bot ----------
+{
+  const { m, reloj } = nueva({ modo: 'multi', asientos: 2, bots: 1, semilla: 21 });
+  m.unirse('h', 'Hugo'); m.empezar('h');
+  const e0 = m.estado('h'); const actor = m._actor();
+  check(e0.limiteDur === (actor.bot ? m.tiempos.botIni : m.tiempos.inicial), 'la colocación inicial muestra el reloj de una persona (30 s) o el de un bot (corto)');
+  let n = 0; while (m.fase === FASE.INICIAL && n++ < 400) { reloj.t += 700; m.avanzar(); const a = m._actor(); if (a && !a.bot) m.colocar('h', m.estado('h').lugares[0]); }
+  let visto = { bot: null, humano: null };
+  for (let i = 0; i < 4000 && (visto.bot === null || visto.humano === null) && m.fase === FASE.TURNO; i++) {
+    reloj.t += 700; m.avanzar(); const t = m.t, a = m._actor();
+    if (t && a && (t.sub === 'turno' || t.sub === 'descarte') && m.limiteDur) { if (a.bot) visto.bot = m.limiteDur; else visto.humano = m.limiteDur; }
+    const j = m.jugador('h'); if (a === j) { const e = m.estado('h'); if (e.turno && e.turno.sub === 'turno') m.pasar('h'); else if (e.turno && e.turno.sub === 'descarte') m.descartar('h', R.descarteAzar(e.mano, azarH, e.manoMax)); else if (e.turno && e.turno.sub === 'tirada') m.seguir('h'); }
+  }
+  check(visto.bot === m.tiempos.bot && visto.humano === m.tiempos.turno, 'en el turno, la persona tiene 45 s y al bot se le muestra un reloj corto (así la barra corre en todos los turnos)');
+}
+
 // ---------- guardar y recuperar a mitad de la partida ----------
 {
   const { m, reloj } = nueva({ modo: 'multi', asientos: 3, bots: 2, meta: 8, semilla: 6 });
