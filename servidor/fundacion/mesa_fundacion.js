@@ -13,7 +13,7 @@ const Bots = require('../bots');
 const { TIEMPO_VALIDO, escalarTiempos } = require('../tiempo');
 
 const FASE = { ESPERA: 'espera', INICIAL: 'inicial', TURNO: 'turno', FIN: 'fin' };
-const TIEMPOS = { tirada: 6000, turno: 45000, inicial: 30000, fin: 1600, ausente: 2500, ausencia: 180000, reemplazo: 30000 };
+const TIEMPOS = { tirada: 7000, turno: 45000, inicial: 30000, fin: 1600, ausente: 2500, ausencia: 180000, reemplazo: 30000 };
 const CLAVES_TIEMPO = ['turno', 'inicial'];   // los plazos que cambian con el tiempo de la sala
 const MAX_APODO = 16;
 const MAX_ASIENTOS = 8;
@@ -356,7 +356,7 @@ class MesaFundacion {
     this._iniciarTurno(this.orden[this.turnoIdx]);
   }
   _terminarPartida(motivo) {
-    const ranking = this.jugadores.map(j => { const c = R.piezas(this.tab, j.asiento); return { asiento: j.asiento, apodo: j.apodo, bot: j.bot, puntos: this._puntosDe(j.asiento), pueblos: c.pueblo, ciudades: c.ciudad, caminos: c.camino, caballeros: c.caballero, turnos: j.turnos, construidos: j.construidos }; })
+    const ranking = this.jugadores.map(j => { const c = R.piezas(this.tab, j.asiento); return { asiento: j.asiento, apodo: j.apodo, bot: j.bot, puntos: this._puntosDe(j.asiento), pueblos: c.pueblo, ciudades: c.ciudad, caminos: c.camino, caballeros: c.caballero, turnos: j.turnos, construidos: j.construidos, misiones: j.pvExtra || 0 }; })
       .sort((a, b) => b.puntos - a.puntos || a.turnos - b.turnos || a.asiento - b.asiento);
     const empatados = ranking.length > 1 ? ranking.filter(r => r.puntos === ranking[0].puntos && r.turnos === ranking[0].turnos).map(r => r.asiento) : [];
     this.fin = { motivo, modo: this.modo, meta: this.meta, ganador: ranking.length ? { asiento: ranking[0].asiento, apodo: ranking[0].apodo, puntos: ranking[0].puntos, turnos: ranking[0].turnos } : null, empatados: empatados.length > 1 ? empatados : [], ranking, turnos: ranking.reduce((m, r) => Math.max(m, r.turnos), 0) };
