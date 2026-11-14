@@ -683,3 +683,17 @@ img, canvas { -webkit-user-drag: none; }
   .fuJMano { min-height: 2vmin; margin-top: .2vmin; }
   .fuMini { width: 1.4vmin; height: 2vmin; min-width: 5px; min-height: 8px; }
 }
+
+/* celular horizontal: el ranking final cabe con hasta 8 jugadores, con cada fila en una línea */
+@media (max-height: 520px) {
+  #fuFinal .caja { width: min(560px, 96%); max-height: 96dvh; padding: 8px 12px; gap: 4px; }
+  #fuFinal .caja h3 { font-size: 15px; }
+  #fuFinal .caja .nota { font-size: 12px; margin: 0; }
+  #fuFinal .dmFin .filaR { padding: 2px 8px; gap: 6px; font-size: 12px; }
+  #fuFinal .dmFin .filaR .chico { font-size: 9px; white-space: nowrap; }
+  #fuFinal .botonesFin { margin-top: 2px; gap: 10px; }
+}
+
+/* la acción principal del turno (Construir, o Pasar si no hay nada que hacer) va grande, centrada sobre la mano */
+#fuPrincipal { position: absolute; left: 50%; transform: translateX(-50%); bottom: calc(max(9.6vmin, 40px) + 3vmin); z-index: 6; display: flex; }
+@media (max-height: 520px) { #fuPrincipal { bottom: calc(max(9.6vmin, 40px) + 2vmin); } }
