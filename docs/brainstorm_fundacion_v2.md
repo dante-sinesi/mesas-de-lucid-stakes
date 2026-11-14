@@ -48,6 +48,10 @@ Fundación funciona, pero la experiencia no convence. Lo que se midió y se vivi
 14. **El oro desaparece** junto con los dados de recursos.
 15. **El caballero sigue protegiendo del bandido.**
 16. **Contador de piezas en el HUD:** hay que mostrar cuántas piezas quedan del total de cada tipo (caballeros, ciudades, pueblos y caminos).
+17. **Misiones: conviven las dos clases y todas son compartidas.** A (condición, p. ej. «5 caminos conectados») y B (pedidos pagados con tarjetas). Un solo grupo a la vista para todos. **A:** se la lleva quien la cumple primero. **B:** se la lleva el primero que, en su turno, decide entregar las tarjetas.
+18. **Las misiones vencen por turnos, no por rondas, y también en multijugador.** Motivo: con rondas, en una mesa de 4 y un vencimiento de 3 rondas, cuando llega el cuarto jugador ya se reiniciaron todas. Cada misión lleva su propia cuenta de turnos desde que apareció (se cuenta cada turno de cualquier jugador), así las reposiciones quedan escalonadas. En solitario un turno es una ronda.
+19. **La ayuda al azar con el 7 se descarta.**
+20. **La meta de puntos (hoy 8, 10 o 12) se recalibra con partidas simuladas** una vez que las tarjetas y las misiones estén definidas: con más fuentes de puntos probablemente baje la cantidad de turnos y haya que subir la meta. No se fija ahora.
 
 ## Consecuencias que veo (mías, por confirmar)
 
@@ -66,41 +70,31 @@ Dante preguntó cómo se soluciona esto también en el multijugador. Sin interca
 1. **La colocación inicial como herramienta principal.** **Aprobada** (decisión 12). Es el momento en que se elige dónde estar; la pantalla ayuda a elegir bien. Con la segunda ronda en serpiente, quien va último elige primero y compensa.
 2. **Un mapa justo por diseño.** **Aprobado** (decisión 13).
 3. **Expandirse con caminos** (aclaración pedida por Dante): no es una regla nueva. Es la forma que ya existe de cambiar lo que cobras: si te falta mineral, haces caminos hasta una esquina libre junto a un hexágono de mineral y ahí fundas un pueblo. Para que funcione, el camino tiene que ser barato y tiene que haber esquinas libres (la regla de distancia las limita). Se mide con bots; no cambia ninguna regla.
-4. **Las misiones como válvula de escape.** En revisión: Dante preguntó si lo que propongo es que las misiones se completen a cambio de tarjetas de recursos. Ver «Misiones o pedidos».
-5. **Una pequeña ayuda al azar** (por ejemplo, con el 7, quien no tiene ninguna tarjeta recibe una a elección). Sin decidir.
+4. **Las misiones como válvula de escape.** **Aprobada**: los pedidos (B) se pagan con tarjetas y convierten lo que sobra en puntos (decisión 17).
+5. **Una pequeña ayuda al azar** (por ejemplo, con el 7, quien no tiene ninguna tarjeta recibe una a elección). **Descartada** (decisión 19).
 6. **Descartar con premio.** Se parece a un banco, que se descartó. Sin decidir.
 
 Se mide todo con bots antes de cerrar: cuántas partidas quedan «trabadas» por falta de un recurso con cada combinación.
 
-## Misiones o pedidos (por definir)
+## Misiones y pedidos (definidas a grandes rasgos)
 
-Ejemplo que dio Dante: «construye 5 caminos conectados: +1 punto de victoria». Dante preguntó: *¿dices que las misiones se completen a cambio de tarjetas de recursos?* Hay dos modelos distintos, y no es lo mismo:
+Decisiones 17 y 18. Resumen:
 
-- **A. Misiones de condición** (lo que decía el ejemplo): se cumplen **haciendo algo en el mapa** («5 caminos conectados», «2 ciudades», «un caballero en 3 hexágonos distintos»). No se pagan con tarjetas aparte; las tarjetas se gastan, como siempre, al construir. Dan un objetivo y una meta distinta a cada jugador.
-- **B. Pedidos** (lo que pensaba yo al decir «válvula»): se cumplen **entregando tarjetas** («entrega 2 madera y 2 ladrillo: +1 punto», «entrega 3 tarjetas iguales: +1 punto»). Funcionan como un **banco de puntos**: convierten lo que te sobra en puntos. Eso resuelve el mal reparto (siempre hay un pedido que se paga con lo que tienes), le da otro uso a las tarjetas cuando la mano se llena de lo mismo y agrega decisiones (¿gasto en construir o en un pedido?).
+- **Dos clases en un solo grupo compartido a la vista.** A: de condición (se cumplen haciendo algo en el mapa). B: pedidos (se cumplen entregando tarjetas; son un banco de puntos que convierte lo que sobra y resuelve el mal reparto).
+- **Quién se la lleva:** A, quien la cumple primero. B, quien primero la entrega en su turno. Cada una se lleva una sola vez y se repone.
+- **Vencimiento por turnos** (decisión 18), con cuenta propia por misión. Vale en solitario y en multijugador.
+- Ideas mías, sin confirmar: 4 a la vista (2 de cada clase); el camino más largo y el ejército pasan a ser las dos primeras misiones de condición; cada misión suma +1 punto; cubrir perfiles de recursos distintos.
 
-Mi recomendación: **las dos clases conviven** en el mismo grupo de misiones a la vista.
-
-Respuesta a «¿grupo compartido o individuales?» (Dante dijo que depende de lo anterior). Mi propuesta según lo que elijas:
-- **Si hay pedidos (B):** grupo **compartido** a la vista; cada pedido se lleva una vez y se repone. Es una carrera con interacción (si alguien se lleva el que querías, te adaptas).
-- **Solo con misiones de condición (A):** también compartido; se lleva quien la cumple primero.
-- **En solitario:** el mismo grupo, sin competencia, y **cada misión vence a las K rondas** y se repone: así hay urgencia sin necesidad de rivales.
-
-Ideas mías para completarlo:
-- **Cuántas a la vez:** 4 a la vista (2 de condición y 2 pedidos), con reposición.
-- **El camino más largo y el ejército** pasan a ser las dos primeras misiones de condición (permanentes y disputadas).
-- **Equilibrio:** cada misión suma +1 punto, así que hay más fuentes de puntos: la meta (hoy 8, 10 o 12) se vuelve a calibrar.
-- **Perfiles de recursos:** que el grupo cubra perfiles distintos.
-
-Por decidir: cuántas a la vez, cuántas puede tener una persona, si se ven las misiones futuras (para planificar) o solo las actuales.
+Por decidir (mío):
+- **Cuántos turnos dura cada misión (K).** Propuesta: proporcional a la cantidad de jugadores (p. ej. 2 vueltas completas = 2 × jugadores turnos), para que cada jugador tenga el mismo número de oportunidades en cualquier mesa. En solitario saldría 2 turnos, que es muy poco: ahí habría que fijar un mínimo (p. ej. 6).
+- Si se ven las misiones futuras o solo las actuales, y cuántas puede llevarse una persona.
 
 ## Dudas abiertas (para Dante)
 
-1. **Misiones:** ¿solo de condición (A), solo pedidos (B) o las dos clases juntas (recomendado)? De esto depende si el grupo es compartido, individual o ambos.
-2. **Mal reparto:** ¿qué hacemos con la ayuda al azar (opción 5)? ¿Y con las misiones como válvula, según lo que elijas arriba?
-3. **Solo:** ¿te convence que las misiones venzan a las K rondas (urgencia sin rivales)? ¿Se gana por meta de puntos, por reloj o por las dos cosas?
-4. **Qué decisiones le quedan al jugador** en su turno: qué construir y dónde, qué descartar y qué misión perseguir. ¿Alcanza?
-5. **Duración objetivo:** ¿cuánto tiene que durar una partida con 2, 4 y 8 jugadores?
+1. **Vencimiento de misiones:** ¿te sirve el criterio «2 vueltas completas, con mínimo en solitario»? ¿O prefieres un número fijo de turnos?
+2. **Solo:** ¿se gana por meta de puntos, por reloj o por las dos cosas?
+3. **Qué decisiones le quedan al jugador** en su turno: qué construir y dónde, qué descartar, qué misión perseguir. ¿Alcanza?
+4. **Duración objetivo:** ¿cuánto tiene que durar una partida con 2, 4 y 8 jugadores? (Sirve de objetivo para calibrar la meta de puntos.)
 
 ## Diseño de la pantalla (HUD)
 
@@ -113,7 +107,7 @@ Lo único dicho hasta ahora: está tosco y hay que rediseñarlo, y las tarjetas 
 
 ## Para después de las decisiones
 
-1. Cerrar las reglas (misiones, ayuda al azar, solo, duración).
+1. Cerrar las reglas (vencimiento de misiones, solo, duración y meta de puntos, esta última con simulaciones).
 2. Traducir este documento a documentación: requisitos, flujo del turno y pantallas (`docs/catan_dados.md` y `docs/catan_flujo.md` se reescriben).
 3. Diseñar las vistas con bosquejos A, B y C.
 4. Recién ahí, con la autorización explícita de Dante, el código: reglas, mesa, bots, cliente y simuladores; y la calibración con partidas de bots.
