@@ -697,3 +697,16 @@ img, canvas { -webkit-user-drag: none; }
 /* la acción principal del turno (Construir, o Pasar si no hay nada que hacer) va grande, centrada sobre la mano */
 #fuPrincipal { position: absolute; left: 50%; transform: translateX(-50%); bottom: calc(max(9.6vmin, 40px) + 3vmin); z-index: 6; display: flex; }
 @media (max-height: 520px) { #fuPrincipal { bottom: calc(max(9.6vmin, 40px) + 2vmin); } }
+
+/* celular horizontal: la ayuda entra en una sola vista (láminas más chicas, sin que se pisen) y «Cerrar» va en la esquina */
+.ayApila > *, .ayFila > * { flex: none; }
+@media (max-height: 520px) {
+  .cajaAyuda { position: relative; width: min(760px, 98%); max-height: 99vh; gap: 2px; padding: 6px 10px; }
+  .cajaAyuda .botonesFin { position: absolute; right: 6px; top: 4px; margin: 0; transform: scale(.55); transform-origin: top right; }
+  .ayCuerpo { min-height: 0; gap: 4px; justify-content: flex-start; }
+  .ayTitulo .ayRot { height: 26px !important; width: auto !important; max-width: none; }
+  .ayEscena { zoom: .72; flex: none; }
+  .ayPie { font-size: 12px; line-height: 1.25; max-width: 70ch; }
+  .ayNav { gap: 4px; }
+  .ayNav .boton, .ayNav button { transform: scale(.7); }
+}
