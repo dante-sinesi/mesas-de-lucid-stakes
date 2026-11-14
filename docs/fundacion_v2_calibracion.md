@@ -108,3 +108,22 @@ La meta por omisión pasa a **8 puntos** (100 partidas, ya con las dos palancas)
 
 ## Adoptadas (decisión de Dante, 2026-11-14)
 Se adoptan **el camino de solo 1 madera** y **el pedido de «3 tarjetas cualesquiera»**. Con la regla ya adoptada (100 partidas): 4 jugadores, 15,7 rondas, 45 % de turnos sin hacer nada y el del primero en 8,1 puntos a la ronda 12; 2 jugadores, 22,4 rondas y ninguna partida trabada. Quedan en la regla (`reglas.js` y `misiones.js`) y el simulador ya no las trata como variantes. No se adoptan por ahora más colinas ni el tope de mano por jugadores (siguen como variantes del simulador). Ver `docs/decisiones/ADR-005.md`.
+
+## Medición con la regla final (meta 8, 100 partidas de bots por cantidad de jugadores)
+
+`PASO_MS=1500 node simulador/calibracion.js 100 8 3 4 <jugadores> base`. «Tiempo con bots» es el del reloj de la mesa (tirada de 8,5 s, lo que tarda cada bot y 2,6 s de resultado de cada turno); con personas cada turno es más largo.
+
+| Jugadores | Turnos por partida (media) | Rondas | Tiempo con bots | Turnos sin hacer nada | Estimación con personas (25 a 30 s por turno) |
+|---|---|---|---|---|---|
+| 1 | 34 | 34,9 | 10,0 min | 76 % | 14 a 17 min |
+| 2 | 33 | 17,6 | 10,4 min | 59 % | 14 a 17 min |
+| 3 | 39 | 14,1 | 12,9 min | 49 % | 16 a 20 min |
+| 4 | 45 | 12,1 | 15,2 min | 45 % | 19 a 23 min |
+| 5 | 44 | 9,9 | 15,9 min | 35 % | 18 a 22 min |
+| 6 | 46 | 8,7 | 17,0 min | 31 % | 19 a 23 min |
+| 7 | 50 | 8,2 | 19,1 min | 27 % | 21 a 25 min |
+| 8 | 55 | 7,9 | 21,1 min | 26 % | 23 a 28 min |
+
+- Las 800 partidas terminaron (ninguna trabada). La mediana y la media casi coinciden; el p90 de la duración con bots va de 13 a 27 minutos (de 1 a 8 jugadores).
+- **Turnos sin hacer nada:** bajan de 76 % (solo) a 26 % (8 jugadores): cuantos más jugadores, más cobra cada uno y más recursos distintos tiene a mano. En todas las cantidades el motivo es el mismo: entre el 87 % y el 91 % de las veces **falta algún recurso**, y el que más falta ahora es la **madera** (después lana y trigo; el ladrillo ya no es el cuello de botella).
+- **Duración casi constante:** de 2 a 8 jugadores la partida dura entre 14 y 28 minutos; el solo y los de 2 son los más cortos.
