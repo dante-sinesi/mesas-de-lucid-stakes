@@ -41,7 +41,7 @@ Bots: se agregan y quitan desde la sala de espera, como en los otros juegos (jug
 La tirada y la cobranza son iguales para todos. Después ven el nombre del jugador del turno en el reloj («Turno de Ana»), su ficha resaltada, **lo que hace** (por ejemplo «Ana descarta 2 tarjetas» con dorsos, la pieza que coloca), y el botón «Esperando a Ana». **Su mano propia** sigue visible, y de los demás solo ven **cuántas tarjetas** tienen (como dorsos), nunca cuáles.
 
 ## 5. Casos límite
-- **Tiempo agotado (decidido: se pasa solo):** el turno pasa sin más acciones. Si había un descarte obligatorio sin hacer, se descartan al azar las necesarias (**por confirmar**). Ya no juega un bot esa jugada.
+- **Tiempo agotado (decidido: se pasa solo):** el turno pasa sin más acciones. Si había un descarte obligatorio sin hacer, se descartan al azar las necesarias (decidido). Ya no juega un bot esa jugada.
 - **Ausencia y desconexión:** como en los otros juegos, un bot toma el lugar y lo conserva; si el jugador vuelve, retoma. Las pantallas «Otro se desconecta» y «Reconectando» están en `fundacion_v2_pantallas.md`.
 - **Recargar la página:** vuelve a su momento con el estado actual (incluida su mano privada).
 - **Piezas agotadas** (15 caminos, 5 pueblos, 4 ciudades, 3 caballeros por jugador): ese edificio no se ofrece.

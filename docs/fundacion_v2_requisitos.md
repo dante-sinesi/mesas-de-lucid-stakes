@@ -13,7 +13,7 @@ Estado: **provisorios, derivados del brainstorming aprobado por Dante.** Los nú
 | FU2-R-05 | Un caballero protege a su dueño del bandido en ese hexágono; a los demás no. | Prueba. |
 | FU2-R-06 | El bandido bloquea el hexágono donde está hasta el próximo 7. | Prueba. |
 | FU2-R-07 | Mano máxima 6 al empezar el turno: tras la cobranza, quien tiene el turno y más de 6 tarjetas debe descartar hasta 6 antes de poder construir o entregar. | Prueba de la mesa: acciones rechazadas con descarte pendiente. |
-| FU2-R-08 | Fuera de su turno, un jugador puede tener más de 6 tarjetas. Existe un techo duro si la calibración lo exige (calibrar). | Simulador. |
+| FU2-R-08 | Fuera de su turno, un jugador puede tener más de 6 tarjetas. **Sin techo duro** (decidido): al llegarle el turno, descarta hasta volver a 6. | Simulador. |
 | FU2-R-09 | No hay intercambio entre jugadores ni con un banco. | Prueba: no existe la acción. |
 | FU2-R-10 | En su turno, un jugador puede construir y entregar todo lo que alcance, en cualquier orden. | Prueba de la mesa. |
 | FU2-R-11 | Costos: camino 1 madera + 1 ladrillo; pueblo 1 madera + 1 ladrillo + 1 lana + 1 trigo; **ciudad 3 mineral + 2 trigo (calibrar; plan B: 2 + 2)**; caballero 1 lana + 1 trigo + 1 mineral. | Pruebas de reglas; simulador de costo de ciudad. |
@@ -26,7 +26,7 @@ Estado: **provisorios, derivados del brainstorming aprobado por Dante.** Los nú
 | FU2-R-18 | Camino más largo y ejército más grande se revisan junto con las misiones (qué puntos dan, si cambian de dueño) (calibrar). | Decisión de Dante tras simular. |
 | FU2-R-19 | Meta 8/10/12 (calibrar) con vuelta completa; empate: menos turnos. En solitario se gana por meta de puntos y se guarda la mejor marca. | Simulador y pruebas. |
 | FU2-R-20 | **Reloj por turno** (Normal 45 s, Extendido 90 s, Sin límite; calibrar) para descartar, construir y entregar; la colocación inicial tiene uno propio (Normal 30 s). La tirada no tiene reloj. | Pruebas con reloj falso. |
-| FU2-R-21 | Al agotarse el reloj **el turno se pasa solo**; si había descarte obligatorio pendiente, se descartan al azar las necesarias (a confirmar). | Pruebas con reloj falso. |
+| FU2-R-21 | Al agotarse el reloj **el turno se pasa solo**; si había descarte obligatorio pendiente, se descartan al azar las necesarias (decidido). | Pruebas con reloj falso. |
 | FU2-R-22 | Desconexión y ausencia: un bot toma el lugar y lo conserva; si vuelve, retoma (como en 13 Jack y Diez mil). | Pruebas existentes de salas. |
 
 ## Privacidad y servidor (FU2-S)

@@ -72,7 +72,7 @@ Dos marcadores que **cambian de dueño** si otro jugador los supera, como en Cat
 ## El reloj
 - **Un solo reloj por turno** para descartar, construir y entregar. **Propuesta inicial (se regula jugando):** Normal **45 s**, Extendido **90 s**, Sin límite. La colocación inicial tiene uno más largo (Normal 30 s por pieza, Extendido 60 s).
 - La tirada y la cobranza **no tienen reloj**: son automáticas y se ven un rato (como la producción de la versión 1).
-- **Al agotarse el reloj, el turno se pasa solo** (decidido). Si había un descarte obligatorio sin hacer, **se descartan al azar las tarjetas necesarias** (propuesta mía, por confirmar).
+- **Al agotarse el reloj, el turno se pasa solo** (decidido). Si había un descarte obligatorio sin hacer, **se descartan al azar las tarjetas necesarias** (decidido).
 - Ausencia y desconexión siguen como en 13 Jack y Diez mil: un bot toma el lugar y lo conserva; si el jugador vuelve, retoma.
 
 ## Fin de la partida
@@ -98,7 +98,7 @@ Dos marcadores que **cambian de dueño** si otro jugador los supera, como en Cat
 ## Por calibrar con bots (no se puede decidir hasta tener el juego)
 1. **Meta de puntos** y **duración objetivo** con 2, 4 y 8 jugadores.
 2. **Costo de la ciudad** (3 + 2 o 2 + 2) con el tope de 6.
-3. **Mano en un turno ajeno:** quien cobra mucho sin ser su turno puede acumular más de 6 tarjetas hasta que le toque; medir si hace falta un techo duro.
+3. **Mano en un turno ajeno:** **sin techo por ahora (decidido)**: quien cobra mucho sin ser su turno puede acumular más de 6 tarjetas y, cuando le toca, descarta hasta volver a 6. Solo se revisa si las partidas simuladas muestran un problema.
 4. **Misiones y pedidos:** cuántos a la vez, puntos de cada uno, vencimiento mínimo en solitario.
 5. **Mal reparto:** cuántas partidas se «traban» por falta de un recurso, con el mapa justo y la colocación inicial asistida.
 6. **Peso del mapa:** si quien puebla en 6 y 8 gana claramente más que quien puebla en números bajos.
