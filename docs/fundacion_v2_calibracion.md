@@ -102,3 +102,6 @@ Con 8 jugadores la mano máxima al empezar el turno es 17 (p90 22) y se descarta
 **La partida de 2 que no terminó (semilla 1590):** cada jugador cobraba 4 de los 5 recursos, uno sin colinas (ladrillo) y el otro sin bosque (madera); los dos habían puesto sus 3 caballeros y nunca más pudieron construir un camino, así que ninguno pudo ampliarse. Es el **bloqueo mutuo de un mundo sin intercambio**; la variante con el pedido de «3 cualesquiera» da una salida (puntos sin depender de un recurso) y es la que lo evita.
 
 **Lectura:** el camino de solo madera y el pedido de cualesquiera son las dos palancas que más ayudan; más colinas casi no cambia nada. El tope de la mano por jugadores solo importa con mesas grandes.
+
+## Adoptadas (decisión de Dante, 2026-11-14)
+Se adoptan **el camino de solo 1 madera** y **el pedido de «3 tarjetas cualesquiera»**. Con la regla ya adoptada (100 partidas): 4 jugadores, 15,7 rondas, 45 % de turnos sin hacer nada y el del primero en 8,1 puntos a la ronda 12; 2 jugadores, 22,4 rondas y ninguna partida trabada. Quedan en la regla (`reglas.js` y `misiones.js`) y el simulador ya no las trata como variantes. No se adoptan por ahora más colinas ni el tope de mano por jugadores (siguen como variantes del simulador). Ver `docs/decisiones/ADR-005.md`.

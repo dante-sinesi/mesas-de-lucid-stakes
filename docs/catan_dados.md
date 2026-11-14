@@ -41,7 +41,7 @@ Cuenta regresiva del turno: ver «El reloj».
 ## Los edificios
 | Edificio | Cuesta | Puntos | Requisito |
 |---|---|---|---|
-| Camino | 1 madera + 1 ladrillo | 0 | contiguo a un camino o pueblo tuyo |
+| Camino | **1 madera** | 0 | contiguo a un camino o pueblo tuyo |
 | Pueblo | 1 madera + 1 ladrillo + 1 lana + 1 trigo | 1 | llega un camino tuyo y se respeta la distancia |
 | Ciudad | **3 mineral + 2 trigo** | +1 (mejora un pueblo suyo) | un pueblo tuyo |
 | Caballero | 1 lana + 1 trigo + 1 mineral | 0 | sobre un hexágono donde tengas un edificio: si el bandido cae ahí, no te afecta |
@@ -53,7 +53,7 @@ Piezas por jugador: 15 caminos, 5 pueblos, 4 ciudades y **3 caballeros** (uno po
 ## Misiones y pedidos
 Un solo grupo **compartido y a la vista** de todos (en solitario, el mismo grupo). Dos clases:
 - **Misiones de condición (A):** se cumplen **haciendo algo en el mapa** (por ejemplo, «5 caminos conectados»). **No vencen.** **Se las lleva quien las cumple primero.**
-- **Pedidos (B):** se cumplen **entregando tarjetas** (por ejemplo, «2 madera + 2 ladrillo» o «3 tarjetas iguales»). Son un **banco de puntos**: convierten lo que sobra en puntos y resuelven el mal reparto. **Se los lleva el primero que, en su turno, decide entregarlos.** **Vencen por turnos**, no por rondas: cada pedido dura **dos turnos para cada jugador** (2 × jugadores turnos en total) y lleva su propia cuenta, para que no se reinicien todos a la vez. Cuando alguien entrega uno, **se repone al terminar el turno de quien lo entregó**.
+- **Pedidos (B):** se cumplen **entregando tarjetas** (por ejemplo, «2 madera + 2 ladrillo», «3 tarjetas iguales» o «3 tarjetas cualesquiera»). Son un **banco de puntos**: convierten lo que sobra en puntos y resuelven el mal reparto. **Se los lleva el primero que, en su turno, decide entregarlos.** **Vencen por turnos**, no por rondas: cada pedido dura **dos turnos para cada jugador** (2 × jugadores turnos en total) y lleva su propia cuenta, para que no se reinicien todos a la vez. Cuando alguien entrega uno, **se repone al terminar el turno de quien lo entregó**.
 - Cada misión o pedido da puntos al cumplirse (en las maquetas, +1).
 
 **Por calibrar:** cuántos a la vez (maqueta: 2 de cada clase), cuántos puntos da cada uno y qué pasa con «Camino más largo» y «Ejército más grande» (ver «Las carreras»). **En solitario**, «dos turnos» es muy poco: probablemente haga falta un mínimo mayor; se mide con bots.
