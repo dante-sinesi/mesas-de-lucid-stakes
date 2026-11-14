@@ -14,7 +14,7 @@ Ya probado con bots: la partida de 4 jugadores y meta 10 dura unos 74 turnos; el
 
 ## Próximo paso
 
-Que Dante decida la **meta de puntos** y si adopta más palancas (más colinas, tope de mano por jugadores). Ya están adoptados el camino de solo madera y el pedido de «3 cualesquiera» (ADR-005). Con eso se repite la calibración y se abre el Pull Request.
+Fusionar el Pull Request cuando Dante lo apruebe y jugar partidas con personas para ajustar el reloj y la economía. Ya están adoptados el camino de solo madera, el pedido de «3 cualesquiera» (ADR-005) y la meta de 8 puntos (ADR-006).
 
 ## En curso
 
@@ -22,13 +22,13 @@ Que Dante decida la **meta de puntos** y si adopta más palancas (más colinas, 
 
 ## Bloqueos y preguntas abiertas
 
-- Decisión de Dante: la meta de puntos y las palancas que faltan (ver `docs/fundacion_v2_calibracion.md`).
-- Falta autenticar `gh` para abrir el PR desde la consola (o abrirlo a mano con el texto de la ficha).
+- Pull Request: abierto o por abrir con el texto de la ficha (si `gh` no está autenticado en esta máquina, se abre desde la página de comparación de GitHub).
 - La rama `docs/relevamiento` tiene su propio `docs/ESTADO.md`: al fusionar habrá que reconciliarlos.
 - Duración real del turno (45 s por omisión) y celular horizontal: falta jugarlos con personas.
 
 ## Cambios chicos recientes
 
+- 2026-11-14: la meta por omisión pasa a 8 puntos (ADR-006).
 - 2026-11-14: los requisitos pasan a un archivo por requisito (49) y se adopta el camino de solo madera y el pedido de «3 cualesquiera».
 - 2026-11-14: la barra de tiempo corre también en los turnos de bots (reloj corto del bot).
 - 2026-11-14: contador de piezas con icono y x/máximo; sprite propio del camino.

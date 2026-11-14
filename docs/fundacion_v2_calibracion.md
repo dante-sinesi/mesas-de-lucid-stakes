@@ -103,5 +103,8 @@ Con 8 jugadores la mano máxima al empezar el turno es 17 (p90 22) y se descarta
 
 **Lectura:** el camino de solo madera y el pedido de cualesquiera son las dos palancas que más ayudan; más colinas casi no cambia nada. El tope de la mano por jugadores solo importa con mesas grandes.
 
+## Meta 8 (decisión de Dante, 2026-11-14)
+La meta por omisión pasa a **8 puntos** (100 partidas, ya con las dos palancas): 4 jugadores, 12,1 rondas y 45 turnos; 2 jugadores, 17,1 rondas y 32 turnos; 8 jugadores, 7,9 rondas y 55 turnos; ninguna trabada. Ver `docs/decisiones/ADR-006.md`.
+
 ## Adoptadas (decisión de Dante, 2026-11-14)
 Se adoptan **el camino de solo 1 madera** y **el pedido de «3 tarjetas cualesquiera»**. Con la regla ya adoptada (100 partidas): 4 jugadores, 15,7 rondas, 45 % de turnos sin hacer nada y el del primero en 8,1 puntos a la ronda 12; 2 jugadores, 22,4 rondas y ninguna partida trabada. Quedan en la regla (`reglas.js` y `misiones.js`) y el simulador ya no las trata como variantes. No se adoptan por ahora más colinas ni el tope de mano por jugadores (siguen como variantes del simulador). Ver `docs/decisiones/ADR-005.md`.

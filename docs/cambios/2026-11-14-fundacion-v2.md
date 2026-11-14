@@ -18,7 +18,8 @@ Rehacer Fundación sin los dados de recursos: cada recurso es una tarjeta, cobra
 - [x] Pruebas de la lógica pura del cliente (`test_fundacion_cliente.js`).
 - [x] Documentación: reglas, flujo, pantallas, 49 requisitos (uno por archivo), plan, calibración, ADR y trazabilidad.
 - [x] Adoptar el camino de solo madera y el pedido de «3 cualesquiera» (ADR-005).
-- [ ] **Decidir la meta de puntos con Dante** y repetir la calibración.
+- [x] Meta de 8 puntos por omisión (ADR-006).
+- [ ] Repetir la calibración con personas.
 - [ ] Repetir la calibración con el bot mejorado y con partidas de personas; ajustar el reloj.
 - [ ] Probar el celular horizontal con un teléfono real y medir los dados 3D.
 - [ ] Abrir el Pull Request (texto en este archivo) y fusionar cuando Dante lo apruebe.

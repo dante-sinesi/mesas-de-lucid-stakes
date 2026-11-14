@@ -22,7 +22,7 @@ Archivo generado por `indexar_docs.py`. No editar a mano: se regenera.
 - [[RN-016]] [Pedidos](requisitos/negocio/RN-016.md) — Los pedidos se cumplen entregando tarjetas: 2 madera y 2 ladrillo, 2 lana y 2 trigo, 3 mineral, una de cada recurso, 3 tarjetas iguales o 3 tarjetas cualesquiera.
 - [[RN-017]] [Un pedido que no se puede cumplir no se abre](requisitos/negocio/RN-017.md) — El servidor rechaza la entrega de un pedido que el jugador no puede cumplir, y el cliente no abre su ventana.
 - [[RN-018]] [Camino más largo y ejército más grande](requisitos/negocio/RN-018.md) — El camino más largo (5 caminos o más) y el ejército más grande (2 caballeros o más, el que tenga más) dan 2 puntos cada uno y cambian de dueño si otro jugador los supera.
-- [[RN-019]] [Meta, vuelta completa y modo solo](requisitos/negocio/RN-019.md) — La partida termina cuando alguien llega a la meta (8, 10 o 12 puntos) y se juega la vuelta completa; en el empate gana quien llegó con menos turnos.
+- [[RN-019]] [Meta, vuelta completa y modo solo](requisitos/negocio/RN-019.md) — La partida termina cuando alguien llega a la meta (8 por omisión; también 10 o 12 puntos) y se juega la vuelta completa; en el empate gana quien llegó con menos turnos.
 - [[RN-020]] [Un solo reloj por turno](requisitos/negocio/RN-020.md) — El descarte, la construcción y la entrega comparten un reloj por turno: 45 segundos en Normal y 90 en Extendido, o sin límite; la colocación inicial tiene 30 segundos por pieza.
 - [[RN-021]] [Al agotarse el reloj el turno se pasa solo](requisitos/negocio/RN-021.md) — Cuando se agota el reloj del turno, el turno se pasa solo; si había un descarte obligatorio sin hacer, se descartan al azar las tarjetas necesarias.
 - [[RN-022]] [Desconexión y ausencia](requisitos/negocio/RN-022.md) — Si un jugador se desconecta o deja agotar el reloj dos veces seguidas, un bot toma su lugar y lo conserva; si el jugador vuelve, retoma.
@@ -70,6 +70,7 @@ Archivo generado por `indexar_docs.py`. No editar a mano: se regenera.
 - [[ADR-003]] [Misiones de condición y pedidos compartidos, con vencimiento por turnos](decisiones/ADR-003.md) — Un grupo compartido a la vista de misiones (se las lleva quien las cumple primero) y pedidos (se entregan tarjetas y vencen por turnos).
 - [[ADR-004]] [Reloj único por turno; el tiempo agotado pasa el turno](decisiones/ADR-004.md) — Cada turno tiene un solo reloj (45 s Normal, 90 s Extendido); al agotarse, el turno se pasa solo.
 - [[ADR-005]] [Camino de solo madera y pedido de 3 tarjetas cualesquiera](decisiones/ADR-005.md) — Dos palancas de economía medidas con bots que se adoptan para reducir los turnos sin construir y evitar bloqueos mutuos.
+- [[ADR-006]] [Meta de 8 puntos por omisión](decisiones/ADR-006.md) — La meta por omisión de Fundación pasa de 10 a 8 puntos, porque el tramo final de 8 a 10 puntos se arrastra.
 
 ## Otro
 

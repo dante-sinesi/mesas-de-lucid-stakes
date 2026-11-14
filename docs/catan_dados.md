@@ -76,7 +76,7 @@ Dos marcadores que **cambian de dueño** si otro jugador los supera, como en Cat
 - Ausencia y desconexión siguen como en 13 Jack y Diez mil: un bot toma el lugar y lo conserva; si el jugador vuelve, retoma.
 
 ## Fin de la partida
-- **Objetivo: la meta de puntos** (hoy 8, 10 o 12). Con **más fuentes de puntos** (misiones y pedidos) **probablemente haya que subirla**: **se calibra con partidas simuladas** y **no puede cerrarse hasta tener el juego y los bots hechos**.
+- **Objetivo: la meta de puntos. Por omisión 8** (decidido por Dante tras la calibración; también se puede elegir 10 o 12). Con 8, una partida dura unos 45 turnos con 4 jugadores (ver `fundacion_v2_calibracion.md`).
 - **Vuelta completa** cuando alguien llega, para que todos tengan los mismos turnos. Gana quien tiene más puntos; el empate lo gana quien llegó con menos turnos.
 - **Solo:** se gana por **meta de puntos** (sin reloj de partida); el resultado son los **turnos que tardaste** y se guarda la mejor marca. Las reglas son las mismas en cualquier modo.
 - La pantalla final es la de los otros juegos (ranking, **Nueva partida**, **Compartir** como imagen PNG, **Salir**).
