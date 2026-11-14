@@ -28,6 +28,7 @@ Fusionar el Pull Request cuando Dante lo apruebe y jugar partidas con personas p
 
 ## Cambios chicos recientes
 
+- 2026-11-14: las salas de Fundación de la v1 en plena partida ya no se recuperan al reiniciar el servidor, y una sala dañada no hace perder a las demás.
 - 2026-11-14: la meta por omisión pasa a 8 puntos (ADR-006).
 - 2026-11-14: los requisitos pasan a un archivo por requisito (49) y se adopta el camino de solo madera y el pedido de «3 cualesquiera».
 - 2026-11-14: la barra de tiempo corre también en los turnos de bots (reloj corto del bot).

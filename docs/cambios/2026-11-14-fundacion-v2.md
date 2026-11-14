@@ -12,14 +12,15 @@ Rehacer Fundación sin los dados de recursos: cada recurso es una tarjeta, cobra
 
 - [x] Reglas puras (`servidor/fundacion/reglas.js`): mano, cobranza de todos, mapa justo, descarte, vértices con recursos. Pruebas: `test_fundacion_reglas.js`.
 - [x] Misiones y pedidos (`servidor/fundacion/misiones.js`) con vencimiento por turnos. Pruebas: `test_fundacion_misiones.js`.
-- [x] Mesa (`mesa_fundacion.js`): turno en tres momentos, reloj único, tiempo agotado que pasa el turno, mano privada, salas viejas que vuelven a la espera. Pruebas: `test_fundacion.js`.
+- [x] Mesa (`mesa_fundacion.js`): turno en tres momentos, reloj único, tiempo agotado que pasa el turno, mano privada, salas guardadas con la v1 que no se recuperan (sin salas fantasma). Pruebas: `test_fundacion.js`.
 - [x] Bot nuevo y simulador de calibración (`bot.js`, `simulador/calibracion.js`).
 - [x] Cliente: HUD, tarjetas, tirada con dados 3D en franja, descarte, construir, misiones y pedidos, entregas, colocación inicial asistida, bandido, final, ayuda en láminas.
 - [x] Pruebas de la lógica pura del cliente (`test_fundacion_cliente.js`).
 - [x] Documentación: reglas, flujo, pantallas, 49 requisitos (uno por archivo), plan, calibración, ADR y trazabilidad.
 - [x] Adoptar el camino de solo madera y el pedido de «3 cualesquiera» (ADR-005).
 - [x] Meta de 8 puntos por omisión (ADR-006).
-- [ ] Repetir la calibración con personas.
+- [x] Partida de dos clientes distintos (dos navegadores): la barra de tiempo corre igual para quien espera, las manos no se filtran y las cantidades de tarjetas coinciden.
+- [ ] Repetir la calibración con personas de verdad.
 - [ ] Repetir la calibración con el bot mejorado y con partidas de personas; ajustar el reloj.
 - [ ] Probar el celular horizontal con un teléfono real y medir los dados 3D.
 - [ ] Abrir el Pull Request (texto en este archivo) y fusionar cuando Dante lo apruebe.
@@ -40,7 +41,7 @@ Rehacer Fundación sin los dados de recursos: cada recurso es una tarjeta, cobra
 **Qué no cambia:** Diez mil, 13 Jack, la sala de espera, la entrada y las salas (solo se cambian las acciones de red de Fundación).
 
 **Riesgos y puntos de atención**
-- Las salas de Fundación guardadas con la v1 **vuelven a la sala de espera** (no se pueden recuperar).
+- Las salas de Fundación guardadas con la v1 **en plena partida no se recuperan** al reiniciar el servidor (las que estaban en la sala de espera sí); además, una sala dañada en el archivo ya no hace perder a las demás.
 - La economía aún no está calibrada: con bots, el 60 % de los turnos no construye (falta ladrillo o madera) y el final se arrastra. Hay palancas medidas, a decidir.
 - `web/dados3d.js` suma opciones (`escalaMax`, `sinValores`, `sombraFiel`) que solo usa Fundación; los otros juegos no cambian.
 - Seguridad: no hay claves ni datos personales; el servidor valida cada acción (turno, estado, entradas) y la mano de un jugador no viaja a los demás (prueba `test_fundacion.js`).
