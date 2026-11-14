@@ -710,3 +710,6 @@ img, canvas { -webkit-user-drag: none; }
   .ayNav { gap: 4px; }
   .ayNav .boton, .ayNav button { transform: scale(.7); }
 }
+
+/* las ventanas de construir, misiones y entrega quedan entre la barra de arriba y la mano (nada queda tapado por las cartas) */
+.fuCentro.conMano { top: calc(var(--barra) + 1vmin); bottom: calc(max(9.6vmin, 40px) + 2.6vmin); transform: none; padding: 1vmin 0; gap: 1.4vmin; overflow: hidden; }
