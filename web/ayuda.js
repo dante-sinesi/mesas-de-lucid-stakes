@@ -136,8 +136,58 @@ const Ayuda = (() => {
   const LAMINAS_TJ = SECCIONES_TJ.map(s => s.laminas.map(t => TODAS_TJ.find(l => l.titulo === t)));
 
 
+  // ---------- las láminas de Fundación (los dibujos son los mismos de la partida: tarjetas, piezas, dados) ----------
+  const COL_FU = () => Mesas.COLORES[0];
+  const pieza = (canvas, z = 3) => { const c = FU_ARTE.cvs(canvas.width, canvas.height); c.getContext('2d').drawImage(canvas, 0, 0); c.style.cssText = 'width:' + canvas.width * z + 'px;height:' + canvas.height * z + 'px;image-rendering:pixelated;display:block'; return c; };
+  const tarj = (r, cls) => cartaFU(r, cls || 'chica');
+  const tarjetas = (lista, cls) => { const f = el('div', 'ayFila'); lista.forEach(r => f.appendChild(tarj(r, cls))); return f; };
+  const TODAS_FU = [
+    { titulo: 'LA TIRADA', hacer: () => {
+        const w = el('div', 'ayApila');
+        const f = el('div', 'ayFila'); f.append(dado('normal', 3, 46), rot('+', ORO, 30, 5), dado('normal', 5, 46), rot('=', ORO, 30, 5), rot('8', [0.55, 0.9, 0.45], 50, 7));
+        w.append(f, el('div', 'ayVs', '↓'), caja(pieza(FU_ARTE.casa(COL_FU()), 4), flecha('→'), tarjetas([0]), el('div', 'ayAyuda', 'todos cobran')),
+                 caja(pieza(FU_ARTE.ciudad(COL_FU()), 4), flecha('→'), tarjetas([3, 3]), el('div', 'ayAyuda', 'la ciudad, el doble')));
+        return w;
+      }, pie: 'Con cada tirada cobran todos los que tengan un pueblo o una ciudad junto a ese número.' },
+    { titulo: 'TUS TARJETAS', hacer: () => {
+        const w = el('div', 'ayApila');
+        w.append(tarjetas([0, 0, 1, 2, 3, 4], 'g'), caja(rot('MÁXIMO 6', ORO, 150, 5)), caja(rot('7', [1.0, 0.54, 0.48], 40, 6), flecha('→'), el('div', 'ayAyuda', 'al empezar tu turno, descartas hasta 6')));
+        return w;
+      }, pie: 'Solo tú ves cuáles son. No hay intercambio.' },
+    { titulo: 'CONSTRUIR', hacer: () => {
+        const w = el('div', 'ayApila'), C = COL_FU();
+        [[FU_ARTE.camino(C), [0, 1]], [FU_ARTE.casa(C), [0, 1, 2, 3]], [FU_ARTE.ciudad(C), [3, 3, 4, 4, 4]], [FU_ARTE.caballero(C), [2, 3, 4]]].forEach(([c, costo]) => { const f = el('div', 'ayFila ayDef'); f.append(pieza(c, c.width > 12 ? 3 : 4), tarjetas(costo)); w.appendChild(f); });
+        return w;
+      }, pie: 'Camino, pueblo, ciudad y caballero. Haz todo lo que te alcance.' },
+    { titulo: 'MISIONES Y PEDIDOS', hacer: () => {
+        const w = el('div', 'ayApila');
+        w.append(fila(rot('5 CAMINOS', [0.55, 0.8, 1.0], 140, 4), rot('+1', [0.55, 0.9, 0.45], 40, 5), el('div', 'ayAyuda', 'la gana quien la cumple primero')),
+                 fila(tarjetas([0, 0, 1, 1]), rot('+1', [0.55, 0.9, 0.45], 40, 5), el('div', 'ayAyuda', 'pedido: entregas tarjetas')));
+        return w;
+      }, pie: 'Se ven en la izquierda. Los pedidos vencen.' },
+    { titulo: 'EL BANDIDO', hacer: () => {
+        const w = el('div', 'ayApila');
+        w.append(caja(rot('7', [1.0, 0.54, 0.48], 50, 7), flecha('→'), pieza(FU_ARTE.bandido(), 4), el('div', 'ayAyuda', 'se mueve solo')),
+                 caja(el('div', 'ayAyuda', 'bloquea un hexágono'), flecha('→'), pieza(FU_ARTE.caballero(COL_FU()), 4), el('div', 'ayAyuda', 'el caballero lo frena')));
+        return w;
+      }, pie: 'Con un 7 no cobra nadie.' },
+    { titulo: 'GANAR', hacer: () => {
+        const w = el('div', 'ayApila ayPuntaje'), C = COL_FU();
+        const lin = (c, t, z = 3) => { const f = el('div', 'ayFila ayDef ayPuntos2'); f.append(pieza(c, z), rot(t, ORO, 64, 3)); return f; };
+        w.append(lin(FU_ARTE.casa(C), '1'), lin(FU_ARTE.ciudad(C), '2'), lin(FU_ARTE.camino(C), 'MÁS LARGO 2', 3), lin(FU_ARTE.caballero(C), 'EJÉRCITO 2', 3), fila(rot('MISIÓN', [0.55, 0.8, 1.0], 100, 3), rot('1', ORO, 40, 3)));
+        return w;
+      }, pie: 'Gana quien llega primero a la meta (8, 10 o 12), con la vuelta completa.' },
+  ];
+  const SECCIONES_FU = [
+    { rotulo: 'JUEGO', nombre: 'Cómo se juega', laminas: ['LA TIRADA', 'TUS TARJETAS', 'CONSTRUIR'] },
+    { rotulo: 'PUNTOS', nombre: 'Puntos y misiones', laminas: ['MISIONES Y PEDIDOS', 'EL BANDIDO', 'GANAR'] },
+  ];
+  const LAMINAS_FU = SECCIONES_FU.map(s => s.laminas.map(t => TODAS_FU.find(l => l.titulo === t)));
+
+  const datos = () => (ctx.juego === 'trecejack' ? [SECCIONES_TJ, LAMINAS_TJ] : (ctx.juego === 'fundacion' ? [SECCIONES_FU, LAMINAS_FU] : [SECCIONES, LAMINAS]));
+
   function pintar() {
-    const tj = ctx.juego === 'trecejack', SEC = tj ? SECCIONES_TJ : SECCIONES, LAM = tj ? LAMINAS_TJ : LAMINAS;
+    const [SEC, LAM] = datos();
     const c = ctx.cuerpo, paginas = LAM[seccion];
     c.textContent = '';
     ctx.tabs.textContent = '';
@@ -157,7 +207,7 @@ const Ayuda = (() => {
     ctx.sig.style.visibility = pagina < paginas.length - 1 ? 'visible' : 'hidden';
     ctx.nav.style.display = paginas.length > 1 ? '' : 'none';   // (una sección de una sola página no necesita flechas ni puntos)
   }
-  const ir = d => { const LAM = ctx.juego === 'trecejack' ? LAMINAS_TJ : LAMINAS; pagina = Math.max(0, Math.min(LAM[seccion].length - 1, pagina + d)); pintar(); };
+  const ir = d => { const LAM = datos()[1]; pagina = Math.max(0, Math.min(LAM[seccion].length - 1, pagina + d)); pintar(); };
 
   // Arma la ventana (una sola vez) y la abre en la primera lámina (o donde se quedó).
   function abrir(contexto, desde) {

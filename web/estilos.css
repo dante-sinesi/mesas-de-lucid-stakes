@@ -579,6 +579,7 @@ img, canvas { -webkit-user-drag: none; }
 #fu [hidden] { display: none !important; }
 #fuTiempo { position: absolute; top: 0; left: 0; right: 0; height: 3.4vmin; min-height: 18px; background: #05020c; border-bottom: .3vmin solid var(--borde); z-index: 8; }
 #fuTiempo i { display: block; height: 100%; background: #8bd0ff; transition: width .4s linear; }
+#fuTiempo.quieta { background: #3a3550; }
 #fuTiempo.poco i { background: #ff8b8b; }
 #fuTiempo span { position: absolute; left: 1vmin; top: 0; height: 100%; display: flex; align-items: center; font-weight: 800; color: #fff; text-shadow: 0 .2vmin 0 #000; }
 #fuCab { position: absolute; top: calc(3.4vmin + 6px); right: 1vmin; left: auto; width: auto; z-index: 4; padding: 0; background: none; border: 0; display: flex; gap: 8px; align-items: center; }
@@ -622,6 +623,12 @@ img, canvas { -webkit-user-drag: none; }
 .fuCarta.nueva { box-shadow: 0 0 0 .4vmin var(--oro); transform: translateY(-1.4vmin); }
 .fuCarta.falta { opacity: .45; outline: .3vmin dashed #ff8b8b; outline-offset: .1vmin; }
 .fuDorso { background: repeating-linear-gradient(45deg, #2a1a4d 0 .8vmin, #3a2766 .8vmin 1.6vmin); }
+#fuRecursos { position: absolute; left: 50%; bottom: 1vmin; transform: translateX(-50%); z-index: 6; display: flex; flex-direction: column; align-items: center; gap: .8vmin; background: rgba(18,10,34,.9); border: .3vmin solid var(--borde); padding: .8vmin 1.4vmin; }
+.fuRecT { color: var(--suave); font-size: .95em; }
+.fuNum { display: inline-flex; align-items: center; justify-content: center; min-width: 3.4vmin; height: 3.4vmin; padding: 0 .4vmin; background: #f5ecd0; color: #1a1030; border: .3vmin solid #000; border-radius: 50%; font-weight: 800; box-sizing: border-box; }
+.fuNum.roj { color: #b5301e; }
+.fuCarta.ya { opacity: .6; }
+.fuCarta.vacia { background: #2a1a4d !important; border-style: dashed; opacity: .8; }
 .fuCuenta { align-self: flex-end; color: var(--suave); font-size: .85em; margin-left: .4vmin; }
 .fuCuenta.sobra { color: #ff8b8b; }
 #fuBotones { position: absolute; right: 1vmin; bottom: 1vmin; z-index: 6; display: flex; flex-direction: column; gap: .7vmin; align-items: stretch; }
@@ -653,8 +660,6 @@ img, canvas { -webkit-user-drag: none; }
 .fuOk { color: #8fc06a; font-size: .9em; }
 .fuFalta { color: #ff8b8b; font-size: .9em; text-align: center; }
 .fuBtnAncho { min-width: 26vmin; }
-.fuAyudaFila { display: flex; gap: 10px; align-items: flex-start; text-align: left; font-size: 17px; }
-.fuAyudaFila b { color: var(--oro); }
 #fuGira { display: none; position: absolute; inset: 0; z-index: 20; background: #120a22; color: #fff3c4; align-items: center; justify-content: center; text-align: center; font-size: 22px; padding: 24px; }
 @media (orientation: portrait) and (max-width: 700px) { #fuGira { display: flex; } }
 
