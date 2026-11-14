@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Fundación: dados franja de lado a lado</title>
+<style>
+:root{--fondo:#0c2a40;--panel:#120a22;--oro:#f2c94c;--claro:#fff3c4;--suave:#a99cc9}
+*{box-sizing:border-box;margin:0}
+html,body{height:100%;background:#05020c;color:var(--claro);font:700 16px 'Segoe UI',system-ui,sans-serif;overflow:hidden}
+#esc{position:relative;width:min(100vw,calc(100vh*16/9));aspect-ratio:16/9;margin:0 auto;background:var(--fondo) url(fondo.png) center/100% 100% no-repeat;font-size:calc(100% * 1);container-type:size}
+#esc{font-size:min(1.9vmin,calc(1.9 * 100vh / 100))}
+.fr{position:absolute;display:flex;align-items:center}
+#dados{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:70cqw;display:flex;justify-content:center}
+#dados canvas{display:block}
+.sale{position:absolute;text-align:center}
+.sale b{display:block;font-size:6.2cqw;line-height:1;color:var(--claro);text-shadow:0 .3cqw 0 #000}
+.sale span{font-size:2.2cqw;color:var(--suave)}
+.etq{position:absolute;left:1.4cqw;top:3.4cqw;background:var(--oro);color:#1a1030;padding:.5cqw 1.6cqw;font-size:1.8cqw;z-index:9}
+.btn{position:absolute;right:1.4cqw;bottom:1.4cqw;z-index:9;background:#2a1a4d;color:var(--claro);border:.3cqw solid #3a2766;padding:.6cqw 1.6cqw;font:700 1.6cqw 'Segoe UI';cursor:pointer}
+/* variante A: franja de lado a lado */
+.A .franja{position:absolute;left:0;right:0;top:34cqh;height:34cqh;background:rgba(5,2,12,.88);border-top:.5cqw solid var(--oro);border-bottom:.5cqw solid var(--oro)}
+.A .sale{right:5cqw;top:41cqh}
+/* variante B: la franja es una mesa de fieltro */
+.B .franja{position:absolute;left:0;right:0;top:34cqh;height:34cqh;background:repeating-conic-gradient(#14583f 0 25%,#126a4a 0 50%) 0 0/1.6cqw 1.6cqw;border-top:.9cqw solid #5a3a1c;border-bottom:.9cqw solid #5a3a1c;box-shadow:0 .8cqw 0 rgba(0,0,0,.45),inset 0 .6cqw 0 rgba(0,0,0,.25)}
+.B .sale{right:5cqw;top:40cqh;background:rgba(5,2,12,.7);padding:.6cqw 1.8cqw;border:.3cqw solid var(--oro)}
+/* variante C: franja angosta, centrada, con el cartel adentro */
+.C .franja{position:absolute;left:21cqw;right:21cqw;top:36cqh;height:30cqh;background:rgba(5,2,12,.9);border:.5cqw solid var(--oro);box-shadow:0 .8cqw 0 rgba(0,0,0,.5)}
+.C #dados{left:41cqw;width:36cqw}
+.C .sale{left:58cqw;top:41cqh;width:20cqw}
+.C .sale b{font-size:5cqw}
+</style></head>
+<body><div id="esc" class="A">
+<div class="etq">Dirección A · franja de lado a lado (dados 3D reales)</div>
+<div class="franja"></div>
+<div id="dados"><canvas id="lienzo"></canvas></div>
+<div class="sale" id="sale"><b>Sale 8</b><span>3 + 5</span></div>
+<button class="btn" id="otra" type="button">Tirar otra vez</button>
+</div>
+<script src="../../../../web/dados3d.js"></script>
+<script>
+var esc = new D3.Escena(document.getElementById('lienzo'), document.getElementById('dados'), { maxAlto: Math.round(document.getElementById('esc').clientHeight * 0.30), forzarFila: true, espaciado: 1.7, sinMesa: true, dprMax: 1.5, velocidad: 1.15, escalaMax: 120, sinValores: true });
+esc.configurar(['normal', 'normal']); esc.ajustar();
+var sale = document.getElementById('sale'), semilla = 5, par = [3, 5];
+function tirar() {
+  sale.style.visibility = 'hidden'; semilla += 7;
+  par = [1 + (semilla * 3) % 6, 1 + (semilla * 5) % 6];
+  sale.querySelector('b').textContent = 'Sale ' + (par[0] + par[1]); sale.querySelector('span').textContent = par[0] + ' + ' + par[1];
+  esc.mostrar([1, 1]); esc.tirar([0, 1], par, semilla);
+}
+esc.alTerminar = function () { sale.style.visibility = 'visible'; };
+document.getElementById('otra').onclick = tirar;
+window.addEventListener('resize', function () { esc.maxAlto = Math.round(document.getElementById('esc').clientHeight * 0.30); esc.ajustar(); });
+setTimeout(tirar, 400); setInterval(tirar, 7000);
+</script></body></html>

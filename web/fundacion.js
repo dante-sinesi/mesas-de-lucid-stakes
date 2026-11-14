@@ -22,7 +22,7 @@ const fuEl = (t, c, x) => { const n = document.createElement(t); if (c) n.classN
 function abrirFU() {
   if (!FU.escena) {
     // los dos dados de número, en 3D como los del diez mil (misma caída)
-    FU.escena = new D3.Escena($('fuDadosLienzo'), $('fuDados'), { maxAlto: 260, forzarFila: true, espaciado: 1.7, sinMesa: true, velocidad: 1.15, dprMax: 1.5, escalaMax: 120, sinValores: true });   // (sin mesa, con la sombra de cada dado, y una caída más pausada que la del diez mil)
+    FU.escena = new D3.Escena($('fuDadosLienzo'), $('fuDados'), { maxAlto: 260, forzarFila: true, espaciado: 1.7, sinMesa: true, velocidad: 1.15, dprMax: 1.5, escalaMax: 120, sinValores: true, sombraFiel: true });   // (sin mesa, con la sombra de cada dado, y una caída más pausada que la del diez mil)
     FU.escena.configurar(['normal', 'normal']);
     FU.escena.alAterrizar = () => { if (!document.hidden) Sonido.play('ficha'); };
     FU.escena.alTerminar = () => { if (FU.tirada) aterrizoFU(FU.tirada.key); };
@@ -242,8 +242,7 @@ function iniciarTiradaFU(e, key) {
   const esc = FU.escena, vals = [t.num.a, t.num.b];
   setTimeout(() => {
     if (!FU.tirada || FU.tirada.key !== key) return;
-    $('fuDados').hidden = false; esc.maxAlto = Math.round(Math.min($('fu').clientHeight * 0.5, 340)); esc.ajustar(); esc.mostrar([1, 1]); esc.tirar([0, 1], vals, e.ronda * 31 + t.num.suma);
-    requestAnimationFrame(() => { const r = $('fuDados').getBoundingClientRect(), s0 = $('fu').getBoundingClientRect(); $('fuSale').style.top = Math.round(r.bottom - s0.top + 8) + 'px'; });   // («Sale N» va justo debajo de la mesa)
+    $('fuDados').hidden = false; $('fuFranja').hidden = false; esc.maxAlto = Math.round($('fu').clientHeight * 0.30); esc.ajustar(); esc.mostrar([1, 1]); esc.tirar([0, 1], vals, e.ronda * 31 + t.num.suma);
   }, 250);
   setTimeout(() => aterrizoFU(key), 5200);   // (por si la animación no avisa)
 }
@@ -598,7 +597,7 @@ function entregaVeloFU(e, centro) {
 function pintarDadosFU(e, esc) {
   const caja = $('fuDados'), t = e.turno;
   const ver = esc === 'tirada' && !!FU.tirada && FU.fase <= 1 && !sinMovimiento();
-  caja.hidden = !ver; $('fuSale').hidden = !(ver && FU.fase === 1);
+  caja.hidden = !ver; $('fuFranja').hidden = !ver; $('fuSale').hidden = !(ver && FU.fase === 1);
   if (ver) { const s = $('fuSale'); s.textContent = ''; s.append(fuEl('div', 'fuSaleN', 'Sale ' + t.num.suma), fuEl('div', 'fuSaleD', t.num.a + ' + ' + t.num.b)); }
 }
 // Las ganancias de la tirada de todos, al frente.

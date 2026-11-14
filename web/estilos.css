@@ -638,11 +638,12 @@ img, canvas { -webkit-user-drag: none; }
 #fuBotones { position: absolute; right: 1vmin; bottom: 1vmin; z-index: 6; display: flex; flex-direction: column; gap: .7vmin; align-items: stretch; }
 #fuAviso { position: absolute; top: calc(var(--barra) + 8px); left: 50%; transform: translateX(-50%); z-index: 6; display: flex; flex-direction: column; align-items: center; gap: 1vmin; pointer-events: none; }
 .fuBanner { background: var(--panel, #1d1236); border: .3vmin solid var(--oro); padding: .9vmin 2vmin; font-size: 1.25em; text-align: center; }
-#fuDados { position: absolute; left: 50%; top: var(--medio); transform: translate(-50%, -50%); z-index: 5; width: 80%; display: flex; justify-content: center; pointer-events: none; }
+#fuFranja { position: absolute; left: 0; right: 0; top: calc(var(--medio) - 17%); height: 34%; z-index: 4; background: rgba(5,2,12,.88); border-top: .5vmin solid var(--oro); border-bottom: .5vmin solid var(--oro); pointer-events: none; }
+#fuDados { position: absolute; left: 44%; top: var(--medio); transform: translate(-50%, -50%); z-index: 5; width: 62%; display: flex; justify-content: center; pointer-events: none; }
 #fuDados canvas { display: block; image-rendering: pixelated; }
-#fuSale { position: absolute; left: 50%; top: 72%; transform: translateX(-50%); z-index: 5; text-align: center; pointer-events: none; background: rgba(18,10,34,.92); border: .3vmin solid var(--oro); padding: .8vmin 2.4vmin; }
-.fuSaleN { font-size: 2.1em; font-weight: 800; color: #fff3c4; line-height: 1.1; }
-.fuSaleD { font-size: 1.2em; color: var(--suave); }
+#fuSale { position: absolute; right: 5%; top: var(--medio); transform: translateY(-50%); z-index: 5; text-align: center; pointer-events: none; }
+.fuSaleN { font-size: 4.2em; font-weight: 800; color: #fff3c4; line-height: 1; text-shadow: 0 .4vmin 0 #000; }
+.fuSaleD { font-size: 1.6em; color: var(--suave); }
 #fuGanancias { position: absolute; left: 50%; top: calc(var(--medio) - 8%); transform: translate(-50%, -50%); z-index: 5; display: flex; flex-direction: column; align-items: center; gap: 1.6vmin; background: rgba(5,2,12,.72); padding: 2vmin 3vmin; pointer-events: none; }
 #fuVelo { position: absolute; inset: 0; z-index: 5; }
 .fuFondo { position: absolute; inset: 0; background: rgba(5,2,12,.82); }
