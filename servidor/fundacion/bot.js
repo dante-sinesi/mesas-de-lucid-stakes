@@ -22,7 +22,7 @@ function mejorLugar(mapa, tab, p, edificio, lugares, azar) {
   let mejor = null, mejorV = -Infinity;
   for (const l of lugares) {
     let v;
-    if (edificio === 'pueblo') v = valorVertice(mapa, l);
+    if (edificio === 'pueblo') v = valorVertice(mapa, l) + 2.2 * nuevosTipos(mapa, tab, p, l);   // sin intercambio, lo que no tocas no lo tienes nunca: conviene sumar recursos que todavía no cobras
     else if (edificio === 'ciudad') v = valorVertice(mapa, l) + 0.5;
     else if (edificio === 'caballero') { const hx = mapa.hexes[l]; v = pips(hx.num) + (tab.bandido === l ? 3 : 0); }
     else { const e = mapa.aristas[l]; v = Math.max(libre(mapa, tab, e.a) ? valorVertice(mapa, e.a) : 0, libre(mapa, tab, e.b) ? valorVertice(mapa, e.b) : 0); }   // un camino que lleva a un buen vértice libre
@@ -30,6 +30,13 @@ function mejorLugar(mapa, tab, p, edificio, lugares, azar) {
     if (v > mejorV) { mejorV = v; mejor = l; }
   }
   return mejor;
+}
+// Cuántos recursos distintos suma un pueblo en este vértice a los que ya cobra el jugador.
+function nuevosTipos(mapa, tab, p, v) {
+  const tiene = new Set();
+  tab.vert.forEach((o, id) => { if (o && o.p === p) mapa.vertices[id].hexes.forEach(h => { const hx = mapa.hexes[h]; if (hx.tipo !== 'desierto') tiene.add(hx.tipo); }); });
+  const nuevos = new Set(); mapa.vertices[v].hexes.forEach(h => { const hx = mapa.hexes[h]; if (hx.tipo !== 'desierto' && !tiene.has(hx.tipo)) nuevos.add(hx.tipo); });
+  return nuevos.size;
 }
 const libre = (mapa, tab, v) => tab.vert[v] === null && mapa.vertices[v].vecinos.every(w => tab.vert[w] === null);
 
