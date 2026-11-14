@@ -499,13 +499,18 @@ function pintarManoFU(e, esc) {
   });
 }
 
-const botonFU = (txt, f, cls) => { const b = nuevoBoton(txt, f, FU.MOV ? 1.1 : 1.7); if (cls === 'oro') b.oro = true; if (cls === 'off') b.style.opacity = '.45'; return b; };
+const botonFU = (txt, f, cls, grande) => { const b = nuevoBoton(txt, f, grande ? (FU.MOV ? 1.9 : 3.4) : (FU.MOV ? 1.2 : 2.1)); if (cls === 'oro') b.oro = true; if (cls === 'off') b.style.opacity = '.45'; return b; };
 function pintarBotonesFU(e, esc) {
   const caja = $('fuBotones'), t = e.turno;
   const llave = [esc, FU.sel, FU.zona, FU.panel ? 1 : 0, t && t.edificio, t && t.posibles, e.turnoDe, FU.zonasMostrar.length];
-  conLlave(caja, llave, c => {
+  const princ = $('fuPrincipal'), enTurno = esc === 'turno' && !FU.panel, hay = !!t && ((t.posibles && t.posibles.length) || (t.entregables && t.entregables.length));
+  conLlave(princ, [enTurno, hay], p => {   // la acción principal va grande, sobre la mano: Construir si hay algo para hacer y, si no, Pasar
+    if (!enTurno) return;
+    p.append(hay ? botonFU('Construir', () => { Sonido.play('clic'); FU.panel = 'construir'; repintarFU(); }, 'oro', true) : botonFU('Pasar', () => hacerFU('pasar'), 'oro', true));
+  });
+  conLlave(caja, llave.concat([hay]), c => {
     const add = (...bs) => bs.forEach(b => b && c.append(b));
-    if (esc === 'turno' && !FU.panel) add(botonFU('Construir', () => { Sonido.play('clic'); FU.panel = 'construir'; repintarFU(); }), botonFU('Pasar', () => hacerFU('pasar'), 'oro'));
+    if (enTurno) add(hay ? botonFU('Pasar', () => hacerFU('pasar')) : botonFU('Construir', () => { Sonido.play('clic'); FU.panel = 'construir'; repintarFU(); }));
     else if (esc === 'colocar') add(botonFU('Atrás', () => { if (FU.zona !== null) { FU.zona = null; FU.sel = null; repintarFU(); } else hacerFU('atras'); }), FU.sel !== null ? botonFU('Confirmar', () => confirmarLugarFU(), 'oro') : null);
     else if (esc === 'inicial') add(FU.zona !== null ? botonFU('Atrás', () => { FU.zona = null; FU.sel = null; repintarFU(); }) : null, FU.sel !== null ? botonFU('Poner aquí', () => confirmarLugarFU(), 'oro') : null);
     else if ((esc === 'turnoAjeno' || esc === 'colocarAjeno' || esc === 'descarteAjeno') && e.turnoDe !== null) add(botonFU('Esperando a ' + fuNombreDe(e, e.turnoDe), () => {}, 'off'));

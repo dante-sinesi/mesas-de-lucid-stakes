@@ -1,0 +1,174 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Botones de turno · Dirección A: Flanqueando la mano</title>
+<style data-herramienta>
+html.marco, html.marco body { margin: 0; background: #e9e7e2; font: 14px/1.4 system-ui, sans-serif; color: #1c1b19; }
+html.marco body > *:not(#marco-ui) { display: none !important; }
+#marco-ui .barra { position: sticky; top: 0; z-index: 2; display: flex; flex-wrap: wrap; gap: 8px; align-items: center; padding: 10px 16px; background: #1c1b19; color: #f5f1e8; }
+#marco-ui .barra button { min-height: 36px; padding: 0 14px; border: 1px solid #8a8578; border-radius: 4px; background: transparent; color: inherit; cursor: pointer; }
+#marco-ui .barra button.on { background: #f5f1e8; color: #1c1b19; }
+#marco-ui .vistas { display: flex; gap: 24px; align-items: flex-start; justify-content: center; padding: 16px; }
+#marco-ui figure { margin: 0; }
+#marco-ui figcaption { margin-bottom: 6px; color: #5b574f; }
+#marco-ui .marco-vista { overflow: hidden; border: 1px solid #b9b3a5; background: #fff; }
+#marco-ui iframe { border: 0; background: #fff; }
+aside.nota { display: none; }
+html.con-notas aside.nota { display: block; }
+</style>
+<style>
+:root { --fondo:#0f2d4d; --panel:#1d1236; --borde:#3a2766; --oro:#f2c94c; --claro:#efe6ff; --suave:#a99cc9; --tinta:#1a1030; --cel:#8bd0ff; }
+html, body { margin:0; height:100%; background:#0a0a12; color:var(--claro); font-family: ui-monospace, 'Cascadia Mono', Consolas, monospace; font-weight:700; overflow:hidden; }
+#caja { position:fixed; inset:0; overflow:hidden; contain:strict; }
+#escena { position:absolute; left:50%; top:50%; flex:none; background:var(--fondo); overflow:hidden; transform-origin:center center; }
+#escena.d { width:1280px; height:720px; --b:24px; --ch:11px; --cw:48px; --ch2:66px; }
+#escena.m { width:812px; height:375px; --b:18px; --ch:9px; --cw:30px; --ch2:42px; }
+.barra { position:absolute; left:0; right:0; top:0; height:var(--b); background:#2b6cb0; font-size:var(--ch); display:flex; align-items:center; padding-left:8px; }
+.piezas, .mis, .jug { position:absolute; background:var(--panel); border:2px solid var(--borde); font-size:var(--ch); }
+.piezas { left:8px; top:calc(var(--b) + 6px); padding:6px 10px; letter-spacing:.04em; }
+.mis { left:8px; padding:4px 8px; border-left:5px solid var(--cel); width:170px; }
+.d .mis { }
+.m .mis { width:140px; padding:2px 6px; }
+.jug { right:8px; padding:5px 8px; border-left:7px solid #c06ad8; }
+.d .jug { width:140px; } .m .jug { width:110px; padding:2px 6px; }
+.jug.yo { border-color:var(--oro); }
+.mapa { position:absolute; left:50%; top:50%; width:0; height:0; }
+.hx { position:absolute; width:var(--hw); height:var(--hh); margin:calc(var(--hh) / -2) 0 0 calc(var(--hw) / -2); clip-path:polygon(25% 0,75% 0,100% 50%,75% 100%,25% 100%,0 50%); display:grid; place-items:center; color:#1a1030; font-size:calc(var(--ch) * 1.5); }
+.d .hx { --hw:132px; --hh:114px; } .m .hx { --hw:88px; --hh:76px; }
+.mano { position:absolute; left:50%; bottom:8px; transform:translateX(-50%); display:flex; gap:6px; align-items:flex-end; }
+.c { width:var(--cw); height:var(--ch2); border:3px solid #000; box-sizing:border-box; }
+.cnt { color:var(--suave); font-size:var(--ch); align-self:flex-end; }
+.btn { border:3px solid #000; box-shadow:0 4px 0 #000; font:inherit; cursor:pointer; display:inline-flex; align-items:center; justify-content:center; gap:8px; color:var(--claro); background:var(--panel); }
+.btn:active { transform:translateY(3px); box-shadow:0 1px 0 #000; }
+::selection { background:var(--oro); color:var(--tinta); }
+.btn:hover { filter:brightness(1.15); } .btn:focus-visible { outline:3px solid var(--cel); outline-offset:2px; }
+.btn.princ { background:var(--oro); color:var(--tinta); }
+.btn svg { width:1.3em; height:1.3em; flex:none; }
+@media (prefers-reduced-motion: reduce) { * { transition:none !important; } }
+
+.m [style*="width:150px"] { width:92px !important; height:38px !important; font-size:12px !important; }
+.m [style*="left:calc(50% - 300px)"] { left:calc(50% - 160px) !important; bottom:6px !important; }
+.m [style*="left:calc(50% + 150px)"] { left:calc(50% + 66px) !important; bottom:6px !important; }
+</style>
+<style>
+/* Esta plantilla no impone ningún estilo: el aspecto lo decide el diseñador.
+   Reglas que sí valen (las controla scripts/revisar_diseno.py): una familia tipográfica ideal y dos como máximo
+   en toda la web (más solo con <!-- excepcion-tipografia: motivo -->), etiqueta visible en cada campo, hasta 4 campos visibles y el resto en «opciones avanzadas»,
+   una sola acción principal por pantalla, contraste suficiente, estados de hover y foco, prefers-reduced-motion.
+   SIN DESBORDE HORIZONTAL: nada se sale del ancho de la pantalla ni a 390 px (mobile) ni a 1280 px (desktop). Lo mide scripts/desborde.py en un
+   navegador y revisar_diseno.py lo marca FALLA. Para no caer en eso: columnas con minmax(0, 1fr) y min-width: 0 en lo que va dentro de un grid o un
+   flex, anchos relativos y no fijos, y el código o las tablas anchas dentro de un contenedor con overflow-x: auto. */
+/* Base estructural (no es estilo, no se toca): el ancho que se pide es el ancho que se usa. */
+*, *::before, *::after { box-sizing: border-box; }
+img, svg, video, canvas, iframe { max-width: 100%; }
+body { overflow-wrap: anywhere; }
+</style>
+</head>
+<body>
+<!-- Una dirección = una estructura distinta. Marcar cada pantalla con data-pantalla="nombre" y cada parte
+     intercambiable con data-bloque="nombre" (cabecera, navegación, principal, contenido, formulario, pie),
+     con los mismos nombres en las tres direcciones para poder combinarlas.
+     La carta de la dirección (idea, cliché que evita, riesgo que asume, comportamiento en mobile) va en un
+     <aside class="nota"> que se ve con «Ver notas». -->
+<div id="caja"><div id="escena" class="d" data-pantalla="turno">
+<div class="barra" data-bloque="cabecera">Turno de Dante · 0:41</div>
+<div class="piezas" data-bloque="cabecera">2/15 · 2/5 · 0/4 · 0/3</div>
+<div data-bloque="contenido"><div class="mis" style="top:calc(var(--b) + 60px)">Camino más largo<br><span style="color:var(--suave)">+2 PV</span></div><div class="mis" style="top:calc(var(--b) + 106px)">Ejército más grande<br><span style="color:var(--suave)">+2 PV</span></div><div class="mis" style="top:calc(var(--b) + 152px)">5 caminos<br><span style="color:var(--suave)">+2 PV</span></div><div class="mis" style="top:calc(var(--b) + 198px)">2 ciudades<br><span style="color:var(--suave)">+2 PV</span></div></div>
+<div data-bloque="contenido"><div class="jug " style="top:calc(var(--b) + 150px)">Juan <span style="float:right;color:var(--oro)">2 PV</span></div><div class="jug " style="top:calc(var(--b) + 184px)">Gaby <span style="float:right;color:var(--oro)">2 PV</span></div><div class="jug yo" style="top:calc(var(--b) + 218px)">★ Dante <span style="float:right;color:var(--oro)">2 PV</span></div></div>
+<div class="mapa" style="transform:translate(0,-6%)"><div class="hx" style="left:calc(var(--hw) * -1 * .76);top:calc(var(--hh) * -1 * .76);background:#4a8a3a">8</div><div class="hx" style="left:calc(var(--hw) * 0 * .76);top:calc(var(--hh) * -1 * .76);background:#b8582c">6</div><div class="hx" style="left:calc(var(--hw) * 1 * .76);top:calc(var(--hh) * -1 * .76);background:#d9b13a">9</div><div class="hx" style="left:calc(var(--hw) * -1.5 * .76);top:calc(var(--hh) * 0 * .76);background:#7d8aa3">11</div><div class="hx" style="left:calc(var(--hw) * -0.5 * .76);top:calc(var(--hh) * 0 * .76);background:#8fc06a">4</div><div class="hx" style="left:calc(var(--hw) * 0.5 * .76);top:calc(var(--hh) * 0 * .76);background:#2f6e2f">10</div><div class="hx" style="left:calc(var(--hw) * 1.5 * .76);top:calc(var(--hh) * 0 * .76);background:#d9b13a">5</div><div class="hx" style="left:calc(var(--hw) * -1 * .76);top:calc(var(--hh) * 1 * .76);background:#4a8a3a">2</div><div class="hx" style="left:calc(var(--hw) * 0 * .76);top:calc(var(--hh) * 1 * .76);background:#b8582c">3</div><div class="hx" style="left:calc(var(--hw) * 1 * .76);top:calc(var(--hh) * 1 * .76);background:#d9b13a">12</div></div><div class="mano" data-bloque="mano"><div class="c" style="background:#2f6e2f"></div><div class="c" style="background:#2f6e2f"></div><div class="c" style="background:#b8582c"></div><div class="c" style="background:#b8582c"></div><div class="c" style="background:#8fc06a"></div><div class="c" style="background:#d9b13a"></div><div class="c" style="background:#7d8aa3"></div><span class="cnt">7/6</span></div>
+<div data-bloque="principal">
+<button class="btn princ" style="position:absolute;bottom:14px;left:calc(50% - 300px);width:150px;height:58px;font-size:18px"><svg viewBox="0 0 12 12" aria-hidden="true"><rect x="1" y="1" width="7" height="4" fill="currentColor"/><rect x="5" y="5" width="2" height="6" fill="currentColor"/></svg>Construir</button>
+<button class="btn" style="position:absolute;bottom:14px;left:calc(50% + 150px);width:150px;height:58px;font-size:18px"><svg viewBox="0 0 12 12" aria-hidden="true"><path d="M2 1h3l5 5-5 5H2l5-5z" fill="currentColor"/></svg>Pasar</button>
+</div>
+</div></div>
+<script data-herramienta>
+(function () {
+  var e = document.getElementById('escena');
+  function ajustar() {
+    var w = innerWidth, h = innerHeight, mov = w < 700;
+    e.className = mov ? 'm' : 'd';
+    var ew = mov ? 812 : 1280, eh = mov ? 375 : 720, rot = mov ? 90 : 0;
+    var cw = rot ? eh : ew, ch = rot ? ew : eh, s = Math.min(w / cw, h / ch);
+    e.style.transform = 'translate(-50%,-50%) scale(' + s + ') rotate(' + rot + 'deg)';
+  }
+  addEventListener('resize', ajustar); ajustar();
+})();
+</script>
+<aside class="nota"><b>Flanqueando la mano</b><br>Idea: Los dos botones al nivel de la mano, uno a cada lado: la acción y su resultado quedan en la misma línea de la vista y del pulgar. Construir (dorado) a la izquierda, Pasar (oscuro) a la derecha.<br>Cliché que evita: La esquina inferior derecha vacía con botones sueltos y chicos.<br>Riesgo: Con la mano de 7 cartas el conjunto ocupa bastante ancho; en mobile los botones se acortan y quedan pegados a las cartas.<br>Mobile: Botones de 92×38 flanqueando la mano de 30×42; alcanzables con los dos pulgares.</aside><!-- ESTILO_BOTONES -->
+<script data-herramienta>
+(function () {
+  var params = new URLSearchParams(location.search);
+  if (params.has('notas')) document.documentElement.classList.add('con-notas');
+  if (params.has('solo')) return;
+  document.documentElement.classList.add('marco');
+  var base = location.href.split('#')[0].split('?')[0];
+  var ui = document.createElement('div');
+  ui.id = 'marco-ui';
+  ui.setAttribute('data-herramienta', '');
+  function el(tag, attrs, texto) {
+    var e = document.createElement(tag);
+    Object.keys(attrs || {}).forEach(function (k) { e.setAttribute(k, attrs[k]); });
+    if (texto) e.textContent = texto;
+    return e;
+  }
+  var barra = el('div', { 'class': 'barra' });
+  barra.appendChild(el('strong', {}, 'Dirección A'));
+  [['desktop', 'Desktop'], ['mobile', 'Mobile'], ['ambas', 'Ambas']].forEach(function (p) {
+    var b = el('button', { type: 'button', 'data-v': p[0] }, p[1]);
+    if (p[0] === 'ambas') b.className = 'on';
+    barra.appendChild(b);
+  });
+  var etiqueta = el('label');
+  etiqueta.appendChild(el('input', { type: 'checkbox', id: 'ver-notas' }));
+  etiqueta.appendChild(document.createTextNode(' Ver notas (aside.nota)'));
+  barra.appendChild(etiqueta);
+  ui.appendChild(barra);
+  ui.appendChild(el('div', { 'class': 'vistas' }));
+  document.body.appendChild(ui);
+  var modo = 'ambas';
+  function dibujar() {
+    var vistas = ui.querySelector('.vistas');
+    vistas.innerHTML = '';
+    var lista = modo === 'ambas' ? [['Desktop', 1280, 820], ['Mobile', 390, 844]] :
+      modo === 'desktop' ? [['Desktop', 1280, 820]] : [['Mobile', 390, 844]];
+    var total = lista.reduce(function (s, v) { return s + v[1] + 24; }, 0);
+    var ancho = window.innerWidth || document.documentElement.clientWidth || 1280;
+    var k = Math.max(0.2, Math.min(1, (ancho - 32) / total));
+    var notas = ui.querySelector('#ver-notas').checked ? '&notas=1' : '';
+    lista.forEach(function (v) {
+      var fig = document.createElement('figure');
+      var cap = document.createElement('figcaption');
+      cap.textContent = v[0] + ' · ' + v[1] + ' px';
+      var marco = document.createElement('div');
+      marco.className = 'marco-vista';
+      marco.style.width = Math.round(v[1] * k) + 'px';
+      marco.style.height = Math.round(v[2] * k) + 'px';
+      var f = document.createElement('iframe');
+      f.title = 'Vista ' + v[0];
+      f.src = base + '?solo=1' + notas;
+      f.style.width = v[1] + 'px';
+      f.style.height = v[2] + 'px';
+      f.style.transform = 'scale(' + k + ')';
+      f.style.transformOrigin = '0 0';
+      marco.appendChild(f);
+      fig.appendChild(cap);
+      fig.appendChild(marco);
+      vistas.appendChild(fig);
+    });
+  }
+  ui.querySelectorAll('[data-v]').forEach(function (b) {
+    b.addEventListener('click', function () {
+      modo = b.getAttribute('data-v');
+      ui.querySelectorAll('[data-v]').forEach(function (x) { x.classList.toggle('on', x === b); });
+      dibujar();
+    });
+  });
+  ui.querySelector('#ver-notas').addEventListener('change', dibujar);
+  window.addEventListener('resize', dibujar);
+  dibujar();
+})();
+</script>
+</body>
+</html>
