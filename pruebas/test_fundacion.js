@@ -198,6 +198,26 @@ function correr(m, reloj, token, pasos) {
   check(m2.fase === FASE.ESPERA && m2.jugadores.length === 2, 'una partida guardada con la versión 1 vuelve a la sala de espera');
 }
 
+// ---------- al reiniciar el servidor: las salas de Fundación de la versión 1 en plena partida no se recuperan, y una sala dañada no pierde a las demás ----------
+{
+  const fs = require('fs'), archivo = path.join(__dirname, 'tmp_salas_prueba.json'), reloj = { t: 9000000 };
+  const a = new Salas({ archivo: null, ahora: () => reloj.t });
+  const r1 = a.crear({ juego: 'fundacion', modoFU: 'multi', asientos: 3, bots: 2, publica: true }); a.entrar(r1.sala, 'token_largo_de_prueba_a', 'Ana'); a.accion(r1.sala, 'token_largo_de_prueba_a', 'empezar');
+  const r2 = a.crear({ juego: 'fundacion', modoFU: 'multi', asientos: 4, bots: 1, publica: true }); a.entrar(r2.sala, 'token_largo_de_prueba_b', 'Beto');
+  const r3 = a.crear({ juego: 'diezmil', modoDM: 'multi', asientos: 3, publica: true }); a.entrar(r3.sala, 'token_largo_de_prueba_c', 'Cami');
+  const datos = { ROTA: { mesa: null } };   // (una sala dañada que va primero)
+  for (const [c, sala] of a.salas) datos[c] = { creada: sala.creada, uso: sala.uso, publica: !!sala.publica, mesa: sala.mesa.guardar() };
+  check(datos[r1.sala].mesa.fase === 'inicial' && datos[r1.sala].mesa.v === 2, 'la sala en partida se guarda como de la versión 2');
+  delete datos[r1.sala].mesa.v; datos[r1.sala].mesa.jugadores.forEach(j => { delete j.mano; delete j.pvExtra; });   // (como la dejaba la versión 1)
+  fs.writeFileSync(archivo, JSON.stringify(datos));
+  try {
+    const b = new Salas({ archivo, ahora: () => reloj.t });
+    check(!b.salas.has(r1.sala), 'la sala de la versión 1 en plena partida no se recupera (no deja una sala fantasma)');
+    check(b.salas.has(r2.sala) && b.salas.get(r2.sala).mesa.fase === 'espera', 'una sala de Fundación en la sala de espera se recupera');
+    check(b.salas.has(r3.sala), 'las salas de otros juegos se recuperan, aunque haya una dañada');
+  } finally { fs.unlinkSync(archivo); }
+}
+
 // ---------- las reglas de la sala ----------
 check(new MesaFundacion({ modo: 'multi' }).meta === 8 && new MesaFundacion({ modo: 'multi', meta: 5 }).meta === 8 && new MesaFundacion({ modo: 'multi', meta: 12 }).meta === 12, 'la meta por omisión es 8 y una meta inválida vuelve a 8');
 {

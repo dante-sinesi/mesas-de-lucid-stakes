@@ -340,11 +340,14 @@ class Salas {
     try {
       const datos = JSON.parse(fs.readFileSync(this.archivo, 'utf8'));
       for (const codigo of Object.keys(datos)) {
-        const juego = datos[codigo].mesa.juego;
-        if (juego !== 'diezmil' && juego !== 'trecejack' && juego !== 'fundacion') continue;   // (las salas de otros juegos guardadas por una versión vieja se descartan)
-        const s = this._nueva(juego === 'fundacion' ? MesaFundacion.desde(datos[codigo].mesa, {}) : (juego === 'trecejack' ? Mesa13.desde(datos[codigo].mesa, {}) : MesaDM.desde(datos[codigo].mesa, {})));
-        s.creada = datos[codigo].creada; s.uso = datos[codigo].uso; s.publica = !!datos[codigo].publica;
-        this.salas.set(codigo, s);
+        try {   // (una sala dañada no hace perder a las demás)
+          const juego = datos[codigo].mesa.juego;
+          if (juego !== 'diezmil' && juego !== 'trecejack' && juego !== 'fundacion') continue;   // (las salas de otros juegos guardadas por una versión vieja se descartan)
+          if (juego === 'fundacion' && datos[codigo].mesa.v !== 2 && datos[codigo].mesa.fase !== 'espera') continue;   // (una partida de Fundación de la versión 1 no se puede seguir: no se deja una sala fantasma)
+          const s = this._nueva(juego === 'fundacion' ? MesaFundacion.desde(datos[codigo].mesa, {}) : (juego === 'trecejack' ? Mesa13.desde(datos[codigo].mesa, {}) : MesaDM.desde(datos[codigo].mesa, {})));
+          s.creada = datos[codigo].creada; s.uso = datos[codigo].uso; s.publica = !!datos[codigo].publica;
+          this.salas.set(codigo, s);
+        } catch (e) { /* esta sala no se recupera */ }
       }
     } catch (e) { /* sin archivo o dañado: se empieza sin salas */ }
   }
