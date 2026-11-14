@@ -29,23 +29,29 @@ Rehacer Fundación sin los dados de recursos: cada recurso es una tarjeta, cobra
 
 **Título:** Fundación v2: tarjetas de recursos, misiones y pedidos, y pantalla horizontal
 
-**Qué cambia**
-- Fundación deja los dados de recursos y el oro. Con cada tirada de dos dados **cobran todos** (pueblo 1 tarjeta, ciudad 2); la mano es privada y de máximo 6 (se descarta al empezar el turno).
+## Qué cambia
+- Fundación deja los dados de recursos y el oro. Con cada tirada de dos dados **cobran todos** (pueblo 1 tarjeta, ciudad 2); la mano es **privada** y de máximo 6 (se descarta al empezar el turno). No hay intercambio.
 - **Misiones de condición y pedidos** compartidos a la vista; los pedidos vencen por turnos y se reponen al terminar el turno de quien los entregó.
 - **Un solo reloj por turno** (45 s Normal, 90 s Extendido): al agotarse, el turno se pasa solo. La barra corre también en los turnos de bots.
-- **Mapa justo** al generar la isla y **colocación inicial asistida** (se ven los recursos que daría cada pueblo).
-- **Cliente nuevo**: pantalla horizontal, estructura «Mesa de Risk», tarjetas sin texto, dados 3D en una franja central, ventanas de descarte, construir, misiones y pedidos, entrega, bandido que se mueve solo, cámara y marca en lo que construye cada jugador, final como el del Diez mil y el 13 Jack.
+- **Mapa justo** al generar la isla y **colocación inicial asistida**.
+- **Economía calibrada con bots**: el camino cuesta solo 1 madera, entra el pedido de «3 tarjetas cualesquiera» y la meta por omisión es 8 puntos (ADR-005 y ADR-006).
+- **Cliente nuevo**: pantalla horizontal «Mesa de Risk», tarjetas sin texto, dados 3D en una franja central, ventanas de descarte, construir, misiones y pedidos, entregas, bandido que se mueve solo, cámara y marca en lo que construye cada jugador, final como el del Diez mil y el 13 Jack, y ayuda en láminas.
 - **Servidor autoritativo con estado por jugador**: cada uno recibe su mano y, de los demás, solo la cantidad.
-- Simulador de calibración con variantes, y documentación de reglas, flujo, pantallas, requisitos, ADR y trazabilidad.
+- Simulador de calibración con variantes y documentación viva: ESTADO, ficha de cambio, 6 ADR, decisiones de diseño, 49 requisitos (uno por archivo) y trazabilidad.
 
-**Qué no cambia:** Diez mil, 13 Jack, la sala de espera, la entrada y las salas (solo se cambian las acciones de red de Fundación).
+## Qué no cambia
+Diez mil, 13 Jack, la sala de espera, la entrada y las salas (solo cambian las acciones de red de Fundación).
 
-**Riesgos y puntos de atención**
-- Las salas de Fundación guardadas con la v1 **en plena partida no se recuperan** al reiniciar el servidor (las que estaban en la sala de espera sí); además, una sala dañada en el archivo ya no hace perder a las demás.
-- La economía aún no está calibrada: con bots, el 60 % de los turnos no construye (falta ladrillo o madera) y el final se arrastra. Hay palancas medidas, a decidir.
-- `web/dados3d.js` suma opciones (`escalaMax`, `sinValores`, `sombraFiel`) que solo usa Fundación; los otros juegos no cambian.
-- Seguridad: no hay claves ni datos personales; el servidor valida cada acción (turno, estado, entradas) y la mano de un jugador no viaja a los demás (prueba `test_fundacion.js`).
+## Riesgos y puntos de atención
+- Las salas de Fundación guardadas con la v1 **en plena partida no se recuperan** al reiniciar el servidor (las que están en la sala de espera sí), y una sala dañada en el archivo ya no hace perder a las demás.
+- `web/dados3d.js` suma opciones (`escalaMax`, `sinValores`, `sombraFiel`) que solo usa Fundación.
+- Seguridad: sin claves ni datos personales; el servidor valida cada acción y la mano de un jugador no viaja a los demás (prueba en `test_fundacion.js`).
+- La economía se calibró solo con bots; falta jugarla con personas (reloj de 45 s, ritmo de los pedidos).
 
-**Cómo se probó:** `npm test` (17 suites, «fallos: 0»), partidas completas de bots y de un humano simple, calibración con 100 partidas por configuración, y capturas del cliente en escritorio y celular horizontal.
+## Cómo se probó
+`npm test` (17 suites, «fallos: 0»), partidas completas de bots y de un humano simple, una partida entre dos clientes distintos (la barra de tiempo corre igual para quien espera y las manos no se filtran), calibración con 100 partidas por configuración (`docs/fundacion_v2_calibracion.md`) y capturas del cliente en escritorio y celular horizontal.
 
-**No verificado:** el celular horizontal en un teléfono real, la caída de los dados 3D en celular y el reloj con personas.
+## No verificado
+El celular horizontal en un teléfono real, la caída de los dados 3D en celular y el reloj con personas.
+
+Documentación: `docs/ESTADO.md`, `docs/cambios/2026-11-14-fundacion-v2.md`, `docs/decisiones/`, `docs/trazabilidad_fundacion_v2.md`.
