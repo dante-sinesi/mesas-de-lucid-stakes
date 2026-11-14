@@ -194,7 +194,7 @@ const D3 = (() => {
     // `lienzo`: el canvas; `contenedor`: de quien toma el ancho; opciones: { maxAlto }
     constructor(lienzo, contenedor, opciones = {}) {
       this.lienzo = lienzo; this.contenedor = contenedor; this.ctx = lienzo.getContext('2d');
-      this.maxAlto = opciones.maxAlto || 9999; this.forzarFila = !!opciones.forzarFila; this.espaciado = opciones.espaciado; this.forzarGrilla = !!opciones.forzarGrilla; this.sinMesa = !!opciones.sinMesa; this.velocidad = opciones.velocidad; this.sombra = opciones.sombra !== false; this.dprMax = opciones.dprMax; this.escalaMax = opciones.escalaMax;   // (opciones de Fundación: en fila o en dos filas de 3, sin la mesa de fieltro)
+      this.maxAlto = opciones.maxAlto || 9999; this.forzarFila = !!opciones.forzarFila; this.espaciado = opciones.espaciado; this.forzarGrilla = !!opciones.forzarGrilla; this.sinMesa = !!opciones.sinMesa; this.velocidad = opciones.velocidad; this.sombra = opciones.sombra !== false; this.dprMax = opciones.dprMax; this.escalaMax = opciones.escalaMax; this.sinValores = !!opciones.sinValores;   // (opciones de Fundación: en fila o en dos filas de 3, sin la mesa de fieltro)
       this.mesaCaras = carasDe(voxelesMesa(), TABLE_VOX, [-TABLE_X / 2, 0, -TABLE_Z / 2]);
       this.modelos = {};
       this.dados = [];          // por lugar: { tipo, valor, pos, R, squash, apartado, seleccionado, brillo, anim }
@@ -338,7 +338,7 @@ const D3 = (() => {
       const px = Math.max(11, Math.round(this.sc * 0.24));
       ctx.font = '700 ' + px + 'px "Lucid Stakes", monospace'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.lineWidth = 3; ctx.lineJoin = 'round';
       this.dados.forEach((d, i) => {
-        if (d.anim || !this.pantalla[i] || !d.mostrarValor || (ESTILOS[d.tipo] && ESTILOS[d.tipo].caras)) return;
+        if (d.anim || this.sinValores || !this.pantalla[i] || !d.mostrarValor || (ESTILOS[d.tipo] && ESTILOS[d.tipo].caras)) return;
         const c = this.pantalla[i], y = c.y + this.sc * 0.66;
         ctx.strokeStyle = 'rgba(8,4,16,.85)'; ctx.strokeText(String(d.valor), c.x, y);
         ctx.fillStyle = d.apartado ? 'rgb(140,150,140)' : 'rgb(255,243,196)'; ctx.fillText(String(d.valor), c.x, y);

@@ -13,7 +13,7 @@ const Bots = require('../bots');
 const { TIEMPO_VALIDO, escalarTiempos } = require('../tiempo');
 
 const FASE = { ESPERA: 'espera', INICIAL: 'inicial', TURNO: 'turno', FIN: 'fin' };
-const TIEMPOS = { tirada: 8500, turno: 45000, inicial: 30000, fin: 1600, ausente: 2500, ausencia: 180000, reemplazo: 30000 };
+const TIEMPOS = { tirada: 8500, turno: 45000, inicial: 30000, bot: 14000, botIni: 6000, fin: 1600, ausente: 2500, ausencia: 180000, reemplazo: 30000 };
 const CLAVES_TIEMPO = ['turno', 'inicial'];   // los plazos que cambian con el tiempo de la sala
 const MAX_APODO = 16;
 const MAX_ASIENTOS = 8;
@@ -178,7 +178,7 @@ class MesaFundacion {
     this.orden = R.mezclar(this.jugadores.map(j => j.asiento), R.rng(this.semilla + 1));
     this.inicial = { plan: R.ordenInicial(this.orden.length).map(i => this.orden[i]), idx: 0, sub: 'pueblo', ultimoPueblo: null };
     this.fase = FASE.INICIAL;
-    this._fijarLimite();
+    this._fijarLimite('inicial');
   }
 
   // ---------- los plazos ----------
@@ -189,7 +189,11 @@ class MesaFundacion {
     return null;
   }
   // El reloj: uno por cada colocación inicial y uno por turno (corre desde que termina la tirada y vale para descartar, construir y entregar).
-  _fijarLimite(clave) { this.limite = this.ahora() + (this.tiempos[clave] || this.tiempos.turno); this.botEn = null; }
+  // (a quien juega un bot se le muestra un reloj corto, que es lo que tarda un bot: así la barra de todos los turnos se ve correr)
+  _fijarLimite(clave) {
+    const j = this._actor(); if (j && this._juegaElBot(j)) clave = clave === 'inicial' ? 'botIni' : 'bot';
+    this.limiteDur = this.tiempos[clave] || this.tiempos.turno; this.limite = this.ahora() + this.limiteDur; this.botEn = null;
+  }
   _juegaElBot(j) { return j.bot || j.expulsado || (!j.conectado && this.modo === 'multi'); }
   // Cuánto espera un bot entre jugadas: lo justo para que los demás vean lo que hace.
   _demoraBot() { return this.fase === FASE.INICIAL ? 1800 : 2200; }
@@ -268,7 +272,7 @@ class MesaFundacion {
       ini.sub = 'pueblo'; ini.ultimoPueblo = null; ini.idx++;
       if (ini.idx >= ini.plan.length) { this._empezarTurnos(); return { ok: true }; }
     }
-    this._fijarLimite();
+    this._fijarLimite('inicial');
     return { ok: true };
   }
   _empezarTurnos() {
@@ -478,7 +482,7 @@ class MesaFundacion {
     }
     const out = {
       juego: 'fundacion', sinTiempo: !!this.sinTiempo, pausa: this.pausa !== null, tiempos: { turno: this.tiempos.turno, inicial: this.tiempos.inicial, tirada: this.tiempos.tirada }, version: this.version, ahora: this.ahora(),
-      modo: this.modo, fase: this.fase, limite: this.limite, meta: this.meta, ronda: this.ronda, finDeVuelta: this.finDeVuelta, llegoMeta: this.llegoMeta, maxAsientos: this.maxAsientos, tiempoModo: this.tiempoModo,
+      modo: this.modo, fase: this.fase, limite: this.limite, limiteDur: this.limiteDur || null, meta: this.meta, ronda: this.ronda, finDeVuelta: this.finDeVuelta, llegoMeta: this.llegoMeta, maxAsientos: this.maxAsientos, tiempoModo: this.tiempoModo,
       turnoDe: this.fase === FASE.TURNO && this.t ? this.t.asiento : (this.fase === FASE.INICIAL && this.inicial ? this._actor().asiento : null),
       yo: yo ? yo.asiento : null, mano: yo ? yo.mano.slice() : null, manoMax: R.MANO_MAX, reemplazado: !!(yo && yo.reemplazado), anfitrion: this.anfitrion() ? this.anfitrion().asiento : null,
       jugadores: this.jugadores.map(j => { const c = this.tab ? R.piezas(this.tab, j.asiento) : { pueblo: 0, ciudad: 0, camino: 0, caballero: 0 }; return { asiento: j.asiento, apodo: j.apodo, conectado: j.conectado, bot: !!j.bot, expulsado: !!j.expulsado, puntos: this.tab ? this._puntosDe(j.asiento) : 0, misiones: j.pvExtra || 0, tarjetas: R.totalMano(j.mano || R.manoVacia()), pueblos: c.pueblo, ciudades: c.ciudad, caminos: c.camino, caballeros: c.caballero, quedan: this.tab ? R.quedan(this.tab, j.asiento) : null, turnos: j.turnos }; }),

@@ -22,7 +22,7 @@ const fuEl = (t, c, x) => { const n = document.createElement(t); if (c) n.classN
 function abrirFU() {
   if (!FU.escena) {
     // los dos dados de número, en 3D como los del diez mil (misma caída)
-    FU.escena = new D3.Escena($('fuDadosLienzo'), $('fuDados'), { maxAlto: 260, forzarFila: true, espaciado: 1.7, sinMesa: true, velocidad: 1.15, dprMax: 1.5, escalaMax: 170 });   // (sin mesa, con la sombra de cada dado, y una caída más pausada que la del diez mil)
+    FU.escena = new D3.Escena($('fuDadosLienzo'), $('fuDados'), { maxAlto: 260, forzarFila: true, espaciado: 1.7, sinMesa: true, velocidad: 1.15, dprMax: 1.5, escalaMax: 120, sinValores: true });   // (sin mesa, con la sombra de cada dado, y una caída más pausada que la del diez mil)
     FU.escena.configurar(['normal', 'normal']);
     FU.escena.alAterrizar = () => { if (!document.hidden) Sonido.play('ficha'); };
     FU.escena.alTerminar = () => { if (FU.tirada) aterrizoFU(FU.tirada.key); };
@@ -230,7 +230,7 @@ function iniciarTiradaFU(e, key) {
   const esc = FU.escena, vals = [t.num.a, t.num.b];
   setTimeout(() => {
     if (!FU.tirada || FU.tirada.key !== key) return;
-    $('fuDados').hidden = false; esc.maxAlto = Math.round(Math.min($('fu').clientHeight * 0.6, 430)); esc.ajustar(); esc.mostrar([1, 1]); esc.tirar([0, 1], vals, e.ronda * 31 + t.num.suma);
+    $('fuDados').hidden = false; esc.maxAlto = Math.round(Math.min($('fu').clientHeight * 0.5, 340)); esc.ajustar(); esc.mostrar([1, 1]); esc.tirar([0, 1], vals, e.ronda * 31 + t.num.suma);
     requestAnimationFrame(() => { const r = $('fuDados').getBoundingClientRect(), s0 = $('fu').getBoundingClientRect(); $('fuSale').style.top = Math.round(r.bottom - s0.top + 8) + 'px'; });   // («Sale N» va justo debajo de la mesa)
   }, 250);
   setTimeout(() => aterrizoFU(key), 5200);   // (por si la animación no avisa)
@@ -579,7 +579,7 @@ function pintarDadosFU(e, esc) {
   const caja = $('fuDados'), t = e.turno;
   const ver = esc === 'tirada' && !!FU.tirada && FU.fase <= 1 && !sinMovimiento();
   caja.hidden = !ver; $('fuSale').hidden = !(ver && FU.fase === 1);
-  if (ver) $('fuSale').textContent = 'Sale ' + t.num.suma;
+  if (ver) { const s = $('fuSale'); s.textContent = ''; s.append(fuEl('div', 'fuSaleN', 'Sale ' + t.num.suma), fuEl('div', 'fuSaleD', t.num.a + ' + ' + t.num.b)); }
 }
 // Las ganancias de la tirada de todos, al frente.
 function pintarGananciasFU(e, esc) {
@@ -612,9 +612,9 @@ function relojFU(e) {
   b.hidden = false; b.classList.toggle('quieta', !conReloj);   // (la barra no aparece y desaparece: cuando no hay tiempo que contar queda gris)
   if (!conReloj) { b.firstChild.style.width = '0%'; b.lastChild.textContent = ''; b.classList.remove('poco'); return; }
   const de = e.fase === 'inicial' && e.inicial ? e.inicial.de : (t ? t.de : null), mio = de === e.yo;
-  const total = e.fase === 'inicial' ? e.tiempos.inicial : e.tiempos.turno, restante = e.limite ? e.limite - ahora() : total;
+  const total = e.limiteDur || (e.fase === 'inicial' ? e.tiempos.inicial : e.tiempos.turno), restante = e.limite ? e.limite - ahora() : total;
   const frac = e.sinTiempo || !e.limite ? 1 : Math.max(0, Math.min(1, restante / total));
-  b.firstChild.style.width = Math.round(frac * 100) + '%'; b.classList.toggle('poco', !e.sinTiempo && restante < 8000);
+  b.firstChild.style.width = Math.round(frac * 100) + '%'; b.classList.toggle('poco', !e.sinTiempo && restante < Math.max(2500, total * 0.2));
   const s = Math.max(0, Math.ceil(restante / 1000));
   b.lastChild.textContent = (mio ? 'Tu turno' : 'Turno de ' + (de === null ? '—' : fuNombreDe(e, de))) + (e.sinTiempo || !e.limite ? '' : ' · ' + Math.floor(s / 60) + ':' + String(s % 60).padStart(2, '0'));
 }
