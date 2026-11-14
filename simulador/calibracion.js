@@ -10,11 +10,9 @@ const M = require(path.join(__dirname, '..', 'servidor', 'fundacion', 'misiones.
 const PARTIDAS = Number(process.argv[2]) || 40, META = Number(process.argv[3]) || 10, MINERAL = Number(process.argv[4]) || 3, PEDIDO_MIN = process.argv[5] === undefined ? R.CFG.pedidoMin : Number(process.argv[5]);
 const CANTIDADES = (process.argv[6] || '1,2,4,6,8').split(',').map(Number);
 R.COSTOS.ciudad = [0, 0, 0, 2, MINERAL]; R.CFG.pedidoMin = PEDIDO_MIN;
-// Las variantes a medir (se suman con +): colinas (más ladrillo y bosque en la isla), camino (cuesta solo madera), cualquiera (pedido de 3 tarjetas cualesquiera), mano (el tope de la mano sube con la mesa).
+// Las variantes a medir (se suman con +): colinas (más ladrillo y bosque en la isla) y mano (el tope de la mano sube con la mesa). El camino de solo madera y el pedido de 3 tarjetas cualesquiera ya son la regla.
 const VARIANTES = (process.argv[7] || 'base').split('+');
 if (VARIANTES.includes('colinas')) { R.TIPOS_19.colinas = 4; R.TIPOS_19.campos = 3; R.TIPOS_37.colinas = 8; R.TIPOS_37.campos = 7; }
-if (VARIANTES.includes('camino')) R.COSTOS.camino = [1, 0, 0, 0, 0];
-if (VARIANTES.includes('cualquiera')) M.IDS.B.push('cualquiera3');
 if (VARIANTES.includes('mano')) R.CFG.manoPorJugadorExtra = 1;
 
 function jugar(jugadores, semilla) {

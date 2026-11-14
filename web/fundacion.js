@@ -8,10 +8,10 @@ const FU = { e: null, escena: null, sel: null, zona: null, panel: null, selDesc:
 const FU_TIPO_RECURSO = { bosque: 0, colinas: 1, pastos: 2, campos: 3, montana: 4 };
 const FU_NOMBRE_REC = ['madera', 'ladrillo', 'lana', 'trigo', 'mineral'];
 const FU_NOMBRE_ED = { camino: 'Camino', pueblo: 'Pueblo', ciudad: 'Ciudad', caballero: 'Caballero' };
-const FU_COSTOS = { camino: [1, 1, 0, 0, 0], pueblo: [1, 1, 1, 1, 0], ciudad: [0, 0, 0, 2, 3], caballero: [0, 0, 1, 1, 1] };   // (los mismos del servidor: reglas.js)
+const FU_COSTOS = { camino: [1, 0, 0, 0, 0], pueblo: [1, 1, 1, 1, 0], ciudad: [0, 0, 0, 2, 3], caballero: [0, 0, 1, 1, 1] };   // (los mismos del servidor: reglas.js)
 const FU_MISION = {
   red5: '5 caminos conectados', ciudades2: '2 ciudades', pueblos4: '4 pueblos o ciudades', caballeros3: 'Los 3 caballeros',
-  par: 'Entrega 2 madera + 2 ladrillo', pareja: 'Entrega 2 lana + 2 trigo', mineral3: 'Entrega 3 mineral', surtido: 'Entrega una de cada recurso', iguales3: 'Entrega 3 tarjetas iguales',
+  par: 'Entrega 2 madera + 2 ladrillo', pareja: 'Entrega 2 lana + 2 trigo', mineral3: 'Entrega 3 mineral', surtido: 'Entrega una de cada recurso', iguales3: 'Entrega 3 tarjetas iguales', cualquiera3: 'Entrega 3 tarjetas cualesquiera',
 };
 const fuColor = asiento => Mesas.COLORES[asiento % Mesas.COLORES.length];
 const fuRgb = c => 'rgb(' + c.map(v => Math.round(v * 255)).join(',') + ')';
@@ -170,10 +170,18 @@ function costoFU(costo, mano) {
   costo.forEach((n, r) => { for (let i = 0; i < n; i++) { const c = cartaFU(r, 'chica' + (mano && i >= mano[r] ? ' falta' : '')); f.append(c); } });
   return f;
 }
+// Las tres tarjetas de un pedido «cualesquiera»: sin color, porque vale cualquiera.
+function costoCualquieraFU(mano) { const f = fuEl('div', 'fuCosto'), tiene = mano ? mano.reduce((s, n) => s + n, 0) : 3; for (let i = 0; i < 3; i++) f.append(dorsoFU('chica' + (i >= tiene ? ' falta' : ''))); return f; }
 function costoIgualesFU(mano) { const f = fuEl('div', 'fuCosto'); let r = 0; if (mano) mano.forEach((n, i) => { if (n > mano[r]) r = i; }); for (let i = 0; i < 3; i++) f.append(cartaFU(r, 'chica' + (mano && i >= mano[r] ? ' falta' : ''))); return f; }
 // Las tarjetas que se entregarían por un pedido con esta mano (lo mismo que decide el servidor), o null.
 function entregaFU(m, mano) {
   if (m.costo) return m.costo.every((n, r) => mano[r] >= n) ? m.costo.slice() : null;
+  if (m.cualquiera) {   // las del recurso que más hay, de a una (con empate, el primero), como lo decide el servidor
+    if (mano.reduce((s, n) => s + n, 0) < m.cualquiera) return null;
+    const x = mano.slice(), q = [0, 0, 0, 0, 0];
+    for (let k = 0; k < m.cualquiera; k++) { let r = 0; x.forEach((n, i) => { if (n > x[r]) r = i; }); x[r]--; q[r]++; }
+    return q;
+  }
   let r = -1; mano.forEach((n, i) => { if (n >= m.iguales && (r < 0 || n > mano[r])) r = i; });
   if (r < 0) return null; const q = [0, 0, 0, 0, 0]; q[r] = m.iguales; return q;
 }
@@ -571,11 +579,12 @@ function pedidosVeloFU(e, centro) {
     const c = fuEl('div', 'fuOp ' + (ok ? 'si' : (B ? 'no' : 'info')));
     if (FU_ICONO_MISION[m.id]) c.append(piezaFU(FU_ICONO_MISION[m.id], e.yo, 3));
     c.append(fuEl('div', 'fuNm', FU_MISION[m.id] || m.id));
-    if (B) c.append(m.costo ? costoFU(m.costo, mano) : costoIgualesFU(mano));
+    if (B) c.append(m.costo ? costoFU(m.costo, mano) : (m.cualquiera ? costoCualquieraFU(mano) : costoIgualesFU(mano)));
     const falt = []; if (B && m.costo) m.costo.forEach((n, r) => { if (mano[r] < n) falt.push((n - mano[r]) + ' ' + FU_NOMBRE_REC[r]); });
+    const mensajeNo = m.costo ? 'Te falta ' + falt.join(' y ') : (m.cualquiera ? 'Necesitas 3 tarjetas' : 'Necesitas 3 tarjetas iguales');
     c.append(fuEl('div', 'fuSub', B ? '+1 PV · ' + (m.quedan === 1 ? 'vence en 1 turno' : 'vence en ' + m.quedan + ' turnos') : '+1 PV · no se entrega: se cumple construyendo'));
-    if (B) c.append(fuEl('div', ok ? 'fuOk' : 'fuFalta', ok ? 'Puedes entregarlo' : (m.costo ? 'Te falta ' + falt.join(' y ') : 'Necesitas 3 tarjetas iguales')));
-    if (B) c.onclick = () => { Sonido.play('clic'); if (ok) { FU.panel = { entrega: m.id }; repintarFU(); } else avisoFU(m.costo ? 'Te falta ' + falt.join(' y ') : 'Necesitas 3 tarjetas iguales'); };
+    if (B) c.append(fuEl('div', ok ? 'fuOk' : 'fuFalta', ok ? 'Puedes entregarlo' : mensajeNo));
+    if (B) c.onclick = () => { Sonido.play('clic'); if (ok) { FU.panel = { entrega: m.id }; repintarFU(); } else avisoFU(mensajeNo); };
     ops.append(c);
   });
   centro.append(fuEl('div', 'fuTitulo', 'Misiones y pedidos'), ops, botonFU('Atrás', () => { FU.panel = null; repintarFU(); }));

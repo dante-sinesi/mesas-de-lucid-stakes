@@ -156,7 +156,7 @@ const Ayuda = (() => {
       }, pie: 'Solo tú ves cuáles son. No hay intercambio.' },
     { titulo: 'CONSTRUIR', hacer: () => {
         const w = el('div', 'ayApila'), C = COL_FU();
-        [[FU_ARTE.caminoIcono(C), [0, 1]], [FU_ARTE.casa(C), [0, 1, 2, 3]], [FU_ARTE.ciudad(C), [3, 3, 4, 4, 4]], [FU_ARTE.caballero(C), [2, 3, 4]]].forEach(([c, costo]) => { const f = el('div', 'ayFila ayDef'); f.append(pieza(c, c.width > 12 ? 3 : 4), tarjetas(costo)); w.appendChild(f); });
+        [[FU_ARTE.caminoIcono(C), [0]], [FU_ARTE.casa(C), [0, 1, 2, 3]], [FU_ARTE.ciudad(C), [3, 3, 4, 4, 4]], [FU_ARTE.caballero(C), [2, 3, 4]]].forEach(([c, costo]) => { const f = el('div', 'ayFila ayDef'); f.append(pieza(c, c.width > 12 ? 3 : 4), tarjetas(costo)); w.appendChild(f); });
         return w;
       }, pie: 'Camino, pueblo, ciudad y caballero. Haz todo lo que te alcance.' },
     { titulo: 'MISIONES Y PEDIDOS', hacer: () => {
