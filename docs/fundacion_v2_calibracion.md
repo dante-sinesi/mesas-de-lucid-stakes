@@ -49,3 +49,39 @@ Cada punto de meta suma unos 2 rondas (≈ 8 turnos) con 4 jugadores. Hoy no hay
 2. Medir variantes de pedidos (menos puntos o más caros) y de misiones.
 3. Decidir con Dante: meta, duración objetivo, si el tope de 6 se mantiene con 8 jugadores y si 3 + 2 se mantiene.
 4. Confirmar el tiempo por turno con partidas de personas (cuando el cliente nuevo esté listo).
+
+## Segunda medición (100 partidas por configuración, bot con colocación asistida)
+
+Con `node simulador/calibracion.js 100 <meta> 3 4 4` (y 60 partidas con 2 y 8 jugadores). Ahora el simulador también dice **por qué** un jugador se queda sin hacer nada y **cuántos puntos tiene el que va primero en cada ronda**.
+
+### Duración (ciudad 3 mineral + 2 trigo)
+| Configuración | Rondas (promedio) | Turnos de la partida |
+|---|---|---|
+| 4 jugadores, meta 8 | 14,8 | 55 |
+| 4 jugadores, meta 10 | 19,5 | 74 |
+| 4 jugadores, meta 12 | 22,8 | 87 |
+| 2 jugadores, meta 10 | 30,5 (p90 48; 1 de 60 no terminó) | 59 |
+| 8 jugadores, meta 10 | 11,4 | 83 |
+
+### Dónde se traban las partidas: la curva de puntos
+Puntos del que va primero, con 4 jugadores y meta 10:
+
+| Ronda | 3 | 6 | 9 | 12 | 15 | 18 | 21 | 24 |
+|---|---|---|---|---|---|---|---|---|
+| Puntos | 2,9 | 4,2 | 5,6 | 7,1 | 8,0 | 8,4 | 8,8 | 9,3 |
+
+La partida avanza bien hasta los 7 u 8 puntos (unos 0,9 puntos por ronda) y **después se arrastra**: de 8 a 10 puntos pasan 8 rondas o más. Con meta 8 el arrastre casi no se nota (se llega en 15 rondas); con 12 se alarga hasta casi las 23 rondas. **El final se traba a partir de los 7 u 8 puntos.**
+
+### Por qué no se hace nada en un turno (4 jugadores)
+- **87 %: falta algún recurso** (92 % con meta 8). El que más falta para un pueblo es el **ladrillo**, y después la madera (con 100 partidas: ladrillo 2498, madera 2001, trigo 1860, lana 1630).
+- 10 %: tiene lo que cuesta pero **no hay lugar** para ponerlo (sube a 17 % con 8 jugadores, porque la isla se llena).
+- 3 %: no tiene tarjetas.
+- En total, **el 60 % de los turnos no construye ni entrega nada** con 4 jugadores (72 % con 2; 37 % con 8).
+
+### Mano y descartes
+Con 8 jugadores la mano máxima al empezar el turno es 17 (p90 22) y se descartan unas 4 tarjetas por turno: gran parte de lo que se cobra se tira.
+
+### Lectura (a decidir con Dante)
+1. **La meta de 8 o 10 puntos:** hoy el tramo final (7 a 10 puntos) es el más lento. Con meta 8 la partida termina antes del arrastre. Si se quiere mantener 10, hay que arreglar la economía del final.
+2. **El problema de fondo es el reparto**, y en especial el **ladrillo y la madera**, que piden camino y pueblo. La isla de 19 hexágonos tiene solo 3 colinas (ladrillo).
+3. Palancas posibles (todas se pueden medir con el simulador): más colinas y bosques en la isla; que el camino cueste menos; pedidos con «3 tarjetas cualesquiera»; dar más lugares de expansión; un tope de mano que crezca con la cantidad de jugadores.
