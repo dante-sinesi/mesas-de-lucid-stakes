@@ -1,5 +1,5 @@
 'use strict';
-// Las misiones y los pedidos de Fundación (versión 2). Un solo grupo compartido a la vista de todos. Reglas: docs/catan_dados.md ("Misiones y pedidos").
+// Las misiones y los pedidos de Fundación (versión 2). Un solo grupo compartido a la vista de todos. Reglas: docs/fundacion_reglas.md ("Misiones y pedidos").
 //   - Misiones de condición (A): se cumplen haciendo algo en el mapa; no vencen; se las lleva quien las cumple primero.
 //   - Pedidos (B): se cumplen entregando tarjetas; se los lleva el primero que los entrega en su turno; vencen a los 2 turnos de cada jugador (cuenta propia por pedido).
 // Lo que se lleva alguien o vence se repone al terminar el turno de quien lo cumplió o entregó. Todo es puro y el estado es un objeto simple (se guarda con la sala).

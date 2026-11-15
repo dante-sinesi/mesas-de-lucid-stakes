@@ -1,6 +1,6 @@
 # Fundación v2: primera calibración con bots
 
-Estado: **primeras mediciones, con un bot simple y muestras chicas (20 a 40 partidas por configuración).** Sirven para ver órdenes de magnitud y detectar problemas, no para cerrar números. La meta y los demás valores por calibrar (`catan_dados.md`, «Por calibrar») se cierran con el bot mejorado y con partidas de personas. Se mide con `node simulador/calibracion.js [partidas] [meta] [mineral de la ciudad] [pedidoMin] [jugadores]`.
+Estado: **primeras mediciones, con un bot simple y muestras chicas (20 a 40 partidas por configuración).** Sirven para ver órdenes de magnitud y detectar problemas, no para cerrar números. La meta y los demás valores por calibrar (`fundacion_reglas.md`, «Por calibrar») se cierran con el bot mejorado y con partidas de personas. Se mide con `node simulador/calibracion.js [partidas] [meta] [mineral de la ciudad] [pedidoMin] [jugadores]`.
 
 El bot de esta calibración: coloca sus pueblos buscando recursos que todavía no cobra, construye lo mejor que alcance (ciudad, pueblo, pedido, caballero, camino), entrega pedidos cuando puede y descarta primero lo que le sobra del recurso más abundante. No planifica expansión ni ahorra para una ciudad.
 

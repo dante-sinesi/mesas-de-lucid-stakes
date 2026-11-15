@@ -1,6 +1,6 @@
 # Fundación v2: índice de requisitos
 
-Los requisitos de Fundación v2 viven **uno por archivo** en `docs/requisitos/` (reglas del juego = negocio `RN`, pantallas = usuario `RU`, servidor = funcional `RF`, calidad = no funcional `RNF`). Esta tabla es solo el índice y la equivalencia con los identificadores del primer borrador (FU2-…). Reglas: `catan_dados.md`; flujo: `catan_flujo.md`; pantallas: `fundacion_v2_pantallas.md`; plan: `fundacion_v2_plan.md`; trazabilidad: `trazabilidad_fundacion_v2.md`.
+Los requisitos de Fundación v2 viven **uno por archivo** en `docs/requisitos/` (reglas del juego = negocio `RN`, pantallas = usuario `RU`, servidor = funcional `RF`, calidad = no funcional `RNF`). Esta tabla es solo el índice y la equivalencia con los identificadores del primer borrador (FU2-…). Reglas: `fundacion_reglas.md`; flujo: `fundacion_flujo.md`; pantallas: `fundacion_v2_pantallas.md`; plan: `fundacion_v2_plan.md`; trazabilidad: `trazabilidad_fundacion_v2.md`.
 
 | Antes | Ahora | Requisito | Verificación |
 |---|---|---|---|

@@ -1,6 +1,6 @@
 'use strict';
-// Las reglas de Fundación (el Catan de dados, versión 2): el mapa de hexágonos, las tarjetas de recursos, los costos, los lugares válidos, la cobranza de todos, el bandido, los puntos y las carreras.
-// Todo es puro (sin red ni reloj): la mesa (mesa_fundacion.js) las usa y las pruebas las miran de a una. Reglas del juego: docs/catan_dados.md. Las misiones y los pedidos están en misiones.js.
+// Las reglas de Fundación (el juego de dados de colonización, versión 2): el mapa de hexágonos, las tarjetas de recursos, los costos, los lugares válidos, la cobranza de todos, el bandido, los puntos y las carreras.
+// Todo es puro (sin red ni reloj): la mesa (mesa_fundacion.js) las usa y las pruebas las miran de a una. Reglas del juego: docs/fundacion_reglas.md. Las misiones y los pedidos están en misiones.js.
 //
 // El mapa usa coordenadas enteras. Un hexágono (q, r) tiene el centro en a = 2q + r (a por √3) e y = 3r; sus esquinas están a ±1 en a y a -2, -1, 1, 2 en y.
 // Así cada vértice se identifica por dos enteros y nunca hay decimales para comparar (el cliente multiplica por el tamaño que quiera).

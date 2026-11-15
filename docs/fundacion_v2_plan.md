@@ -1,6 +1,6 @@
 # Fundación v2: plan de programación
 
-Estado: **plan propuesto, nada programado.** El código solo empieza cuando Dante lo autorice de forma explícita. Reglas: `catan_dados.md`. Flujo: `catan_flujo.md`. Pantallas: `fundacion_v2_pantallas.md`. Requisitos: `fundacion_v2_requisitos.md`. Origen: `brainstorm_fundacion_v2.md`. La versión 1 (`fundacion_plan.md`) quedó implementada y se rehace.
+Estado: **plan propuesto, nada programado.** El código solo empieza cuando Dante lo autorice de forma explícita. Reglas: `fundacion_reglas.md`. Flujo: `fundacion_flujo.md`. Pantallas: `fundacion_v2_pantallas.md`. Requisitos: `fundacion_v2_requisitos.md`. Origen: `brainstorm_fundacion_v2.md`. La versión 1 (`fundacion_plan.md`) quedó implementada y se rehace.
 
 ## Cómo se trabaja (reglas de siempre)
 - Una rama por cambio (`feature/fundacion-v2`, a partir de `main`), un commit por hito, `npm test` en «fallos: 0» antes de cada commit, el service worker sube de versión con cada cambio del cliente, paquete con `node herramientas/empaquetar.js`.

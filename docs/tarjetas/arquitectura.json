@@ -1,0 +1,68 @@
+{
+ "tipo": "flujo",
+ "titulo": "Cómo se reparte el trabajo",
+ "columnas": 4,
+ "nodos": [
+  {
+   "id": "n",
+   "texto": "Navegador",
+   "col": 0,
+   "fila": 0
+  },
+  {
+   "id": "s",
+   "texto": "Servidor Node",
+   "col": 1,
+   "fila": 0
+  },
+  {
+   "id": "l",
+   "texto": "Salas",
+   "col": 2,
+   "fila": 0
+  },
+  {
+   "id": "r",
+   "texto": "Reglas de cada juego",
+   "col": 3,
+   "fila": 0
+  },
+  {
+   "id": "b",
+   "texto": "Bots",
+   "col": 3,
+   "fila": 1
+  },
+  {
+   "id": "d",
+   "texto": "Salas guardadas",
+   "col": 2,
+   "fila": 1
+  }
+ ],
+ "flechas": [
+  {
+   "de": "n",
+   "a": "s"
+  },
+  {
+   "de": "s",
+   "a": "l"
+  },
+  {
+   "de": "l",
+   "a": "r"
+  },
+  {
+   "de": "l",
+   "a": "b",
+   "estilo": "punteada"
+  },
+  {
+   "de": "l",
+   "a": "d",
+   "estilo": "punteada"
+  }
+ ],
+ "pie": "El navegador envía lo que haces; el servidor aplica las reglas, guarda las salas y devuelve el estado de la mesa."
+}

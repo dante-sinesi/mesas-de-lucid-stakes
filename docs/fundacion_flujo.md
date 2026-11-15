@@ -1,6 +1,6 @@
-# Fundación (Catan de dados): flujo de crear sala y de un turno (versión 2)
+# Fundación (juego de dados de colonización): flujo de crear sala y de un turno (versión 2)
 
-Estado: **diseño cerrado, nada programado de la versión 2.** Sigue `catan_dados.md` (reglas) y `fundacion_v2_pantallas.md` (pantallas), y reutiliza la entrada, las salas y los bots que ya existen (`entrada_y_salas`, `diseno.md`). Nombre: **Fundación** (id interno `fundacion`). La primera versión (con dados de recursos) sigue implementada en `feature/fundacion` hasta que se rehaga según `fundacion_v2_plan.md`.
+Estado: **diseño cerrado, nada programado de la versión 2.** Sigue `fundacion_reglas.md` (reglas) y `fundacion_v2_pantallas.md` (pantallas), y reutiliza la entrada, las salas y los bots que ya existen (`entrada_y_salas`, `diseno.md`). Nombre: **Fundación** (id interno `fundacion`). La primera versión (con dados de recursos) sigue implementada en `feature/fundacion` hasta que se rehaga según `fundacion_v2_plan.md`.
 
 ## 1. Cómo se llega a una partida (sin cambios)
 

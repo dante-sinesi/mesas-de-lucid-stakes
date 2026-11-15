@@ -19,43 +19,13 @@ Juegos de mesa para jugar en el navegador con amigos o contra bots, desde el cel
 |---|---|
 | **Diez mil** · dados | Tiras los dados, apartas puntos y decides si te plantas o arriesgas todo. |
 | **13 Jack** · cartas | Cada jugador tiene su propio mazo y arma manos de 21 con combos y cartas especiales. |
-| **Fundación** · mapa y tarjetas | Un Catan rápido: con cada tirada cobran todos, y se gasta lo ganado en construir o en cumplir pedidos. |
+| **Fundación** · mapa y tarjetas | Un juego de colonización rápido: con cada tirada cobran todos, y se gasta lo ganado en construir o en cumplir pedidos. |
 
 ## Cómo funciona
 
-<!-- diagrama: docs/diagramas/arquitectura.md#1 -->
-### Cómo se reparte el trabajo
+<p align="center"><img src="docs/img/arquitectura.svg" alt="Cómo se reparte el trabajo" width="760"><br><sub>El navegador envía lo que haces; el servidor aplica las reglas, guarda las salas y devuelve el estado de la mesa.</sub></p>
 
-```mermaid
-flowchart LR
-    N["Navegador<br/>(web/)"] -->|"acciones"| S["Servidor Node<br/>(server.js)"]
-    S -->|"estado de la mesa"| N
-    S --> L["Salas<br/>(servidor/salas.js)"]
-    L --> M["Reglas y mesas<br/>de cada juego"]
-    L --> B["Bots"]
-    L --> D[("datos/salas.json")]
-```
-<!-- /diagrama -->
-
-El navegador manda lo que haces y recibe el estado de la mesa; el servidor guarda las salas y aplica las reglas.
-
-<!-- diagrama: docs/diagramas/turno-fundacion.md#1 -->
-### Un turno de Fundación
-
-```mermaid
-flowchart TD
-    A["Empieza el turno"] --> B["Tiradas que le tocan<br/>(0, 1 o más)"]
-    B --> C["Cobran todos<br/>los que tengan edificios"]
-    C --> D{"Más de 6<br/>tarjetas?"}
-    D -->|"Sí"| E["Descarta hasta 6"]
-    D -->|"No"| F["Elige: construir,<br/>entregar o pasar"]
-    E --> F
-    F -->|"Una acción"| G["Pasa el turno"]
-    F -->|"Pasar"| G
-```
-<!-- /diagrama -->
-
-Cada turno de Fundación: las tiradas, el cobro, el descarte si hace falta y una sola acción.
+<p align="center"><img src="docs/img/turno.svg" alt="Un turno de Fundación" width="760"><br><sub>Cada turno de Fundación: tiradas, cobro de todos, descarte si hace falta y una sola acción.</sub></p>
 
 Así se ven las mesas y los tres juegos (Fundación, a mitad de partida):
 
@@ -78,7 +48,7 @@ Así se ven las mesas y los tres juegos (Fundación, a mitad de partida):
 - Índice de la documentación: [docs/INDEX.md](docs/INDEX.md)
 - Estado actual: [docs/ESTADO.md](docs/ESTADO.md)
 - Cómo está hecho el proyecto hoy: [docs/diseno.md](docs/diseno.md)
-- Reglas y pantallas de Fundación: [reglas](docs/catan_dados.md), [flujo](docs/catan_flujo.md) y [pantallas](docs/fundacion_v2_pantallas.md)
+- Reglas y pantallas de Fundación: [reglas](docs/fundacion_reglas.md), [flujo](docs/fundacion_flujo.md) y [pantallas](docs/fundacion_v2_pantallas.md)
 - Duración y balance medidos con bots: [docs/fundacion_v2_calibracion.md](docs/fundacion_v2_calibracion.md)
 - Principios para diseñar juegos nuevos: [docs/principios_diseno.md](docs/principios_diseno.md)
 
@@ -94,6 +64,7 @@ Así se ven las mesas y los tres juegos (Fundación, a mitad de partida):
 server.js          Arranque HTTP: sirve web/ y enruta /api/*
 servidor/          Salas, reglas y máquinas de estado de cada juego, y los bots
 web/               Cliente: pantallas, dibujo en canvas, dados 3D, sonido y service worker
+datos/             Salas guardadas, se crea al jugar (no se versiona)
 simulador/         Partidas solo de bots para medir duración y balance
 pruebas/           Suites de pruebas
 herramientas/      Scripts para empaquetar el sitio y generar los glifos

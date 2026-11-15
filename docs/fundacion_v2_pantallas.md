@@ -1,6 +1,6 @@
 # Fundación v2: pantallas y HUD
 
-Estado: **diseño aprobado por Dante, nada programado.** Reglas en `catan_dados.md`, flujo en `catan_flujo.md`, requisitos en `fundacion_v2_requisitos.md`.
+Estado: **diseño aprobado por Dante, nada programado.** Reglas en `fundacion_reglas.md`, flujo en `fundacion_flujo.md`, requisitos en `fundacion_v2_requisitos.md`.
 
 Las maquetas navegables están en `docs/diseno_hud_v2/`: abrir `index.html` (selector **Celular horizontal / Escritorio** y un botón por escena; también se cambia con las flechas ← y →). `hud_escenas.html` es la página de las escenas y usa `web/dados3d.js` de este repositorio para los dados reales. Son bosquejos de diseño: **no son el código del juego**, y los dibujos de las tarjetas son provisorios.
 
