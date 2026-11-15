@@ -1,67 +1,120 @@
 # Mesas de Lucid Stakes
 
-Mesas de juego multijugador en tiempo real, para jugar en el navegador (celular o escritorio) con amigos o contra bots. Tres juegos propios, todo con arte en píxeles dibujado por código, dados 3D y sonido sintetizado: sin imágenes ni librerías externas.
+Juegos de mesa para jugar en el navegador con amigos o contra bots, desde el celular o la computadora. No hay nada que instalar: abres el enlace y juegas.
 
 [![Ver el trailer](docs/media/portada.jpg)](docs/media/trailer.mp4)
 
 **🎲 [Jugar ahora: mesas.dsinesi.com](https://mesas.dsinesi.com)** · **▶ [Ver el trailer (1 minuto)](docs/media/trailer.mp4)**
 
+## Qué te da
+
+- **Tres juegos propios**, para pasar un rato corto o una partida larga.
+- **Partidas con amigos:** creas una sala, compartes el código de 4 letras y juegan hasta 8.
+- **Partidas solo:** los bots llenan los lugares vacíos y reemplazan a quien se va.
+- **Celular y computadora:** el mismo juego en las dos. Si te desconectas, vuelves a la partida donde estabas.
+
 ## Los juegos
 
 | | |
 |---|---|
-| **Diez mil** · dados | Tiras, apartas puntos y decides si te plantas o arriesgas todo. Dados 3D, objetos, tienda de mejoras y modos con amigos, escalera y carrera. |
-| **13 Jack** · cartas | Cada jugador tiene su propio mazo de 13 cartas y juega manos de 21 con patrones, combos y 19 cartas especiales. |
-| **Fundación** · mapa + tarjetas | Un Catan rápido para 1 a 8 jugadores: con cada tirada de dos dados cobran todos las tarjetas de sus edificios (máximo 6 en la mano, privadas), y las gastan en caminos, pueblos, ciudades y caballeros o en pedidos y misiones, mientras el bandido se mueve solo. Pantalla horizontal. |
+| **Diez mil** · dados | Tiras los dados, apartas puntos y decides si te plantas o arriesgas todo. |
+| **13 Jack** · cartas | Cada jugador tiene su propio mazo y arma manos de 21 con combos y cartas especiales. |
+| **Fundación** · mapa y tarjetas | Un Catan rápido: con cada tirada cobran todos, y se gasta lo ganado en construir o en cumplir pedidos. |
 
-## Capturas
+## Cómo funciona
+
+<!-- diagrama: docs/diagramas/arquitectura.md#1 -->
+### Cómo se reparte el trabajo
+
+```mermaid
+flowchart LR
+    N["Navegador<br/>(web/)"] -->|"acciones"| S["Servidor Node<br/>(server.js)"]
+    S -->|"estado de la mesa"| N
+    S --> L["Salas<br/>(servidor/salas.js)"]
+    L --> M["Reglas y mesas<br/>de cada juego"]
+    L --> B["Bots"]
+    L --> D[("datos/salas.json")]
+```
+<!-- /diagrama -->
+
+El navegador manda lo que haces y recibe el estado de la mesa; el servidor guarda las salas y aplica las reglas.
+
+<!-- diagrama: docs/diagramas/turno-fundacion.md#1 -->
+### Un turno de Fundación
+
+```mermaid
+flowchart TD
+    A["Empieza el turno"] --> B["Tiradas que le tocan<br/>(0, 1 o más)"]
+    B --> C["Cobran todos<br/>los que tengan edificios"]
+    C --> D{"Más de 6<br/>tarjetas?"}
+    D -->|"Sí"| E["Descarta hasta 6"]
+    D -->|"No"| F["Elige: construir,<br/>entregar o pasar"]
+    E --> F
+    F -->|"Una acción"| G["Pasa el turno"]
+    F -->|"Pasar"| G
+```
+<!-- /diagrama -->
+
+Cada turno de Fundación: las tiradas, el cobro, el descarte si hace falta y una sola acción.
+
+Así se ve **Fundación**: en tu turno haces una acción (construir o entregar un pedido), y la tirada de dados la ven y la cobran todos.
+
+| Tu turno (computadora) | Las ganancias de la tirada (computadora) |
+|---|---|
+| ![Turno en la computadora](docs/media/fundacion-turno.png) | ![Ganancias de la tirada en la computadora](docs/media/fundacion-tirada.png) |
+| **Tu turno (celular)** | **Las ganancias de la tirada (celular)** |
+| ![Turno en el celular](docs/media/fundacion-celular-turno.png) | ![Ganancias de la tirada en el celular](docs/media/fundacion-celular-tirada.png) |
+
+Y estos son los otros juegos y la sala de espera:
 
 | Lobby con salas abiertas | Sala de espera con bots |
 |---|---|
 | ![Lobby](docs/media/lobby.jpg) | ![Sala de espera](docs/media/sala-de-espera.jpg) |
 | **Diez mil** | **13 Jack** |
 | ![Diez mil](docs/media/diez-mil.jpg) | ![13 Jack](docs/media/13-jack.jpg) |
-| **Fundación** (escritorio) | **Fundación** (celular, 8 jugadores) |
-| ![Fundación](docs/media/fundacion.jpg) | ![Fundación en celular](docs/media/fundacion-celular.jpg) |
 
-## Qué tiene por dentro
 
-- **Servidor autoritativo en Node.js, sin dependencias** (solo módulos nativos). Las reglas viven en el servidor; el cliente solo envía acciones y dibuja lo que recibe.
-- **Tiempo real con long-polling**: compatible con hosting compartido, sin WebSockets. Reconexión, recarga de página y reinicio del servidor sin perder la partida.
-- **Salas con amigos**: código de 4 letras, clave opcional, mapa del lobby con mesas públicas, hasta 8 jugadores, bots que llenan las plazas y que reemplazan a quien se desconecta o no juega (con aviso y botón para retomar el control).
-- **Cliente sin frameworks**: HTML + JavaScript + CSS. Todo el arte es píxel plano dibujado por código en `<canvas>`; los dados 3D son un renderizador propio de cubos; el sonido se sintetiza con WebAudio.
-- **PWA instalable** con service worker versionado.
-- **Diseño adaptable**: el mismo juego en celular y en escritorio, con una cámara de mapa con zoom y zonas táctiles para elegir en pantallas chicas.
-- **Pruebas**: 17 suites de Node (`npm test`) que cubren reglas, salas, bots, partidas completas y el service worker.
-- **Balance con datos**: simuladores de partidas solo con bots (`simulador/`) que miden la duración y dónde se traba el juego según la cantidad de jugadores; ver [`docs/fundacion_v2_calibracion.md`](docs/fundacion_v2_calibracion.md) (y, de la versión anterior, [`docs/fundacion_estadisticas.md`](docs/fundacion_estadisticas.md)) y [`docs/fundacion_costo_ciudad.md`](docs/fundacion_costo_ciudad.md).
 
-## Cómo probarlo
+## Cómo empezar
 
-```bash
-npm start          # http://localhost:3000
-npm test           # todas las pruebas (cada suite termina en "fallos: 0")
-```
+1. Instala [Node.js](https://nodejs.org) 18 o más nuevo (no hay nada más que instalar).
+2. Arranca el servidor con `npm start`.
+3. Abre `http://localhost:3000` en el navegador.
 
-Requiere Node 18 o superior. No hay nada que instalar.
+## Más información
 
-## Estructura
+- Índice de la documentación: [docs/INDEX.md](docs/INDEX.md)
+- Estado actual: [docs/ESTADO.md](docs/ESTADO.md)
+- Cómo está hecho el proyecto hoy: [docs/diseno.md](docs/diseno.md)
+- Reglas y pantallas de Fundación: [reglas](docs/catan_dados.md), [flujo](docs/catan_flujo.md) y [pantallas](docs/fundacion_v2_pantallas.md)
+- Duración y balance medidos con bots: [docs/fundacion_v2_calibracion.md](docs/fundacion_v2_calibracion.md)
+- Principios para diseñar juegos nuevos: [docs/principios_diseno.md](docs/principios_diseno.md)
+
+## Para quien colabora
+
+**Requisitos:** Node 18 o más nuevo. No tiene dependencias que instalar.
+
+**Pruebas:** `npm test` corre las 17 suites (reglas, salas, bots, partidas completas y service worker); cada una termina en «fallos: 0».
+
+**Carpetas:**
 
 ```
 server.js          Arranque HTTP: sirve web/ y enruta /api/*
 servidor/          Salas, reglas y máquinas de estado de cada juego, y los bots
-web/               Cliente: pantallas, dibujo en canvas, dados 3D, sonido, service worker
+web/               Cliente: pantallas, dibujo en canvas, dados 3D, sonido y service worker
 simulador/         Partidas solo de bots para medir duración y balance
 pruebas/           Suites de pruebas
-docs/              Diseño de los juegos, estadísticas y decisiones de balance
+herramientas/      Scripts para empaquetar el sitio y generar los glifos
+paquete/           El .zip que se sube al hosting (no se versiona)
+presentacion/      Scripts para capturar pantallas y montar el trailer (todavía sin versionar)
+prototipos/        Maquetas HTML de diseño y capturas de revisión
+respaldos/         Copias de seguridad de las salas guardadas (no se versiona)
+docs/              Documentación: requisitos, decisiones, diagramas, diseño y estado
 ```
 
-## Documentación de diseño
+**Técnica:** servidor en Node.js sin dependencias, tiempo real con long-polling (compatible con hosting compartido, sin WebSockets), cliente en HTML, JavaScript y CSS sin frameworks, arte en píxeles dibujado por código y sonido sintetizado.
 
-- [`docs/diseno.md`](docs/diseno.md): el proyecto hoy.
-- [`docs/catan_dados.md`](docs/catan_dados.md), [`docs/catan_flujo.md`](docs/catan_flujo.md) y [`docs/fundacion_v2_pantallas.md`](docs/fundacion_v2_pantallas.md): reglas, flujo y pantallas de Fundación.
-- [`docs/ESTADO.md`](docs/ESTADO.md) y [`docs/INDEX.md`](docs/INDEX.md): dónde está el proyecto y cómo navegar la documentación.
-- [`docs/fundacion_plan.md`](docs/fundacion_plan.md): plan de programación y decisiones.
-- [`docs/principios_diseno.md`](docs/principios_diseno.md): principios para diseñar juegos nuevos.
+Ramas por cambio, commits con Conventional Commits en español neutro y Pull Request. Detalle en la documentación.
 
 ## Autor
 
