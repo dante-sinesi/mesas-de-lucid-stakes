@@ -1,8 +1,8 @@
-# Fundación (Catan de dados): reglas de la versión 2
+# Fundación (juego de dados de colonización): reglas de la versión 2
 
-Estado: **diseño cerrado en el brainstorming (`brainstorm_fundacion_v2.md`), nada programado.** Reemplaza las reglas de la primera versión (con dados de recursos), que quedó implementada en `feature/fundacion` y que se rehace. Nació de *Catan: The Dice Game*, pero **no es una copia**: se inspira en el Catan de siempre y se lleva a **1 a 8 jugadores**. Los números son puntos de partida que se calibran con bots. Sigue `principios_diseno.md`; la investigación está en `investigacion_juegos.md`.
+Estado: **diseño cerrado en el brainstorming (`brainstorm_fundacion_v2.md`), nada programado.** Reemplaza las reglas de la primera versión (con dados de recursos), que quedó implementada en `feature/fundacion` y que se rehace. Nació de un juego de dados de colonización, pero **no es una copia**: se inspira en los clásicos de colonización y se lleva a **1 a 8 jugadores**. Los números son puntos de partida que se calibran con bots. Sigue `principios_diseno.md`; la investigación está en `investigacion_juegos.md`.
 
-Qué es **decidido** y qué está **por calibrar** se marca en cada sección. Los requisitos numerados están en `fundacion_v2_requisitos.md`; el flujo, en `catan_flujo.md`; las pantallas, en `fundacion_v2_pantallas.md`; el plan de programación, en `fundacion_v2_plan.md`.
+Qué es **decidido** y qué está **por calibrar** se marca en cada sección. Los requisitos numerados están en `fundacion_v2_requisitos.md`; el flujo, en `fundacion_flujo.md`; las pantallas, en `fundacion_v2_pantallas.md`; el plan de programación, en `fundacion_v2_plan.md`.
 
 ## La idea en una frase
 Una isla común de hexágonos. Cada ronda tiene **5 tiradas** de dos dados, repartidas entre los turnos; con cada una **cobran todos** los jugadores que tienen un pueblo o una ciudad junto a los hexágonos con ese número; cada recurso es una **tarjeta** que va a tu mano (máximo 6). En tu turno haces **una acción**: **gastas tarjetas** en construir un camino, pueblo, ciudad o caballero, o las **entregas** para cumplir un pedido. El primero en llegar a la meta de puntos gana.
@@ -19,10 +19,10 @@ Una isla común de hexágonos. Cada ronda tiene **5 tiradas** de dos dados, repa
 
 ## La isla
 - **19 hexágonos** hasta 4 jugadores y **37** de 5 a 8 (el mapa clásico agrandado una vuelta). Solo: 19.
-- Bosque (madera), colinas (ladrillo), pastos (lana), campos (trigo), montaña (mineral) y un desierto, **mezclados al azar en cada partida** y con los números del Catan clásico (2 a 12, sin el 7). Cada número muestra sus **puntitos** (la probabilidad).
+- Bosque (madera), colinas (ladrillo), pastos (lana), campos (trigo), montaña (mineral) y un desierto, **mezclados al azar en cada partida** y con los números clásicos (2 a 12, sin el 7). Cada número muestra sus **puntitos** (la probabilidad).
 - **Mapa justo por diseño (decidido):** al generar la isla se comprueba que **cada recurso tenga hexágonos con números buenos (5 a 9) al alcance** y que ninguno quede escondido. Los criterios exactos se calibran con bots.
 - **Mapa común:** todos construyen en la misma isla, así que los vértices se disputan.
-- Reglas del mapa tomadas de Catan: **regla de distancia** (no se puebla pegado a otro pueblo) y **los caminos abren camino** (solo se puebla donde llega un camino tuyo). Cada jugador elige **dónde** pone cada pieza.
+- Reglas del mapa tomadas de los juegos de colonización clásicos: **regla de distancia** (no se puebla pegado a otro pueblo) y **los caminos abren camino** (solo se puebla donde llega un camino tuyo). Cada jugador elige **dónde** pone cada pieza.
 - **Colocación inicial en serpiente** (1.º, 2.º… último, y último, … 1.º): cada uno pone 1 pueblo y 1 camino, dos veces. Al elegir un pueblo, la pantalla muestra **qué recursos dará y cuáles faltan** (herramienta contra el mal reparto).
 
 ## Los recursos y la mano
@@ -65,7 +65,7 @@ Un solo grupo **compartido y a la vista** de todos (en solitario, el mismo grupo
 - Con un 7 **no cobra nadie** esa tirada.
 
 ## Las carreras
-Dos marcadores que **cambian de dueño** si otro jugador los supera, como en Catan (reglas de la versión 1, **por revisar** junto con las misiones de condición):
+Dos marcadores que **cambian de dueño** si otro jugador los supera, como en los juegos de colonización clásicos (reglas de la versión 1, **por revisar** junto con las misiones de condición):
 - **Camino más largo:** 5 caminos o más (se cuenta el total). +2 puntos.
 - **Ejército más grande:** quien tenga **más caballeros**, con un **mínimo de 2** (tope de 3 por jugador). En empate se queda con él quien ya lo tenía. +2 puntos.
 
@@ -89,7 +89,7 @@ Dos marcadores que **cambian de dueño** si otro jugador los supera, como en Cat
 - **Variabilidad:** isla mezclada, bandido, tiradas y misiones distintas cada vez.
 
 ## Identidad y arte (sin cambios)
-- Nombre: **Fundación** (id interno `fundacion`); icono A «Pueblo y ciudad». Arte de **píxeles planos y pegados, sin espacios** (hexágonos de 32 de ancho, piezas, fichas). Caminos con un espacio antes de las esquinas. Bandido chico junto a la ficha de número; el hexágono bloqueado se oscurece y su número se tacha en rojo. Detalles en `prototipos/arte_catan/` y `prototipos/definicion_catan/`.
+- Nombre: **Fundación** (id interno `fundacion`); icono A «Pueblo y ciudad». Arte de **píxeles planos y pegados, sin espacios** (hexágonos de 32 de ancho, piezas, fichas). Caminos con un espacio antes de las esquinas. Bandido chico junto a la ficha de número; el hexágono bloqueado se oscurece y su número se tacha en rojo. Detalles en `prototipos/arte_fundacion/` y `prototipos/definicion_fundacion/`.
 - **Tarjetas de recurso nuevas:** una tarjeta por unidad, color del recurso y un dibujo (tronco, ladrillo, nube, espiga, roca); los dibujos de las maquetas son provisorios.
 
 ## Descartado

@@ -1,6 +1,6 @@
 # Fundación v2: brainstorming
 
-Estado: **brainstorming cerrado y traducido a la documentación (14 de noviembre de 2026), nada programado.** La documentación vigente es `catan_dados.md` (reglas), `catan_flujo.md` (flujo), `fundacion_v2_pantallas.md`, `fundacion_v2_requisitos.md` y `fundacion_v2_plan.md`; este documento queda como registro de cómo se decidió. Regla de trabajo acordada: no se escribe código hasta que Dante lo autorice de forma explícita. Todo lo que él va diciendo se anota aquí, tal cual; después este documento se traduce a documentación (requisitos, flujo, diseño) y recién ahí empieza el código.
+Estado: **brainstorming cerrado y traducido a la documentación (14 de noviembre de 2026), nada programado.** La documentación vigente es `fundacion_reglas.md` (reglas), `fundacion_flujo.md` (flujo), `fundacion_v2_pantallas.md`, `fundacion_v2_requisitos.md` y `fundacion_v2_plan.md`; este documento queda como registro de cómo se decidió. Regla de trabajo acordada: no se escribe código hasta que Dante lo autorice de forma explícita. Todo lo que él va diciendo se anota aquí, tal cual; después este documento se traduce a documentación (requisitos, flujo, diseño) y recién ahí empieza el código.
 
 Convención: lo que dijo Dante va en **Ideas de Dante** y **Decisiones**; lo que agrego yo (consecuencias, dudas, propuestas) va aparte y marcado como mío, para que se pueda aceptar, corregir o descartar.
 
@@ -136,6 +136,6 @@ Turno, Dados 1 a 3, Descarte (obligatorio, listo, opcional), Construir, Nada que
 ## Para después de las decisiones
 
 1. Cerrar la duración y, con simulaciones, la meta de puntos (reglas del resto, cerradas por ahora).
-2. Traducir este documento a documentación: requisitos, flujo del turno y pantallas (`docs/catan_dados.md` y `docs/catan_flujo.md` se reescriben).
+2. Traducir este documento a documentación: requisitos, flujo del turno y pantallas (`docs/fundacion_reglas.md` y `docs/fundacion_flujo.md` se reescriben).
 3. Diseñar las vistas con bosquejos (hecho en una primera ronda; ver «Diseño de la pantalla»).
 4. Recién ahí, con la autorización explícita de Dante, el código: reglas, mesa, bots, cliente y simuladores; y la calibración con partidas de bots.

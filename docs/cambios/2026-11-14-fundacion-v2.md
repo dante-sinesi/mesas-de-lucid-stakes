@@ -2,7 +2,7 @@
 
 **Estado:** en curso (todo programado; falta decidir la economía y abrir el Pull Request)
 **Rama:** `feature/fundacion-v2` (sale de `docs/brainstorm-fundacion`, que ya está subida)
-**Origen:** `docs/brainstorm_fundacion_v2.md` (decisiones de Dante), `docs/catan_dados.md` (reglas), `docs/catan_flujo.md` (flujo), `docs/fundacion_v2_pantallas.md` (HUD), `docs/fundacion_v2_requisitos.md` (requisitos)
+**Origen:** `docs/brainstorm_fundacion_v2.md` (decisiones de Dante), `docs/fundacion_reglas.md` (reglas), `docs/fundacion_flujo.md` (flujo), `docs/fundacion_v2_pantallas.md` (HUD), `docs/fundacion_v2_requisitos.md` (requisitos)
 
 ## Alcance
 

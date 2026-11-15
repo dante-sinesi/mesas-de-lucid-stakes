@@ -251,4 +251,4 @@ El diseño acordado del Rulepoly (ruleta de casillas con dueño, sin apuestas ni
 
 ## Fundación
 
-Tercer juego de la plataforma (id `fundacion`): Catan de dados para 1 a 8 jugadores en un mismo mapa generado al azar, con dados 3D de recursos. Reglas en `docs/catan_dados.md`, flujo en `docs/catan_flujo.md`, plan y simulador en `docs/fundacion_plan.md`. Servidor en `servidor/fundacion/`, cliente en `web/fundacion.js` y `web/fu_arte.js`. Service worker bj-101.
+Tercer juego de la plataforma (id `fundacion`): juego de dados de colonización para 1 a 8 jugadores en un mismo mapa generado al azar, con dados 3D de recursos. Reglas en `docs/fundacion_reglas.md`, flujo en `docs/fundacion_flujo.md`, plan y simulador en `docs/fundacion_plan.md`. Servidor en `servidor/fundacion/`, cliente en `web/fundacion.js` y `web/fu_arte.js`. Service worker bj-101.

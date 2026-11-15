@@ -14,7 +14,7 @@ Hecha el 9 de noviembre de 2026, al dejar el Rulepoly (ruleta + Monopoly) por no
 
 **Dados**
 1. **Generala / Yahtzee** (1 a muchos): guardas dados, vuelves a tirar hasta 3 veces y anotas una figura. Probabilidades exactas.
-2. **Catan: The Dice Game** (1 a 4): 6 dados con recursos, hasta 3 tiradas guardando dados, y con el resultado construyes en tu planilla. Solo funciona bien. **Es la base elegida** (ver `catan_dados.md`).
+2. *un juego de dados de colonización* (1 a 4): 6 dados con recursos, hasta 3 tiradas guardando dados, y con el resultado construyes en tu planilla. Solo funciona bien. **Es la base elegida** (ver `fundacion_reglas.md`).
 3. **That's Pretty Clever** (1 a 4): dados que se anotan en una planilla con combinaciones.
 4. **Qwixx** (2 a 5): todos usan la misma tirada y tachan números en su hoja.
 5. **King of Tokyo** (2 a 6): dados de «tirar de nuevo» con combate.
@@ -38,18 +38,18 @@ Hecha el 9 de noviembre de 2026, al dejar el Rulepoly (ruleta + Monopoly) por no
 17. **Quacks of Quedlinburg** (2 a 4, 6 con expansión): sacas fichas de una bolsa sin pasarte y mejoras la bolsa.
 18. **Sagrada** (1 a 4): eliges dados para armar un vitral con reglas.
 19. **Machi Koro** (2 a 5): dados que activan edificios, con motor.
-20. **Catan** (3 a 4): mapa con números, recursos y construcción.
+20. **Colonización de islas** (3 a 4): mapa con números, recursos y construcción.
 
 ## Lo que se aprendió
 - Los juegos de **«todos resuelven el mismo azar»** (12 a 16) son los que mejor cumplen solo = acompañado y aceptan 8 jugadores sin cambios. A cambio, tienen poca interacción.
 - Los de **cartas con riesgo** (7 a 9) comparten la tensión del Diez mil, pero se parecen demasiado a lo que ya hay.
-- **Catan** aporta tres cosas que le faltaban al Rulepoly: el porcentaje de cada número está a la vista, construir es tener «casillas con dueño» y hay carreras por logros (camino más largo, ejército). Lo que lo complica es el comercio entre jugadores, las cartas de desarrollo y el ladrón.
-- **Camino elegido:** partir de **Catan: The Dice Game** (dados que se guardan y se vuelven a tirar + una planilla que se va construyendo), ampliado a 8 jugadores. Diseño en `catan_dados.md`.
+- **El género de colonización** aporta tres cosas que le faltaban al Rulepoly: el porcentaje de cada número está a la vista, construir es tener «casillas con dueño» y hay carreras por logros (camino más largo, ejército). Lo que lo complica es el comercio entre jugadores, las cartas de desarrollo y el ladrón.
+- **Camino elegido:** partir de *un juego de dados de colonización* (dados que se guardan y se vuelven a tirar + una planilla que se va construyendo), ampliado a 8 jugadores. Diseño en `fundacion_reglas.md`.
 
 ## Intentos descartados antes (Rulepoly)
 Ver `rulepoly.md`. Resumen de por qué no cerró: se parecía demasiado al Diez mil (pedir o plantarse), tenía demasiados sistemas para una sola decisión y no terminaba de definirse el modo solo. Se probaron variantes con gajos de tamaño distinto, bola común, UNO con ruleta y otros cruces; ninguna convenció.
 
 ## Fuentes consultadas
-- [Catan: The Dice Game](https://zatu.com/product/catan-dice-game-clamshell/)
+- un juego de dados de colonización
 - [Dice Miner](https://atlas-games.com/product_tables/AG1480)
 - [Fill or Bust](https://jlericson.netlify.app/2022/02/15/fill_or_bust)

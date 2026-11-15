@@ -1,8 +1,8 @@
 # Fundación: plan de programación (versión 1)
 
-> **Nota:** este plan es de la primera versión, con dados de recursos, ya implementada. La versión 2 (sin dados de recursos, con mano de tarjetas, misiones y pedidos) está en `fundacion_v2_plan.md`; las reglas nuevas, en `catan_dados.md`.
+> **Nota:** este plan es de la primera versión, con dados de recursos, ya implementada. La versión 2 (sin dados de recursos, con mano de tarjetas, misiones y pedidos) está en `fundacion_v2_plan.md`; las reglas nuevas, en `fundacion_reglas.md`.
 
-Reglas en `catan_dados.md`, flujo y pantallas en `catan_flujo.md`, arte y maquetas en `prototipos/` (`arte_catan`, `etapas_isla`). El id interno del juego es `fundacion`; el nombre que se ve es «Fundación». La sala de espera es **la misma de los otros juegos** (asientos, bots, reglas del anfitrión, invitar): solo cambia el contenido del cuadro de reglas.
+Reglas en `fundacion_reglas.md`, flujo y pantallas en `fundacion_flujo.md`, arte y maquetas en `prototipos/` (`arte_fundacion`, `etapas_isla`). El id interno del juego es `fundacion`; el nombre que se ve es «Fundación». La sala de espera es **la misma de los otros juegos** (asientos, bots, reglas del anfitrión, invitar): solo cambia el contenido del cuadro de reglas.
 
 Se trabaja en la rama `feature/fundacion`, con un commit por fase y las pruebas (`npm test`, «fallos: 0») antes de cada uno.
 

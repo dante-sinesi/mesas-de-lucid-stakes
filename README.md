@@ -19,7 +19,7 @@ Juegos de mesa para jugar en el navegador con amigos o contra bots, desde el cel
 |---|---|
 | **Diez mil** · dados | Tiras los dados, apartas puntos y decides si te plantas o arriesgas todo. |
 | **13 Jack** · cartas | Cada jugador tiene su propio mazo y arma manos de 21 con combos y cartas especiales. |
-| **Fundación** · mapa y tarjetas | Un Catan rápido: con cada tirada cobran todos, y se gasta lo ganado en construir o en cumplir pedidos. |
+| **Fundación** · mapa y tarjetas | Un juego de colonización rápido: con cada tirada cobran todos, y se gasta lo ganado en construir o en cumplir pedidos. |
 
 ## Cómo funciona
 
@@ -78,7 +78,7 @@ Así se ven las mesas y los tres juegos (Fundación, a mitad de partida):
 - Índice de la documentación: [docs/INDEX.md](docs/INDEX.md)
 - Estado actual: [docs/ESTADO.md](docs/ESTADO.md)
 - Cómo está hecho el proyecto hoy: [docs/diseno.md](docs/diseno.md)
-- Reglas y pantallas de Fundación: [reglas](docs/catan_dados.md), [flujo](docs/catan_flujo.md) y [pantallas](docs/fundacion_v2_pantallas.md)
+- Reglas y pantallas de Fundación: [reglas](docs/fundacion_reglas.md), [flujo](docs/fundacion_flujo.md) y [pantallas](docs/fundacion_v2_pantallas.md)
 - Duración y balance medidos con bots: [docs/fundacion_v2_calibracion.md](docs/fundacion_v2_calibracion.md)
 - Principios para diseñar juegos nuevos: [docs/principios_diseno.md](docs/principios_diseno.md)
 

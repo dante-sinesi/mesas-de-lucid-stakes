@@ -1,6 +1,6 @@
 'use strict';
-// Una mesa de Fundación (el Catan de dados, versión 2): un mapa común de hexágonos, de 1 a 8 jugadores que cobran tarjetas de recursos con cada tirada y construyen caminos, pueblos y ciudades.
-// Toda la lógica de la sala vive aquí; la red solo la consulta (como MesaDM y Mesa13). Las reglas están en reglas.js, las misiones y pedidos en misiones.js y el jugador automático en bot.js. Diseño: docs/catan_dados.md y docs/catan_flujo.md.
+// Una mesa de Fundación (el juego de dados de colonización, versión 2): un mapa común de hexágonos, de 1 a 8 jugadores que cobran tarjetas de recursos con cada tirada y construyen caminos, pueblos y ciudades.
+// Toda la lógica de la sala vive aquí; la red solo la consulta (como MesaDM y Mesa13). Las reglas están en reglas.js, las misiones y pedidos en misiones.js y el jugador automático en bot.js. Diseño: docs/fundacion_reglas.md y docs/fundacion_flujo.md.
 //
 // Fases: ESPERA -> INICIAL (cada uno pone dos pueblos y dos caminos, en serpiente) -> TURNO -> FIN.
 // Un turno tiene tres momentos: tirada (los dos dados de número; cobran todos; automática y sin reloj), descarte (solo quien tiene el turno y solo si tiene más de 6 tarjetas) y turno (construir, entregar pedidos y pasar, con un solo reloj).
