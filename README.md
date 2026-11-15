@@ -2,9 +2,9 @@
 
 Juegos de mesa para jugar en el navegador con amigos o contra bots, desde el celular o la computadora. No hay nada que instalar: abres el enlace y juegas.
 
-[![Ver el trailer](docs/media/portada.jpg)](docs/media/trailer.mp4)
+[![Ver el trailer](docs/media/portada.jpg)](https://youtu.be/SNVv_v0kqvc)
 
-**🎲 [Jugar ahora: mesas.dsinesi.com](https://mesas.dsinesi.com)** · **▶ [Ver el trailer (1 minuto)](docs/media/trailer.mp4)**
+**🎲 [Jugar ahora: mesas.dsinesi.com](https://mesas.dsinesi.com)** · **▶ [Ver el trailer en YouTube](https://youtu.be/SNVv_v0kqvc)** (también [el archivo del video](docs/media/trailer.mp4))
 
 ## Qué te da
 
