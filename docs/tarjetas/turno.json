@@ -1,0 +1,66 @@
+{
+ "tipo": "flujo",
+ "titulo": "Un turno de Fundación",
+ "columnas": 4,
+ "nodos": [
+  {
+   "id": "a",
+   "texto": "Empieza el turno",
+   "col": 0,
+   "fila": 0
+  },
+  {
+   "id": "b",
+   "texto": "Tiradas (0, 1 o más)",
+   "col": 1,
+   "fila": 0
+  },
+  {
+   "id": "c",
+   "texto": "Cobran todos",
+   "col": 2,
+   "fila": 0
+  },
+  {
+   "id": "d",
+   "texto": "Descarta si hay más de 6",
+   "col": 3,
+   "fila": 0
+  },
+  {
+   "id": "e",
+   "texto": "Una acción: construir o entregar",
+   "col": 3,
+   "fila": 1
+  },
+  {
+   "id": "f",
+   "texto": "Pasa el turno",
+   "col": 2,
+   "fila": 1
+  }
+ ],
+ "flechas": [
+  {
+   "de": "a",
+   "a": "b"
+  },
+  {
+   "de": "b",
+   "a": "c"
+  },
+  {
+   "de": "c",
+   "a": "d"
+  },
+  {
+   "de": "d",
+   "a": "e"
+  },
+  {
+   "de": "e",
+   "a": "f"
+  }
+ ],
+ "pie": "Cada turno de Fundación: tiradas, cobro de todos, descarte si hace falta y una sola acción."
+}
