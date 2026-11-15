@@ -57,23 +57,15 @@ flowchart TD
 
 Cada turno de Fundación: las tiradas, el cobro, el descarte si hace falta y una sola acción.
 
-Así se ve **Fundación**: en tu turno haces una acción (construir o entregar un pedido), y la tirada de dados la ven y la cobran todos.
-
-| Tu turno (computadora) | Las ganancias de la tirada (computadora) |
-|---|---|
-| ![Turno en la computadora](docs/media/fundacion-turno.png) | ![Ganancias de la tirada en la computadora](docs/media/fundacion-tirada.png) |
-| **Tu turno (celular)** | **Las ganancias de la tirada (celular)** |
-| ![Turno en el celular](docs/media/fundacion-celular-turno.png) | ![Ganancias de la tirada en el celular](docs/media/fundacion-celular-tirada.png) |
-
-Y estos son los otros juegos y la sala de espera:
+Así se ven las mesas y los tres juegos (Fundación, a mitad de partida):
 
 | Lobby con salas abiertas | Sala de espera con bots |
 |---|---|
 | ![Lobby](docs/media/lobby.jpg) | ![Sala de espera](docs/media/sala-de-espera.jpg) |
 | **Diez mil** | **13 Jack** |
 | ![Diez mil](docs/media/diez-mil.jpg) | ![13 Jack](docs/media/13-jack.jpg) |
-
-
+| **Fundación** | |
+| ![Fundación](docs/media/fundacion.png) | |
 
 ## Cómo empezar
 
