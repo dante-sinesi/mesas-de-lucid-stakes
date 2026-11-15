@@ -6,14 +6,14 @@ Archivo generado por `indexar_docs.py`. No editar a mano: se regenera.
 
 - [[RN-001]] [Sin dados de recursos ni oro](requisitos/negocio/RN-001.md) — Fundación no tiene dados de recursos ni oro; los recursos son cinco: madera, ladrillo, lana, trigo y mineral.
 - [[RN-002]] [Cada recurso es una tarjeta](requisitos/negocio/RN-002.md) — Cada unidad de recurso es una tarjeta; la mano de un jugador es una cuenta por recurso.
-- [[RN-003]] [Con cada tirada cobran todos](requisitos/negocio/RN-003.md) — Con un número distinto de 7 cobran todos los jugadores: una tarjeta por cada pueblo y dos por cada ciudad que toque un hexágono con ese número que no esté bloqueado.
+- [[RN-003]] [Con cada tirada cobran todos](requisitos/negocio/RN-003.md) — Cada ronda tiene 5 tiradas, repartidas entre los turnos (un turno puede tener varias o ninguna). Con un número distinto de 7 cobran todos los jugadores: una tarjeta por cada pueblo y dos por cada ciudad que toque un hexágono con ese número que no esté bloqueado.
 - [[RN-004]] [Con un 7 no cobra nadie y el bandido salta](requisitos/negocio/RN-004.md) — Con un 7 no cobra nadie y el bandido salta a un hexágono al azar distinto del actual, también en solitario.
 - [[RN-005]] [El caballero protege de un bandido](requisitos/negocio/RN-005.md) — Un caballero protege a su dueño del bandido en ese hexágono; a los demás jugadores no.
 - [[RN-006]] [El bandido bloquea un hexágono](requisitos/negocio/RN-006.md) — El bandido bloquea el hexágono donde está hasta el próximo 7.
 - [[RN-007]] [Mano máxima de 6 y descarte](requisitos/negocio/RN-007.md) — Al empezar su turno, ya cobrada la tirada, quien tiene el turno y más de 6 tarjetas debe descartar justo lo que sobra antes de construir o entregar.
 - [[RN-008]] [Sin techo duro fuera del turno](requisitos/negocio/RN-008.md) — Fuera de su turno, un jugador puede tener más de 6 tarjetas sin límite; al llegarle el turno descarta hasta volver a 6.
 - [[RN-009]] [No hay intercambio](requisitos/negocio/RN-009.md) — No hay intercambio de tarjetas entre jugadores ni con un banco.
-- [[RN-010]] [Todas las acciones que alcancen en un turno](requisitos/negocio/RN-010.md) — En su turno, un jugador puede construir y entregar todo lo que le alcance, en cualquier orden, y termina el turno pasando.
+- [[RN-010]] [Una acción por turno](requisitos/negocio/RN-010.md) — En su turno, un jugador hace una sola acción (construir o entregar un pedido) y el turno termina solo; también puede pasar sin hacer nada.
 - [[RN-011]] [Costos de los edificios](requisitos/negocio/RN-011.md) — Camino: 1 madera.
 - [[RN-012]] [Piezas por jugador](requisitos/negocio/RN-012.md) — Cada jugador tiene 15 caminos, 5 pueblos, 4 ciudades y 3 caballeros; un edificio sin piezas o sin lugar válido no se ofrece.
 - [[RN-013]] [Mapa justo](requisitos/negocio/RN-013.md) — Al generar la isla, cada recurso tiene al menos un hexágono con número de 5 a 9 y una suma mínima de puntitos (7 en la isla de 19 y 14 en la de 37).
@@ -22,7 +22,7 @@ Archivo generado por `indexar_docs.py`. No editar a mano: se regenera.
 - [[RN-016]] [Pedidos](requisitos/negocio/RN-016.md) — Los pedidos se cumplen entregando tarjetas: 2 madera y 2 ladrillo, 2 lana y 2 trigo, 3 mineral, una de cada recurso, 3 tarjetas iguales o 3 tarjetas cualesquiera.
 - [[RN-017]] [Un pedido que no se puede cumplir no se abre](requisitos/negocio/RN-017.md) — El servidor rechaza la entrega de un pedido que el jugador no puede cumplir, y el cliente no abre su ventana.
 - [[RN-018]] [Camino más largo y ejército más grande](requisitos/negocio/RN-018.md) — El camino más largo (5 caminos o más) y el ejército más grande (2 caballeros o más, el que tenga más) dan 2 puntos cada uno y cambian de dueño si otro jugador los supera.
-- [[RN-019]] [Meta, vuelta completa y modo solo](requisitos/negocio/RN-019.md) — La partida termina cuando alguien llega a la meta (8 por omisión; también 10 o 12 puntos) y se juega la vuelta completa; en el empate gana quien llegó con menos turnos.
+- [[RN-019]] [Meta, vuelta completa y modo solo](requisitos/negocio/RN-019.md) — La partida termina cuando alguien llega a la meta (20 por omisión; también 14 puntos) y se juega la vuelta completa; en el empate gana quien llegó con menos turnos.
 - [[RN-020]] [Un solo reloj por turno](requisitos/negocio/RN-020.md) — El descarte, la construcción y la entrega comparten un reloj por turno: 45 segundos en Normal y 90 en Extendido, o sin límite; la colocación inicial tiene 30 segundos por pieza.
 - [[RN-021]] [Al agotarse el reloj el turno se pasa solo](requisitos/negocio/RN-021.md) — Cuando se agota el reloj del turno, el turno se pasa solo; si había un descarte obligatorio sin hacer, se descartan al azar las tarjetas necesarias.
 - [[RN-022]] [Desconexión y ausencia](requisitos/negocio/RN-022.md) — Si un jugador se desconecta o deja agotar el reloj dos veces seguidas, un bot toma su lugar y lo conserva; si el jugador vuelve, retoma.
@@ -46,7 +46,7 @@ Archivo generado por `indexar_docs.py`. No editar a mano: se regenera.
 - [[RU-015]] [Entrada y sala de espera comunes](requisitos/usuario/RU-015.md) — La sala de espera, la entrada y el crear sala son los comunes de la sala; de Fundación solo cambian las reglas (tiempo por turno y meta).
 - [[RU-016]] [Interfaz con poco texto](requisitos/usuario/RU-016.md) — Las pantallas de juego usan poco texto, sin desplazamiento (scroll), con arte de píxeles planos y sin textos de ayuda ni de depuración en el HUD.
 - [[RU-017]] [Jugadores ordenados por orden de ronda](requisitos/usuario/RU-017.md) — La lista de jugadores del lateral se ordena de primero a último según el orden de juego de la ronda.
-- [[RU-018]] [Zoom del mapa con gestos y rueda](requisitos/usuario/RU-018.md) — El mapa se acerca con dos dedos o la rueda, se mueve arrastrando, y en el celular el zoom a la zona llega tras el primer toque.
+- [[RU-018]] [Zoom del mapa con gestos y rueda](requisitos/usuario/RU-018.md) — El mapa se acerca y se aleja con dos dedos o con la rueda, se mueve arrastrando, y en el celular el zoom a la zona de construcción llega recién después del primer toque.
 
 ## Funcional
 
@@ -73,7 +73,7 @@ Archivo generado por `indexar_docs.py`. No editar a mano: se regenera.
 - [[ADR-004]] [Reloj único por turno; el tiempo agotado pasa el turno](decisiones/ADR-004.md) — Cada turno tiene un solo reloj (45 s Normal, 90 s Extendido); al agotarse, el turno se pasa solo.
 - [[ADR-005]] [Camino de solo madera y pedido de 3 tarjetas cualesquiera](decisiones/ADR-005.md) — Dos palancas de economía medidas con bots que se adoptan para reducir los turnos sin construir y evitar bloqueos mutuos.
 - [[ADR-006]] [Meta de 8 puntos por omisión](decisiones/ADR-006.md) — La meta por omisión de Fundación pasa de 10 a 8 puntos, porque el tramo final de 8 a 10 puntos se arrastra.
-- [[ADR-007]] [Ritmo de Fundación: 5 tiradas por ronda, una acción por turno y meta 20](decisiones/ADR-007.md) — Las tiradas pasan a ser 5 por ronda repartidas entre los turnos, una sola acción por turno y meta 20, para que cada jugador juegue entre 20 y 30 turnos.
+- [[ADR-007]] [Ritmo de Fundación: 5 tiradas por ronda, una acción por turno y meta 20](decisiones/ADR-007.md) — Las tiradas pasan a ser 5 por ronda repartidas entre los turnos, cada turno permite una sola acción y la meta por omisión sube a 20 puntos, para que cada jugador juegue entre 20 y 30 turnos sin importar cuántos sean.
 
 ## Otro
 
@@ -82,6 +82,7 @@ Archivo generado por `indexar_docs.py`. No editar a mano: se regenera.
 - [[NOTAS]] [fundacion-dados: notas de la ronda (2026-11-14)](diseno/rondas/2026-11-14-fundacion-dados/NOTAS.md) — Una sola hoja para trabajos chicos (una pantalla, una landing, un formulario). Para proyectos medianos o grandes usar `crear_bosquejos.py --nombre ... --complet
 - [[README]] [Documentación del proyecto](README.md) — Documentación viva: se actualiza con cada cambio y se indexa automáticamente.
 - [[Sin título]] [Sin título](Sin título.md) — classDiagram class Animal { +String nombre +comer() void } class Perro { +ladrar() void } Animal <|-- Perro
+- [[arquitectura]] [Arquitectura](diagramas/arquitectura.md) — ¿Qué hace el servidor y qué hace el navegador?
 - [[brainstorm_diez_mil]] [Diez mil: brainstorming](brainstorm_diez_mil.md) — Estado: **idea para conversar, nada programado.** Todo lo que está marcado con `?` es una duda abierta; los números son puntos de partida para ajustar probando 
 - [[brainstorm_fundacion_v2]] [Fundación v2: brainstorming](brainstorm_fundacion_v2.md) — Estado: **brainstorming cerrado y traducido a la documentación (14 de noviembre de 2026), nada programado.** La documentación vigente es `catan_dados.md` (regla
 - [[brainstorm_ruleta]] [Rulepoly: brainstorming (primera versión)](brainstorm_ruleta.md) — > **Reemplazado por `rulepoly.md`**, que recoge lo que se acordó después de conversarlo. Este texto queda como historia: parte de lo de acá (apuestas, grupos, c
@@ -104,6 +105,7 @@ Archivo generado por `indexar_docs.py`. No editar a mano: se regenera.
 - [[principios_diseno]] [Principios de diseño de los juegos](principios_diseno.md) — Anotados el 9 de noviembre de 2026, a partir de lo que hace atractivos al Diez mil y al 13 Jack. Sirven de guía para el Rulepoly y para cualquier juego futuro: 
 - [[rulepoly]] [Rulepoly: el juego (diseño acordado)](rulepoly.md) — > **En revisión (9 nov 2026):** Dante sintió que este diseño está trabado (se parece al Diez mil, tiene demasiados sistemas y el modo solo no cerraba). Se explo
 - [[trazabilidad_fundacion_v2]] [Trazabilidad de Fundación v2](trazabilidad_fundacion_v2.md) — Cada requisito de `docs/fundacion_v2_requisitos.md` con el código que lo cumple y la prueba que lo verifica. Si un requisito no tiene prueba automática, la colu
+- [[turno-fundacion]] [Turno de Fundación](diagramas/turno-fundacion.md) — ¿Qué pasa desde que empieza un turno hasta que pasa al siguiente jugador?
 
 ## Trazabilidad
 
